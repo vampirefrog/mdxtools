@@ -244,7 +244,7 @@ public:
 					}
 					break;
 				case NoteDuration:
-					handleNote(nn, b);
+					handleNote(nn, b + 1);
 					state = None;
 					break;
 				case TempoVal:
