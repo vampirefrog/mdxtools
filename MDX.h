@@ -96,7 +96,7 @@ public:
 		while(!s.eof()) {
 			MDXVoice inst;
 			if(!inst.load(s)) break;
-			//handleVoice(inst);
+			handleVoice(inst);
 		}
 		s.seek(file_base + mml_offset[0]);
 		enum {
@@ -174,10 +174,12 @@ public:
 								break;
 							case 0xfa:
 								handleVolumeDec();
+								handleCommand(b);
 								state = None;
 								break;
 							case 0xf9:
 								handleVolumeInc();
+								handleCommand(b);
 								state = None;
 								break;
 							case 0xf8:
@@ -185,6 +187,7 @@ public:
 								break;
 							case 0xf7:
 								handleDisableKeyOff();
+								handleCommand(b);
 								state = None;
 								break;
 							case 0xf6:
@@ -213,6 +216,7 @@ public:
 								break;
 							case 0xee:
 								handleSyncWait();
+								handleCommand(b);
 								state = None;
 								break;
 							case 0xed:
@@ -232,6 +236,7 @@ public:
 								break;
 							case 0xe8:
 								handlePCM8ExpansionShift();
+								handleCommand(b);
 								state = None;
 								break;
 							case 0xe7:
@@ -239,6 +244,7 @@ public:
 								break;
 							default:
 								handleUndefinedCommand(b);
+								handleCommand(b);
 								break;
 						}
 					}
@@ -249,6 +255,7 @@ public:
 					break;
 				case TempoVal:
 					handleSetTempo(b);
+					handleCommand(0xff, b);
 					state = None;
 					break;
 				case OPMRegisterNum:
@@ -257,26 +264,32 @@ public:
 					break;
 				case OPMRegisterVal:
 					handleSetOPMRegister(nn, b);
+					handleCommand(0xfe, nn, b);
 					state = None;
 					break;
 				case VoiceNum:
 					handleSetVoiceNum(b);
+					handleCommand(0xfd, b);
 					state = None;
 					break;
 				case OutputPhaseVal:
 					handleOutputPhase(b);
+					handleCommand(0xfc, b);
 					state = None;
 					break;
 				case VolumeVal:
 					handleSetVolume(b);
+					handleCommand(0xfb, b);
 					state = None;
 					break;
 				case SoundLen:
 					handleSoundLength(b);
+					handleCommand(0xf8, b);
 					state = None;
 					break;
 				case RepeatStartCount:
 					handleRepeatStart(b);
+					handleCommand(0xf6, b);
 					state = RepeatStartZero;
 					break;
 				case RepeatStartZero:
@@ -288,6 +301,7 @@ public:
 					break;
 				case RepeatEndOffsetLSB:
 					handleRepeatEnd((nn << 8) | b);
+					handleCommand(0xf5, (nn << 8) | b);
 					state = None;
 					break;
 				case RepeatEscapeMSB:
@@ -296,6 +310,7 @@ public:
 					break;
 				case RepeatEscapeLSB:
 					handleRepeatEscape((nn << 8) | b);
+					handleCommand(0xf4, (nn << 8) | b);
 					state = None;
 					break;
 				case DetuneMSB:
@@ -304,6 +319,7 @@ public:
 					break;
 				case DetuneLSB:
 					handleDetune((nn << 8) | b);
+					handleCommand(0xf3, (nn << 8) | b);
 					state = None;
 					break;
 				case PortamentoMSB:
@@ -312,11 +328,13 @@ public:
 					break;
 				case PortamentoLSB:
 					handlePortamento((nn << 8) | b);
+					handleCommand(0xf2, (nn << 8) | b);
 					state = None;
 					break;
 				case DataEndMSB:
 					if(b == 0) {
 						handleDataEnd();
+						handleCommand(0xf1, 0);
 						state = None;
 					} else {
 						nn = b;
@@ -325,29 +343,31 @@ public:
 					break;
 				case DataEndLSB:
 					handleDataEnd((nn << 8) & b);
+					handleCommand(0xf1, (nn << 8) & b);
 					state = None;
 					break;
 				case KeyOnDelayVal:
 					handleKeyOnDelay(b);
+					handleCommand(0xf0, b);
 					break;
 				case SyncSendChannel:
 					handleSyncSend(b);
+					handleCommand(0xef, b);
 					state = None;
 					break;
 				case ADPCMNoiseFreqVal:
 					handleADPCMNoiseFreq(b);
-					state = None;
-					break;
-				case LFODelayVal:
-					handleLFODelaySetting(b);
+					handleCommand(0xed, b);
 					state = None;
 					break;
 				case LFOPitchB:
 					if(b == 0x80) {
 						handleLFOPitchMPOF();
+						handleCommand(0xec, b);
 						state = None;
 					} else if(b == 0x81) {
 						handleLFOPitchMPON();
+						handleCommand(0xec, b);
 						state = None;
 					} else {
 						nn = b;
@@ -369,14 +389,17 @@ public:
 				case LFOPitchChangeLSB:
 					v |= b;
 					handleLFOPitch(nn, w, v);
+					handleCommand(0xec, nn, w, v);
 					state = None;
 					break;
 				case LFOVolumeB:
 					if(b == 0x80) {
 						handleLFOVolumeMAOF();
+						handleCommand(0xeb, b);
 						state = None;
 					} else if(b == 0x81) {
 						handleLFOVolumeMAON();
+						handleCommand(0xeb, b);
 						state = None;
 					} else {
 						nn = b;
@@ -398,14 +421,17 @@ public:
 				case LFOVolumeChangeLSB:
 					v |= b;
 					handleLFOVolume(nn, w, v);
+					handleCommand(0xeb, nn, w, v);
 					state = None;
 					break;
 				case OPMLFOB:
 					if(b == 0x80) {
 						handleOPMLFOMHOF();
+						handleCommand(0xea, b);
 						state = None;
 					} else if(b == 0x81) {
 						handleOPMLFOMHON();
+						handleCommand(0xea, b);
 						state = None;
 					} else {
 						nn = b;
@@ -427,6 +453,12 @@ public:
 				case OPMLFOChangeLSB:
 					v |= b;
 					handleOPMLFO(nn, w, v);
+					handleCommand(0xea, nn, w, v);
+					state = None;
+					break;
+				case LFODelayVal:
+					handleLFODelaySetting(b);
+					handleCommand(0xe9, b);
 					state = None;
 					break;
 				case FadeOutB1:
@@ -434,6 +466,7 @@ public:
 					break;
 				case FadeOutValue:
 					handleFadeOut(b);
+					handleCommand(0xe7, b);
 					state = None;
 					break;
 				default:
