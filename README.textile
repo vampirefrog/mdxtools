@@ -57,33 +57,33 @@ Voice format. This corresponds to the registers in the YM2151 sound chip. Each f
 | D1R & RR x 4 |
 
 MML Commands. Each command consists of one byte, followed by specific parameters.
-* 0x00 - 0x7f - Rest +1 clock cycles
-* 0x80 - 0xdf - Note data (??????????)
-* 0xff tempo.b - Set Tempo
-* 0xfe register.b data.b - Set OPM register
-* 0xfd voice.b - Set current voice
-* 0xfc phase.b - Set output phase (?????????)
-* 0xfb volume.b - Set volume
-* 0xfa - Decrease volume
-* 0xf9 - Increase volume
-* 0xf8 length.b - Sound length (?????????)
-* 0xf7
-* 0xf6
-* 0xf5
-* 0xf4
-* 0xf3
-* 0xf2
-* 0xf1
-* 0xf0
-* 0xef
-* 0xee
-* 0xed
-* 0xec
-* 0xeb
-* 0xea
-* 0xe9
-* 0xe8
-* 0xe7
+|\2. 0x00 - 0x7f | Rest +1 clock cycles |
+|\2. 0x80 - 0xdf | Note data (??????????) |
+| 0xff | tempo.b | Set Tempo |
+| 0xfe | register.b data.b | Set OPM register |
+| 0xfd | voice.b | Set current voice |
+| 0xfc | phase.b | Set output phase (?????????) |
+| 0xfb | volume.b | Set volume |
+| 0xfa | | Decrease volume |
+| 0xf9 | | Increase volume |
+| 0xf8 | length.b | Sound length (?????????) |
+| 0xf7 |
+| 0xf6 |
+| 0xf5 |
+| 0xf4 |
+| 0xf3 |
+| 0xf2 |
+| 0xf1 |
+| 0xf0 |
+| 0xef |
+| 0xee |
+| 0xed |
+| 0xec |
+| 0xeb |
+| 0xea |
+| 0xe9 |
+| 0xe8 |
+| 0xe7 |
 
 
 
