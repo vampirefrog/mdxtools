@@ -6,12 +6,12 @@ A bunch of tools for handling the MDX music format (music for the Sharp X68000)
 The rest of this document is work in progress.
 
 About the file format
----------------------
+--------------------
 
 MDX is a Music Macro Language format, with commands such as Note, Rest, Set Tempo and many others. It was used for storing music on the Sharp X68000 computer. There is a large library of MDX files available.
 
 Download music library
-----------------------
+--------------------
 
 * See zip file near end of page - http://www.gamesx.com/wiki/doku.php?id=x68000:sxsi_disk_image_with_games_and_lots_of_mdx_files
 * Also this (not sure if same collection) http://nfggames.com/forum2/index.php?topic=4813.0
@@ -45,6 +45,10 @@ Header format:
 The voice and MML offsets are relative to the voice data offset position (right after the title and PDX file name). To implement this in code, just use a ftell() after you've read the PDX file name. The MML data offset array points to each of the channels. Some files use 9 channels, other use 16. To detect which is which, subtract the file position of the first MML data offset word from its value, then divide by 2. See MDX.h for the implementation.
 
 Voice format. This corresponds to the registers in the YM2151 sound chip. Each field is 1 byte. The x4 fields are 4 bytes corresponding to M1, M2, C1, C2.
+
+|/3. spans 3 rows | a |
+| b |
+| c |
 
 * Voice ID
 * FL & CON
