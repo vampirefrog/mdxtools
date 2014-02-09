@@ -46,19 +46,15 @@ The voice and MML offsets are relative to the voice data offset position (right 
 
 Voice format. This corresponds to the registers in the YM2151 sound chip. Each field is 1 byte. The x4 fields are 4 bytes corresponding to M1, M2, C1, C2.
 
-|/3. spans 3 rows | a |
-| b |
-| c |
-
-* Voice ID
-* FL & CON
-* Slot Mask
-* DT1 & MUL x 4
-* TL x 4
-* KS & AR x 4
-* AME & D1R x 4
-* DT2 & D2R x 4
-* D1R & RR x 4
+| Voice ID |
+| FL & CON |
+| Slot Mask |
+| DT1 & MUL x 4 |
+| TL x 4 |
+| KS & AR x 4 |
+| AME & D1R x 4 |
+| DT2 & D2R x 4 |
+| D1R & RR x 4 |
 
 MML Commands. Each command consists of one byte, followed by specific parameters.
 * 0x00 - 0x7f - Rest +1 clock cycles
