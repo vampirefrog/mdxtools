@@ -1,23 +1,15 @@
-mdxtools
-========
+h1. mdxtools
 
 A bunch of tools for handling the MDX music format (music for the Sharp X68000)
 
 The rest of this document is work in progress.
 
-About the file format
---------------------
-
-MDX is a Music Macro Language format, with commands such as Note, Rest, Set Tempo and many others. It was used for storing music on the Sharp X68000 computer. There is a large library of MDX files available.
-
-Download music library
---------------------
+h2. Download music library
 
 * See zip file near end of page - http://www.gamesx.com/wiki/doku.php?id=x68000:sxsi_disk_image_with_games_and_lots_of_mdx_files
 * Also this (not sure if same collection) http://nfggames.com/forum2/index.php?topic=4813.0
 
-Ways to listen to MDX files
----------------------------
+h2. Ways to listen to MDX files
 
 * Winamp plugin (source available): http://www.vesta.dti.ne.jp/~tsato/soft_sound.html
 * Foobar2000 plugin: http://www.vesta.dti.ne.jp/~tsato/soft_fb2k.html
@@ -26,9 +18,9 @@ Ways to listen to MDX files
 * MDXWin: http://www.pat.hi-ho.ne.jp/sata68/mdxwin.html#mdxwin
 * MMDSP (runs on the X68000 or an emulator): http://www.gamesx.com/wiki/doku.php?id=x68000:sxsi_disk_image_with_games_and_lots_of_mdx_files
 
+h2. About the file format
 
-File format
------------
+MDX is a Music Macro Language format, with commands such as Note, Rest, Set Tempo and many others. It was used for storing music on the Sharp X68000 computer. There is a large library of MDX files available.
 
 WARNING: this document is work in progress. Since I've had to rely on Google Translate, some of the commands might be ambiguously translated. Wherever you see the question marks, there are uncertainties.
 
@@ -57,37 +49,43 @@ Voice format. This corresponds to the registers in the YM2151 sound chip. Each f
 | D1R & RR x 4 |
 
 MML Commands. Each command consists of one byte, followed by specific parameters.
-|\2. 0x00 - 0x7f | Rest +1 clock cycles |
-|\2. 0x80 - 0xdf | Note data (??????????) |
-| 0xff | tempo.b | Set Tempo |
-| 0xfe | register.b data.b | Set OPM register |
-| 0xfd | voice.b | Set current voice |
-| 0xfc | phase.b | Set output phase (?????????) |
-| 0xfb | volume.b | Set volume |
-| 0xfa | | Decrease volume |
-| 0xf9 | | Increase volume |
-| 0xf8 | length.b | Sound length (?????????) |
-| 0xf7 |
-| 0xf6 |
-| 0xf5 |
-| 0xf4 |
-| 0xf3 |
-| 0xf2 |
-| 0xf1 |
-| 0xf0 |
-| 0xef |
-| 0xee |
-| 0xed |
-| 0xec |
-| 0xeb |
-| 0xea |
-| 0xe9 |
-| 0xe8 |
-| 0xe7 |
 
+|\6. @0x00 - 0x7f@ | Rest +1 clock cycles |
+|\6. @0x80 - 0xdf@ | Note data | ???????? |
+|_. cmd |_. b1 |_. b2 |_. b3 |_.b4|_.b5|_.Description|
+| @0xff@ | tempo |\4. | Set Tempo |
+| @0xfe@ | register | data |\3. | Set OPM register |
+| @0xfd@ | voice |\4.| Set current voice |
+| @0xfc@ | phase |\4.| Set output phase | ???????? |
+| @0xfb@ | volume |\4. | Set volume |
+| @0xfa@ |\5. | Decrease volume |
+| @0xf9@ |\5. | Increase volume |
+| @0xf8@ | length.b |\4.| Sound length | ???????? |
+| @0xf7@ |\5. | Disable key off | ???????? |
+| @0xf6@ | repeat.b |\4. @0x00@ | Repeat start | ???????? |
+| @0xf5@ |\5. offset.w | Repeat end | ???????? |
+| @0xf4@ |\5. offset.w | Repeat escape | ???????? |
+| @0xf3@ |\5. detune.w | Detune semitone/64 |
+| @0xf2@ |\5. shift.w | Portamento semitone/16384 | ???????? |
+| @0xf1@ |\5. @0x00@ | Performance end |
+| @0xf1@ |\5. loop.w | Repeat from loop.w |
+| @0xf0@ |\5. delay.b | Key-on delay |
+| @0xef@ |\5. channel.b | Sync send |
+| @0xee@ |\5. | Sync wait |
+| @0xed@ |\5. freq.b | ADPCM / noise frequency setting | ???????? |
+|/3. @0xec@ |\5. @0x80@ | LFO Pitch MPOF |
+|\5. @0x81@ | LFO Pitch MPON |
+| wave.b | period.w |\3. change.w | LFO Pitch control|
+|/3. @0xeb@ |\5. @0x80@ | LFO Volume MAOF |
+|\5. @0x81@ | LFO Volume MAON |
+| wave.b | period.w |\3. change.w | LFO Volume control|
+|/3. @0xea@ |\5. @0x80@ | LFO OPM MHOF |
+|\5. @0x81@ | LFO OPM MHON |
+| sync/wave.b | lfrq.b | pmd.b | amd.b | pms/ams.b | LFO OPM control |
+| @0xe9@ |\5. delay.b | LFO delay setting |
+| @0xe8@ |\5. | PCM8 expansion/ mode shift | ???????? |
+| @0xe7@ | @0x01@ |\04. @speed.b@ | Fade-out |
 
-
-About the Sharp x68000
-----------------------
+h2. About the Sharp x68000
 
 It is a desktop computer released by Sharp in 1987 ([see wikipedia page](http://en.wikipedia.org/wiki/Sharp_X68000)). It contains two sound chips, the YM2151 (8 FM channels) and OKI MSM6258 (1 4-bit PCM). There is an expansion card called Mercury unit that can increase the PCM channels to 8.
