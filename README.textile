@@ -60,31 +60,31 @@ MML Commands. Each command consists of one byte, followed by specific parameters
 | @0xfb@ | volume |\4. | Set volume |
 | @0xfa@ |\5. | Decrease volume |
 | @0xf9@ |\5. | Increase volume |
-| @0xf8@ | length.b |\4.| Sound length | ???????? |
+| @0xf8@ | length |\4.| Sound length | ???????? |
 | @0xf7@ |\5. | Disable key off | ???????? |
-| @0xf6@ | repeat.b |\4. @0x00@ | Repeat start | ???????? |
-| @0xf5@ |\5. offset.w | Repeat end | ???????? |
-| @0xf4@ |\5. offset.w | Repeat escape | ???????? |
-| @0xf3@ |\5. detune.w | Detune semitone/64 |
-| @0xf2@ |\5. shift.w | Portamento semitone/16384 | ???????? |
-| @0xf1@ |\5. @0x00@ | Performance end |
-| @0xf1@ |\5. loop.w | Repeat from loop.w |
-| @0xf0@ |\5. delay.b | Key-on delay |
-| @0xef@ |\5. channel.b | Sync send |
+| @0xf6@ | repeat | @0x00@ |\3. | Repeat start | ???????? |
+| @0xf5@ |\2. offset |\3. | Repeat end | ???????? |
+| @0xf4@ |\2. offset |\3. | Repeat escape | ???????? |
+| @0xf3@ |\2. detune |\3. | Detune semitone/64 |
+| @0xf2@ |\2. shift |\3.| Portamento semitone/16384 | ???????? |
+| @0xf1@ | @0x00@ |\4. | Performance end |
+| @0xf1@ |\2. loop |\3. | Repeat from loop.w |
+| @0xf0@ | delay |\4. | Key-on delay |
+| @0xef@ | channel |\4. | Sync send |
 | @0xee@ |\5. | Sync wait |
-| @0xed@ |\5. freq.b | ADPCM / noise frequency setting | ???????? |
-|/3. @0xec@ |\5. @0x80@ | LFO Pitch MPOF |
-|\5. @0x81@ | LFO Pitch MPON |
-| wave.b | period.w |\3. change.w | LFO Pitch control|
-|/3. @0xeb@ |\5. @0x80@ | LFO Volume MAOF |
-|\5. @0x81@ | LFO Volume MAON |
-| wave.b | period.w |\3. change.w | LFO Volume control|
-|/3. @0xea@ |\5. @0x80@ | LFO OPM MHOF |
-|\5. @0x81@ | LFO OPM MHON |
-| sync/wave.b | lfrq.b | pmd.b | amd.b | pms/ams.b | LFO OPM control |
-| @0xe9@ |\5. delay.b | LFO delay setting |
+| @0xed@ | freq |\4. | ADPCM / noise frequency setting | ???????? |
+|/3. @0xec@ | @0x80@ |\4.| LFO Pitch MPOF |
+| @0x81@ |\4.| LFO Pitch MPON |
+| wave |\2. period |\2. change | LFO Pitch control|
+|/3. @0xeb@ | @0x80@ |\4. | LFO Volume MAOF |
+| @0x81@ |\4.| LFO Volume MAON |
+| wave |\2. period |\2. change | LFO Volume control|
+|/3. @0xea@ | @0x80@ |\4.| LFO OPM MHOF |
+| @0x81@ |\4.| LFO OPM MHON |
+| sync/wave | lfrq | pmd | amd | pms/ams | LFO OPM control |
+| @0xe9@ | delay |\4.| LFO delay setting |
 | @0xe8@ |\5. | PCM8 expansion/ mode shift | ???????? |
-| @0xe7@ | @0x01@ |\04. @speed.b@ | Fade-out |
+| @0xe7@ | @0x01@ | speed |\3.| Fade-out |
 
 h2. About the Sharp x68000
 
