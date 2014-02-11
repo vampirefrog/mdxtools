@@ -11,11 +11,18 @@ h2. Download music library
 
 h2. Ways to listen to MDX files
 
+Windows:
 * Winamp plugin (source available): http://www.vesta.dti.ne.jp/~tsato/soft_sound.html
 * Foobar2000 plugin: http://www.vesta.dti.ne.jp/~tsato/soft_fb2k.html
 * Hoot: http://dmpsoft.s17.xrea.com/hoot/index.html
 * MXV: http://gorry.haun.org/mx/index_e.html
 * MDXWin: http://www.pat.hi-ho.ne.jp/sata68/mdxwin.html#mdxwin
+* KbMedia Player: http://hwm5.gyao.ne.jp/kobarin/
+
+Unix:
+* MDXPlay: http://homepage3.nifty.com/StudioBreeze/software/mdxplay-e.html
+
+X68000:
 * MMDSP (runs on the X68000 or an emulator): http://www.gamesx.com/wiki/doku.php?id=x68000:sxsi_disk_image_with_games_and_lots_of_mdx_files
 
 h2. About the file format
