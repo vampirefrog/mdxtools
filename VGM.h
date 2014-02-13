@@ -147,7 +147,7 @@ struct VGM {
 			c140_chip_type = okim6295_clock = k051649_clock = k054539_clock =
 			huc6280_clock = c140_clock = k053260_clock = pokey_clock = qsound_clock = 0;
 		}
-		if(Version >= 0x170) {
+		if(version >= 0x170) {
 			extra_header_offset = f.readUint32();
 		}
 
@@ -260,6 +260,7 @@ struct VGM {
 		wprintf(L"converter: %s\n", converter);
 		wprintf(L"notes: %s\n", notes);
 	}
+
 };
 
 #endif /* VGM_H__ */
