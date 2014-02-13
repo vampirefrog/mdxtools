@@ -6,7 +6,7 @@
 #include <zlib.h>
 #include <string.h>
 #include <errno.h>
-#ifdef WINDOWS
+#ifdef _WIN32
 #include <winsock2.h>
 #else
 #include <arpa/inet.h>
@@ -19,19 +19,16 @@ struct FileStream {
 	gzFile f;
 	
 	FileStream() { f = 0; }
-	FileStream(const char *filename) {
-		this->open(filename);
+	FileStream(const char *filename, const char *mode="r") {
+		this->open(filename, mode);
 	}
 	~FileStream() {
 		this->close();
 	}
 
-	void open(const char *filename) {
-		f = gzopen(filename, "r");
+	void open(const char *filename, const char *mode="r") {
+		f = gzopen(filename, mode);
 		if(!f) throw new exceptionf("Could not open %s: %s (%d)", filename, strerror(errno), errno);
-	}
-	void openWrite(const char *filename) {
-		f = gzopen(filename, "w");
 	}
 	void close() {
 		gzclose(f);
@@ -109,6 +106,16 @@ struct FileStream {
 		out[0] = 0;
 		iconv_close(i);
 		return ret;
+	}
+
+	void write(const char *s, int len=-1) {
+		if(len < 0) len = strlen(s);
+		gzwrite(f, s, len);
+	}
+
+	void writeUint32(uint32_t i) {
+		uint32_t n = littleUint32(ntohs(i));
+		gzwrite(f, &n, sizeof(n));
 	}
 };
 
