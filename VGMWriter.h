@@ -16,6 +16,12 @@ struct VGMWriter: VGM {
 		buf.putUint8(0x50);
 		buf.putUint8(nn);
 	}
+	void writePSGTone(uint8_t channel, uint8_t vol, uint16_t freq) {
+		uint8_t chan_bits = (channel & 0x03) << 5;
+		writePSG(0b10010000 | chan_bits | (vol & 0x0f));
+		writePSG(0b10000000 | chan_bits | (freq & 0x0f));
+		writePSG(0b00000000 | ((freq & 0x3f0) >> 4));
+	}
 	void writeWait(uint16_t len) {
 		if(len == 735) buf.putUint8(0x62);
 		else if(len == 882) buf.putUint8(0x63);
@@ -24,17 +30,30 @@ struct VGMWriter: VGM {
 			buf.putUint8(len & 0xff);
 			buf.putUint8(len >> 8);
 		}
+		total_samples += len;
 	}
 	void write(const char *filename) {
-		FileStream f(filename, "w0");
+		FileStream f(filename, "w");
+
 		f.write("Vgm ");
-#if 0
-		f.writeUint32(buf.len + 256); f.writeUint32(version); f.writeUint32(sn76489_clock);
+		f.writeUint32(buf.len + 256);
+		f.writeUint32(version);
+		f.writeUint32(sn76489_clock);
+
 		gd3_offset = 0;
-		f.writeUint32(ym2413_clock); f.writeUint32(999); f.writeUint32(total_samples); f.writeUint32(loop_offset);
-		f.writeUint32(loop_samples); f.writeUint32(rate); f.writeUint16(sn76489_feedback);
-		f.writeUint8(sn76489_shift_reg_width); f.writeUint8(sn76489_flags); f.writeUint32(ym2612_clock);
-		vgm_data_offset = 256;
+		f.writeUint32(ym2413_clock);
+		f.writeUint32(gd3_offset);
+		f.writeUint32(total_samples);
+		f.writeUint32(loop_offset);
+
+		f.writeUint32(loop_samples);
+		f.writeUint32(rate);
+		f.writeUint16(sn76489_feedback);
+		f.writeUint8(sn76489_shift_reg_width);
+		f.writeUint8(sn76489_flags);
+		f.writeUint32(ym2612_clock);
+
+		vgm_data_offset = 0x100 - 0x34;
 		f.writeUint32(ym2151_clock); f.writeUint32(vgm_data_offset); f.writeUint32(sega_pcm_clock); f.writeUint32(sega_pcm_interface_reg);
 		f.writeUint32(rf5c68_clock); f.writeUint32(ym2203_clock); f.writeUint32(ym2608_clock); f.writeUint32(ym2610b_clock);
 		f.writeUint32(ym3812_clock); f.writeUint32(ym3526_clock); f.writeUint32(ym8950_clock); f.writeUint32(ymf262_clock);
@@ -51,9 +70,8 @@ struct VGMWriter: VGM {
 		f.writeUint32(0);
 		f.writeUint32(extra_header_offset);
 		f.fill(4 * 16);
+		buf.putUint8(0x66); // EOF
 		f.write(buf);
-#endif
-		f.close();
 	}
 };
 
