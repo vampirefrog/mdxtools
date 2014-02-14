@@ -6,8 +6,9 @@
 #include "wchar.h"
 
 struct VGM {
-	VGM() {}
+	VGM() { reset(); }
 	VGM(const char *filename) {
+		reset();
 		load(filename);
 	}
 	~VGM() {}
@@ -38,6 +39,36 @@ struct VGM {
 		k054539_clock, huc6280_clock, c140_clock, k053260_clock,
 		pokey_clock, qsound_clock;
 	uint32_t extra_header_offset;
+
+	void reset() {
+		eof_offset = version = sn76489_clock =
+		ym2413_clock = gd3_offset = total_samples = loop_offset =
+		loop_samples = rate =
+		sn76489_feedback =
+		sn76489_shift_reg_width = sn76489_flags =
+		ym2612_clock =
+		ym2151_clock = vgm_data_offset = sega_pcm_clock = sega_pcm_interface_reg =
+		rf5c68_clock = ym2203_clock = ym2608_clock = ym2610b_clock =
+		ym3812_clock = ym3526_clock = ym8950_clock = ymf262_clock =
+		ymf278b_clock = ymf271_clock = ymz280b_clock = rf5c164_clock =
+		pwm_clock = ay8910_clock =
+		ay8910_chip_type =
+		ay_flags =
+		volume_modifier = loop_base = loop_modifier =
+		gb_dmg_clock = nes_apu_clock = multipcm_clock = upd7759_clock =
+		okim6258_clock =
+		okim6258_flags = k051649_flags = c140_chip_type =
+		okim6295_clock = k051649_clock =
+		k054539_clock = huc6280_clock = c140_clock = k053260_clock =
+		pokey_clock = qsound_clock =
+		extra_header_offset = 0;
+
+		track_name_en = track_name_jp = 0;
+		game_name_en = game_name_jp = 0;
+		system_name_en = system_name_jp = 0;
+		original_track_author_en = original_track_author_jp = 0;
+		release_date = converter = notes = 0;
+	}
 
 	void load(const char *filename) {
 		f.open(filename);
@@ -151,7 +182,6 @@ struct VGM {
 			extra_header_offset = f.readUint32();
 		}
 
-		printf("eof_offset=0x%08x (%d) version=0x%08x sn76489_clock=0x%08x ym2413_clock=0x%08x gd3_offset=0x%08x\n", eof_offset, eof_offset, version, sn76489_clock, ym2413_clock, gd3_offset);
 		if(gd3_offset) loadGD3();
 
 		f.seek(vgm_data_offset);
@@ -165,6 +195,12 @@ struct VGM {
 	uint16_t *notes;
 
 	bool loadGD3() {
+		if(track_name_en) delete[] track_name_en;
+		track_name_en = track_name_jp = 0;
+		game_name_en = game_name_jp = 0;
+		system_name_en = system_name_jp = 0;
+		original_track_author_en = original_track_author_jp = 0;
+		release_date = converter = notes = 0;
 		f.seek(gd3_offset);
 		if(!f.readCompare("Gd3 ")) {
 			printf("Not a GD3\n");
@@ -248,17 +284,17 @@ struct VGM {
 		PRINTVAR(extra_header_offset);
 		#undef PRINTVAR
 
-		wprintf(L"track_name_en: %s\n", track_name_en);
-		wprintf(L"track_name_jp: %s\n", track_name_jp);
-		wprintf(L"game_name_en: %s\n", game_name_en);
-		wprintf(L"game_name_jp: %s\n", game_name_jp);
-		wprintf(L"system_name_en: %s\n", system_name_en);
-		wprintf(L"system_name_jp: %s\n", system_name_jp);
-		wprintf(L"original_track_author_en: %s\n", original_track_author_en);
-		wprintf(L"original_track_author_jp: %s\n", original_track_author_jp);
-		wprintf(L"release_date: %s\n", release_date);
-		wprintf(L"converter: %s\n", converter);
-		wprintf(L"notes: %s\n", notes);
+		if(track_name_en && *track_name_en) wprintf(L"track_name_en: %s\n", track_name_en);
+		if(track_name_jp && *track_name_jp) wprintf(L"track_name_jp: %s\n", track_name_jp);
+		if(game_name_en && *game_name_en) wprintf(L"game_name_en: %s\n", game_name_en);
+		if(game_name_jp && *game_name_jp) wprintf(L"game_name_jp: %s\n", game_name_jp);
+		if(system_name_en && *system_name_en) wprintf(L"system_name_en: %s\n", system_name_en);
+		if(system_name_jp && *system_name_jp) wprintf(L"system_name_jp: %s\n", system_name_jp);
+		if(original_track_author_en && *original_track_author_en) wprintf(L"original_track_author_en: %s\n", original_track_author_en);
+		if(original_track_author_jp && *original_track_author_jp) wprintf(L"original_track_author_jp: %s\n", original_track_author_jp);
+		if(release_date && *release_date) wprintf(L"release_date: %s\n", release_date);
+		if(converter && *converter) wprintf(L"converter: %s\n", converter);
+		if(notes && *notes) wprintf(L"notes: %s\n", notes);
 	}
 
 };
