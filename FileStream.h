@@ -14,6 +14,7 @@
 #include <iconv.h>
 
 #include "exceptionf.h"
+#include "Buffer.h"
 
 struct FileStream {
 	gzFile f;
@@ -113,9 +114,28 @@ struct FileStream {
 		gzwrite(f, s, len);
 	}
 
+	void write(Buffer &buf) {
+		gzwrite(f, buf.data, buf.len);
+	}
+
 	void writeUint32(uint32_t i) {
-		uint32_t n = littleUint32(ntohs(i));
+		uint32_t n = littleUint32(ntohl(i));
 		gzwrite(f, &n, sizeof(n));
+	}
+	void writeUint16(uint16_t i) {
+		uint32_t n = littleUint16(ntohs(i));
+		gzwrite(f, &n, sizeof(n));
+	}
+	void writeUint8(uint8_t i) {
+		gzwrite(f, &i, 1);
+	}
+	void fill(size_t size, int c = 0) {
+		unsigned char *buf = (unsigned char *)malloc(size);
+		if(buf) {
+			memset(buf, c, size);
+			gzwrite(f, buf, size);
+			free(buf);
+		}
 	}
 };
 
