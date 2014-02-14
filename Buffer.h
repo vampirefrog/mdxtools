@@ -9,6 +9,7 @@ struct Buffer {
 	Buffer() {
 		data = 0;
 		len = 0;
+		alloc_len = 0;
 		chunk_size = 1024;
 	}
 	~Buffer() {
