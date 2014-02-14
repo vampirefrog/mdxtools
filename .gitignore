@@ -1,4 +1,8 @@
 *.o
 *.exe
 *.vgm
+*.vgz
 *.P
+mdxstat
+vgmtest
+vgmdump
