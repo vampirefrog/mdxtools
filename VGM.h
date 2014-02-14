@@ -75,13 +75,14 @@ struct VGM {
 		if(!f.readCompare("Vgm ")) {
 			throw new exceptionf("File header not \"Vgm \": %s", filename);
 		}
-		eof_offset = f.tell() + f.readUint32();
+#define READ_OFFSET(a) { z_off_t of = f.tell(); a = f.readUint32(); if(a) a += of; }
+		READ_OFFSET(eof_offset);
 		version = f.readUint32();
 		sn76489_clock = f.readUint32();
 		ym2413_clock = f.readUint32();
-		gd3_offset = f.tell() + f.readUint32();
+		READ_OFFSET(gd3_offset);
 		total_samples = f.readUint32();
-		loop_offset = f.tell() + f.readUint32();
+		READ_OFFSET(loop_offset);
 		loop_samples = f.readUint32();
 		if(version >= 0x101) {
 			rate = f.readUint32();
@@ -109,7 +110,9 @@ struct VGM {
 			ym2151_clock = 0;
 		}
 		if(version >= 0x150) {
-			vgm_data_offset = f.tell() + f.readUint32();
+			printf("reading vgm_data_offset current=%d\n", vgm_data_offset);
+			READ_OFFSET(vgm_data_offset);
+			printf("vgm_data_offset=%d\n", vgm_data_offset);
 		} else {
 			vgm_data_offset = 0x40;
 		}
@@ -179,9 +182,9 @@ struct VGM {
 			huc6280_clock = c140_clock = k053260_clock = pokey_clock = qsound_clock = 0;
 		}
 		if(version >= 0x170) {
-			extra_header_offset = f.readUint32();
+			READ_OFFSET(extra_header_offset);
 		}
-
+#undef READ_OFFSET
 		if(gd3_offset) loadGD3();
 
 		f.seek(vgm_data_offset);
@@ -228,7 +231,7 @@ struct VGM {
 
 	void dumpInfo() {
 		printf("VGM version %x\n", version);
-		#define PRINTVAR(x) { printf("%s =\t0x%08x (%d)\n", #x, (x), (x)); }
+		#define PRINTVAR(x) { printf("%s =\t0x%08x (%u)\n", #x, (x), (x)); }
 		PRINTVAR(eof_offset);
 		PRINTVAR(version);
 		PRINTVAR(sn76489_clock);
@@ -284,17 +287,19 @@ struct VGM {
 		PRINTVAR(extra_header_offset);
 		#undef PRINTVAR
 
-		if(track_name_en && *track_name_en) wprintf(L"track_name_en: %s\n", track_name_en);
-		if(track_name_jp && *track_name_jp) wprintf(L"track_name_jp: %s\n", track_name_jp);
-		if(game_name_en && *game_name_en) wprintf(L"game_name_en: %s\n", game_name_en);
-		if(game_name_jp && *game_name_jp) wprintf(L"game_name_jp: %s\n", game_name_jp);
-		if(system_name_en && *system_name_en) wprintf(L"system_name_en: %s\n", system_name_en);
-		if(system_name_jp && *system_name_jp) wprintf(L"system_name_jp: %s\n", system_name_jp);
-		if(original_track_author_en && *original_track_author_en) wprintf(L"original_track_author_en: %s\n", original_track_author_en);
-		if(original_track_author_jp && *original_track_author_jp) wprintf(L"original_track_author_jp: %s\n", original_track_author_jp);
-		if(release_date && *release_date) wprintf(L"release_date: %s\n", release_date);
-		if(converter && *converter) wprintf(L"converter: %s\n", converter);
-		if(notes && *notes) wprintf(L"notes: %s\n", notes);
+		printf("GD3:\n");
+		wprintf(L"Hello\n");
+		wprintf(L"track_name_en: %s\n", track_name_en);
+		wprintf(L"track_name_jp: %s\n", track_name_jp);
+		wprintf(L"game_name_en: %s\n", game_name_en);
+		wprintf(L"game_name_jp: %s\n", game_name_jp);
+		wprintf(L"system_name_en: %s\n", system_name_en);
+		wprintf(L"system_name_jp: %s\n", system_name_jp);
+		wprintf(L"original_track_author_en: %s\n", original_track_author_en);
+		wprintf(L"original_track_author_jp: %s\n", original_track_author_jp);
+		wprintf(L"release_date: %s\n", release_date);
+		wprintf(L"converter: %s\n", converter);
+		wprintf(L"notes: %s\n", notes);
 	}
 
 };
