@@ -1,6 +1,8 @@
 #ifndef BUFFER_H_
 #define BUFFER_H_
 
+#include <stdlib.h>
+
 struct Buffer {
 	uint8_t *data;
 	uint32_t len, alloc_len;
