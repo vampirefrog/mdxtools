@@ -19,7 +19,7 @@
 
 struct FileStream {
 	gzFile f;
-	
+
 	FileStream() { f = 0; }
 	FileStream(const char *filename, const char *mode="r") {
 		this->open(filename, mode);
@@ -124,7 +124,7 @@ struct FileStream {
 		gzwrite(f, &n, sizeof(n));
 	}
 	void writeUint16(uint16_t i) {
-		uint32_t n = littleUint16(ntohs(i));
+		uint16_t n = littleUint16(ntohs(i));
 		gzwrite(f, &n, sizeof(n));
 	}
 	void writeUint8(uint8_t i) {
