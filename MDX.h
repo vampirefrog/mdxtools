@@ -513,44 +513,45 @@ public:
 		const char *voiceNames[] = { "M1", "M2", "C1", "C2" };
 		return voiceNames[n & 0x03];
 	}
-	virtual void handleVoice(MDXVoice &v) { v.dump(); }
-	virtual void handleRest(uint8_t duration) { printf("Rest %d\n", duration); }
-	virtual void handleNote(uint8_t note, uint8_t duration) { printf("Note %d duration %d\n", note, duration); }
-	virtual void handleCommand(uint8_t c, ...) { printf("Command 0x%02x: %s\n", c, commandName(c)); }
-	virtual void handleVolumeInc() { printf("VolumeInc\n"); }
-	virtual void handleVolumeDec() { printf("VolumeDec\n"); }
-	virtual void handleDisableKeyOff() { printf("DisableKeyOff\n"); }
-	virtual void handleSyncWait() { printf("SyncWait\n"); }
-	virtual void handlePCM8Enable() { printf("PCM8Enable\n"); }
-	virtual void handleSetTempo(uint8_t t) { printf("SetTempo %d\n", t); }
-	virtual void handleSetVoiceNum(uint8_t t) { printf("SetVoiceNum %d\n", t); }
-	virtual void handleOutputPhase(uint8_t p) { printf("OutputPhase %d\n", p); }
-	virtual void handleSetVolume(uint8_t v) { printf("SetVolume %d\n", v); }
-	virtual void handleSoundLength(uint8_t l) { printf("SoundLength %d\n", l); }
-	virtual void handleKeyOnDelay(uint8_t d) { printf("KeyOnDelay %d\n", d); }
-	virtual void handleSyncSend(uint8_t s) { printf("SyncSend %d\n", s); }
-	virtual void handleADPCMNoiseFreq(uint8_t f) { printf("ADPCMNoiseFreq %d\n", f); }
-	virtual void handleLFODelaySetting(uint8_t d) { printf("LFODelaySetting %d\n", d); }
-	virtual void handleRepeatStart(uint8_t r) { printf("RepeatStart %d\n", r); }
-	virtual void handleRepeatEnd(int16_t r) { printf("RepeatEnd %d\n", r); }
-	virtual void handleRepeatEscape(int16_t r) { printf("RepeatEscape %d\n", r); }
-	virtual void handleDetune(int16_t d) { printf("Detune %d\n", d); }
-	virtual void handlePortamento(int16_t t) { printf("Portamento %d\n", t); }
-	virtual void handleSetOPMRegister(uint8_t reg, uint8_t val) { printf("SetOPMRegister %d %d;\n", reg, val); }
-	virtual void handleDataEnd() { printf("DataEnd\n"); }
-	virtual void handleDataEnd(int16_t end) { printf("DataEnd %d\n", end); }
-	virtual void handleLFOPitch(uint8_t b, uint16_t period, uint16_t change) { printf("LFOPitch %d %d %d\n", b, period, change); }
-	virtual void handleLFOPitchMPON() { printf("LFOPitchMPON\n"); }
-	virtual void handleLFOPitchMPOF() { printf("LFOPitchMPOF\n"); }
-	virtual void handleLFOVolume(uint8_t b, uint16_t period, uint16_t change) { printf("LFOVolume %d %d %d\n", b, period, change); }
-	virtual void handleLFOVolumeMAON() { printf("LFOVolumeMAON\n"); }
-	virtual void handleLFOVolumeMAOF() { printf("LFOVolumeMAOF\n"); }
-	virtual void handleOPMLFO(uint8_t b, uint16_t period, uint16_t change) { printf("OPMLFO %d %d %d\n", b, period, change); }
-	virtual void handleOPMLFOMHON() { printf("OPMLFOMHON\n"); }
-	virtual void handleOPMLFOMHOF() { printf("OPMLFOMHOF\n"); }
-	virtual void handleFadeOut(uint8_t f) { printf("FadeOut %d\n", f); }
-	virtual void handlePCM8ExpansionShift() { printf("PCM8ExpansionShift\n"); }
-	virtual void handleUndefinedCommand(uint8_t b) { printf("UndefinedCommand %d\n", b); }
+	virtual void handleHeader() {} // Called right after header is loaded
+	virtual void handleVoice(MDXVoice &v) {}
+	virtual void handleRest(uint8_t duration) {}
+	virtual void handleNote(uint8_t note, uint8_t duration) {}
+	virtual void handleCommand(uint8_t c, ...) {}
+	virtual void handleVolumeInc() {}
+	virtual void handleVolumeDec() {}
+	virtual void handleDisableKeyOff() {}
+	virtual void handleSyncWait() {}
+	virtual void handlePCM8Enable() {}
+	virtual void handleSetTempo(uint8_t t) {}
+	virtual void handleSetVoiceNum(uint8_t t) {}
+	virtual void handleOutputPhase(uint8_t p) {}
+	virtual void handleSetVolume(uint8_t v) {}
+	virtual void handleSoundLength(uint8_t l) {}
+	virtual void handleKeyOnDelay(uint8_t d) {}
+	virtual void handleSyncSend(uint8_t s) {}
+	virtual void handleADPCMNoiseFreq(uint8_t f) {}
+	virtual void handleLFODelaySetting(uint8_t d) {}
+	virtual void handleRepeatStart(uint8_t r) {}
+	virtual void handleRepeatEnd(int16_t r) {}
+	virtual void handleRepeatEscape(int16_t r) {}
+	virtual void handleDetune(int16_t d) {}
+	virtual void handlePortamento(int16_t t) {}
+	virtual void handleSetOPMRegister(uint8_t reg, uint8_t val) {}
+	virtual void handleDataEnd() {}
+	virtual void handleDataEnd(int16_t end) {}
+	virtual void handleLFOPitch(uint8_t b, uint16_t period, uint16_t change) {}
+	virtual void handleLFOPitchMPON() {}
+	virtual void handleLFOPitchMPOF() {}
+	virtual void handleLFOVolume(uint8_t b, uint16_t period, uint16_t change) {}
+	virtual void handleLFOVolumeMAON() {}
+	virtual void handleLFOVolumeMAOF() {}
+	virtual void handleOPMLFO(uint8_t b, uint16_t period, uint16_t change) {}
+	virtual void handleOPMLFOMHON() {}
+	virtual void handleOPMLFOMHOF() {}
+	virtual void handleFadeOut(uint8_t f) {}
+	virtual void handlePCM8ExpansionShift() {}
+	virtual void handleUndefinedCommand(uint8_t b) {}
 };
 
 #endif /* MDX_H_ */
