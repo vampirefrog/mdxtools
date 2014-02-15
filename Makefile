@@ -1,4 +1,4 @@
-PROGS=mdxstat vgmtest vgmdump
+PROGS=mdxstat vgmtest vgmdump mdxdump
 CFLAGS=-ggdb
 all: $(PROGS)
 
@@ -8,14 +8,13 @@ else
 LIBS=-lz
 endif
 
-mdxstat: mdxstat.cpp MDX.h exceptionf.h FileStream.h
-	$(CXX) $(CFLAGS) $< -o $@ $(LIBS)
-
-vgmtest: vgmtest.cpp VGMWriter.h VGM.h exceptionf.h FileStream.h Buffer.h
-	$(CXX) $(CFLAGS) $< -o $@ $(LIBS)
-
-vgmdump: vgmdump.cpp VGM.h exceptionf.h FileStream.h Buffer.h
+%: %.cpp
 	$(CXX) $(CFLAGS) $< -o $@ $(LIBS)
 
 clean:
 	rm -f $(PROGS) $(addsuffix .exe,$(PROGS)) *.o
+
+mdxstat: mdxstat.cpp MDX.h exceptionf.h FileStream.h
+vgmtest: vgmtest.cpp VGMWriter.h VGM.h exceptionf.h FileStream.h Buffer.h
+vgmdump: vgmdump.cpp VGM.h exceptionf.h FileStream.h Buffer.h
+mdxdump: mdxdump.cpp MDXDumper.h MDX.h exceptionf.h FileStream.h Buffer.h
