@@ -70,8 +70,9 @@ struct MDXVoice {
 };
 
 class MDX {
-private:
-	uint16_t Voice_offset, mml_offset[16];
+protected:
+	uint16_t file_base, Voice_offset, mml_offset[16];
+	uint8_t num_channels;
 	FileStream s;
 public:
 	const char *title, *pcm_file;
@@ -85,13 +86,14 @@ public:
 		s.open(filename);
 		title = s.readLineIconv(0x1a, "Shift_JIS", "UTF-8");
 		pcm_file = s.readLineIconv(0, "Shift_JIS", "UTF-8");
-		int file_base = s.tell();
+		file_base = s.tell();
 		Voice_offset = s.readUint16Big();
 		mml_offset[0] = s.readUint16Big();
-		for(int i = 1; i < mml_offset[0] / 2 - 1 &&  i < 16; i++) {
+		num_channels = mml_offset[0] / 2 - 1;
+		for(int i = 1; i < num_channels &&  i < 16; i++) {
 			mml_offset[i] = s.readUint16Big();
 		}
-		printf("file_base=%d Voice_offset=%d\n", file_base, Voice_offset);
+		handleHeader();
 		s.seek(file_base + Voice_offset);
 		while(!s.eof()) {
 			MDXVoice inst;
