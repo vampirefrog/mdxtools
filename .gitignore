@@ -2,7 +2,12 @@
 *.exe
 *.vgm
 *.vgz
+*.MDX
+*.mdx
+*.PDX
+*.pdx
 *.P
 mdxstat
 vgmtest
 vgmdump
+mdxdump
