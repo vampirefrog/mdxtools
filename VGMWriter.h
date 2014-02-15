@@ -35,8 +35,10 @@ struct VGMWriter: VGM {
 	void write(const char *filename) {
 		FileStream f(filename, "w");
 
+		buf.putUint8(0x66); // EOF
+
 		f.write("Vgm ");
-		f.writeUint32(buf.len + 256);
+		f.writeUint32(buf.len + 256 - 4);
 		f.writeUint32(version);
 		f.writeUint32(sn76489_clock);
 
@@ -70,7 +72,6 @@ struct VGMWriter: VGM {
 		f.writeUint32(0);
 		f.writeUint32(extra_header_offset);
 		f.fill(4 * 16);
-		buf.putUint8(0x66); // EOF
 		f.write(buf);
 	}
 };
