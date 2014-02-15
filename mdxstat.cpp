@@ -23,8 +23,15 @@ public:
 	void outputStats(bool total = false) {
 		int *c = total ? total_cmds: cmds;
 		for(int i = 0; i < 32; i++) {
-			printf("%s (%x): %d\n", commandName(i + 0xe0), i + 0xe0,  c[i]);
+			printf("%s%s%02x ", c[i] > 0xff ? " " : "", c[i] > 0xfff ? " " : "", i + 0xe0);
 		}
+		printf("\n");
+		for(int i = 0; i < 32; i++) {
+			printf("%02x ", c[i]);
+		}
+		printf("\n");
+		//			printf("%s (%x): %d\n", commandName(i + 0xe0), i + 0xe0,  c[i]);
+
 	}
 };
 
