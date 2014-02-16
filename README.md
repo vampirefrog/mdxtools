@@ -1,7 +1,13 @@
 mdxtools
 ========
 
-A bunch of tools for handling the MDX music format (music for the Sharp X68000)
+A bunch of tools for handling the MDX music format (music for the Sharp X68000). The tools are as follows:
+
+* mdx2vgm (TBD) - convert to VGM format
+* mdxdump - dump all the information in a MDX file.
+* mdxstat - analyze and print out some statistics and totals about given MDX files.
+* mml2mdx (TBD) - a MML compiler
+* mdx2mml (TBD) - a MML decompiler
 
 The rest of this document is work in progress.
 
@@ -39,6 +45,13 @@ MML is a text format, containing sound commands similar to MDX and to MIDI as we
 * MML description for MXDRV (japanese): http://www16.atwiki.jp/mxdrv/pages/19.html
 * Another MML description: http://www.geocities.co.jp/Playtown-Denei/9628/mck/mckc-e.txt
 * NRTDRV MML description: http://nrtdrv.sakura.ne.jp/index.cgi?page=MML%A5%B3%A5%DE%A5%F3%A5%C9%B0%EC%CD%F7
+
+Compiling MML files to MDX files: Get run68 from http://sourceforge.jp/projects/sfnet_run68/ , then get MDX_TOOL.lzh from http://nfggames.com/x68000/Mirrors/x68pub/x68tools/SOUND/MXDRV/ . Unpack the lzh file in the same folder as run68, then open a command prompt, navigate to the run68 folder, and run run68.exe mxc.x <file.mml> .
+
+You can find other ways of compiling on this page: http://gimic.jp/index.php?MDX%E3%83%87%E3%83%BC%E3%82%BF%E4%BD%9C%E6%88%90
+
+Decompiling: Similar procedure, but get DMDX from DMDX.lzh.
+
 
 Other tools and resources
 -------------------------
