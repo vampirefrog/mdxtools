@@ -88,8 +88,8 @@ MML Commands. Each command consists of one byte, followed by specific parameters
 * `0xfd` `n` • Set current voice.
 * `0xfc` `n` • Set output phase.
 * `0xfb` `n` • Set volume.
-* `0xfa` • Decrease volume.
-* `0xf9` • Increase volume.
+* `0xfa` • Decrease volume. Corresponds to MML command **(**.
+* `0xf9` • Increase volume. Corresponds to MML command **)**.
 * `0xf8` `n` • Sound length
 * `0xf7` • Disable key off.
 * `0xf6` `n` `0x00` • Repeat `n` times until a Repeat end command.
