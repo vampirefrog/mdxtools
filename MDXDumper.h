@@ -7,6 +7,14 @@ class MDXDumper: public MDX {
 public:
 	MDXDumper(const char *filename) { load(filename); }
 
+	const char *noteName(int note) {
+		const char *noteNames[] = { "C", "C#", "D", "D#" , "E", "F", "F#", "G", "G#", "A", "A#", "B",  };
+		return noteNames[(note - 0x80 + 3) % 12];
+	}
+	int noteOctave(int note) {
+		return (note - 0x80 + 3) / 12 - 2;
+	}
+
 	virtual void handleHeader() {
 		printf("Title: \"%s\"\n", title);
 		printf("PCM file: \"%s\"\n", pcm_file);
@@ -18,7 +26,7 @@ public:
 	}
 	virtual void handleVoice(MDXVoice &v) { v.dump(); }
 	virtual void handleRest(uint8_t duration) { printf("Rest %d\n", duration); }
-	virtual void handleNote(uint8_t note, uint8_t duration) { printf("Note %d duration %d\n", note, duration); }
+	virtual void handleNote(uint8_t note, uint8_t duration) { printf("Note %d (%s%d) duration %d\n", note, noteName(note), noteOctave(note), duration); }
 	virtual void handleCommand(uint8_t c, ...) { /* printf("Command 0x%02x: %s\n", c, commandName(c)); */ }
 	virtual void handleVolumeInc() { printf("VolumeInc\n"); }
 	virtual void handleVolumeDec() { printf("VolumeDec\n"); }
