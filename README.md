@@ -31,13 +31,22 @@ X68000:
 
 * MMDSP (runs on the X68000 or an emulator): http://www.gamesx.com/wiki/doku.php?id=x68000:sxsi_disk_image_with_games_and_lots_of_mdx_files
 
-Other tools
------------
+About MML (Music Macro Language)
+--------------------------------
+MML is a text format, containing sound commands similar to MDX and to MIDI as well.
+
+* MML resources & compilers: http://woolyss.com/chipmusic-mml.php
+* MML description for MXDRV (japanese): http://www16.atwiki.jp/mxdrv/pages/19.html
+
+Other tools and resources
+-------------------------
 
 * mdxpg (convert to MIDI): http://www.geocities.jp/sam_kb/VOPM/MDXPG/index.html
+* nfggames x68000 file archive: http://nfggames.com/x68000/
+* especially the tools here (see MDX_TOOL.lzh) http://nfggames.com/x68000/Mirrors/x68pub/x68tools/SOUND/MXDRV/
 
-About the file format
----------------------
+MDX file format
+---------------
 
 MDX is a Music Macro Language format, with commands such as Note, Rest, Set Tempo and many others. It was used for storing music on the Sharp X68000 computer. There is a large library of MDX files available.
 
