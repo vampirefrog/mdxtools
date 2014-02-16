@@ -82,7 +82,7 @@ Voice format. This corresponds to the registers in the YM2151 sound chip. Each f
 MML Commands. Each command consists of one byte, followed by specific parameters.
 
 * `0x00-0x7f` • Rest +1 clock cycles
-* `0x80-0xdf` `n` • Note data, followed by duration `n` + 1. To calculate the MIDI equivalent note, subtract 0x80 and add 3.
+* `0x80-0xdf` `n` • Note data, followed by duration `n` + 1. Corresponds to MML command **n#,#**. 0x80 corresponds to MML **o0d+**, which means octave 0, note D♯. 0xdf corresponds to **o8d**, octave 8, D. To calculate the MIDI equivalent note, subtract 0x80 and add 3.
 * `0xff` `n` • Set tempo to `n`.
 * `0xfe` `n` `m` • Set OPM register `n` to value `m`.
 * `0xfd` `n` • Set current voice.
