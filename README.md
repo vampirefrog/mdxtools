@@ -67,6 +67,8 @@ Header format:
 
 The voice and MML offsets are relative to the voice data offset position (right after the title and PDX file name). To implement this in code, just use a ftell() after you've read the PDX file name. The MML data offset array points to each of the channels. Some files use 9 channels, other use 16. To detect which is which, subtract the file position of the first MML data offset word from its value, then divide by 2. See MDX.h for the implementation.
 
+The FM channels are labeled A through H. The PCM channel is labeled P. The extra channels, when the Mercury expansion card is present, are labeled Q through W.
+
 Voice format. This corresponds to the registers in the YM2151 sound chip. Each field is 1 byte. The x4 fields are 4 bytes corresponding to M1, M2, C1, C2. Total is 27 bytes per voice.
 
 * Voice ID
@@ -82,7 +84,7 @@ Voice format. This corresponds to the registers in the YM2151 sound chip. Each f
 MML Commands. Each command consists of one byte, followed by specific parameters.
 
 * `0x00-0x7f` • Rest +1 clock cycles
-* `0x80-0xdf` `n` • Note data, followed by duration `n` + 1. Corresponds to MML command **n#,#**. 0x80 corresponds to MML **o0d+**, which means octave 0, note D♯. 0xdf corresponds to **o8d**, octave 8, D. To calculate the MIDI equivalent note, subtract 0x80 and add 3.
+* `0x80-0xdf` `n` • Note data, followed by duration `n` + 1. Corresponds to MML command **n#,#**. 0x80 corresponds to MML **o0d+**, which means octave 0, note D♯. 0xdf corresponds to **o8d**, octave 8, D. To calculate the MIDI equivalent note, subtract 0x80 and add 3. For the PCM channels, P through W, this represents data number (???).
 * `0xff` `n` • Set tempo to `n`.
 * `0xfe` `n` `m` • Set OPM register `n` to value `m`.
 * `0xfd` `n` • Set current voice.
