@@ -37,6 +37,8 @@ MML is a text format, containing sound commands similar to MDX and to MIDI as we
 
 * MML resources & compilers: http://woolyss.com/chipmusic-mml.php
 * MML description for MXDRV (japanese): http://www16.atwiki.jp/mxdrv/pages/19.html
+* Another MML description: http://www.geocities.co.jp/Playtown-Denei/9628/mck/mckc-e.txt
+* NRTDRV MML description: http://nrtdrv.sakura.ne.jp/index.cgi?page=MML%A5%B3%A5%DE%A5%F3%A5%C9%B0%EC%CD%F7
 
 Other tools and resources
 -------------------------
