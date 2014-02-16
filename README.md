@@ -67,7 +67,7 @@ Header format:
 
 The voice and MML offsets are relative to the voice data offset position (right after the title and PDX file name). To implement this in code, just use a ftell() after you've read the PDX file name. The MML data offset array points to each of the channels. Some files use 9 channels, other use 16. To detect which is which, subtract the file position of the first MML data offset word from its value, then divide by 2. See MDX.h for the implementation.
 
-Voice format. This corresponds to the registers in the YM2151 sound chip. Each field is 1 byte. The x4 fields are 4 bytes corresponding to M1, M2, C1, C2.
+Voice format. This corresponds to the registers in the YM2151 sound chip. Each field is 1 byte. The x4 fields are 4 bytes corresponding to M1, M2, C1, C2. Total is 27 bytes per voice.
 
 * Voice ID
 * FL & CON
