@@ -120,3 +120,9 @@ About the Sharp x68000
 ----------------------
 
 It is a desktop computer released by Sharp in 1987 ([see wikipedia page](http://en.wikipedia.org/wiki/Sharp_X68000)). It contains two sound chips, the YM2151 (8 FM channels) and OKI MSM6258 (1 4-bit PCM). There is an expansion card called Mercury unit that can increase the PCM channels to 8.
+
+Emulators
+---------
+
+* XM6: http://mijet.eludevisibility.org/XM6%20Pro-68k/XM6%20Pro-68k.html
+* More emulators at Zophar's: http://www.zophar.net/x68000.html
