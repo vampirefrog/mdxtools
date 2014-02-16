@@ -108,10 +108,10 @@ MML Commands. Each command consists of one byte, followed by specific parameters
 * `0xec` `m` `nn` `aa` • LFO Pitch control. `m` controls the waveform (0=sawtooth, 1=square, 2=triangle), `nn` is the frequency, expressed in clock cycles / 4, and `aa` is the amplitude.
 * `0xeb` `0x80` • LFO Volume MAOF.
 * `0xeb` `0x81` • LFO Volume MAON.
-* `0xeb` `m` • LFO Volume control. Same as LFO Pitch.
+* `0xeb` `m` `nn` `aa` • LFO Volume control. Same as LFO Pitch.
 * `0xea` `0x80` • LFO OPM MHOF.
 * `0xea` `0x81` • LFO OPM MHON.
-* `0xea` `m` `n` `o` `p` `q` • OPM LFO `m`: sync/wave, `n`: lfrq, `o`: pmd, `p`: amd, `q`: pms/ams 
+* `0xea` `m` `n` `o` `p` `q` • OPM LFO `m`=sync/wave, `n`=lfrq, `o`=pmd, `p`=amd, `q`=pms/ams  (???)
 * `0xe9` `n` • Set LFO delay.
 * `0xe8` • PCM8 expansion/ mode shift. (???)
 * `0xe7` `0x01` `n` • Fade-out at speed `n`.
