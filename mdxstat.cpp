@@ -42,8 +42,7 @@ public:
 			printf("%02x ", c[i]);
 		}
 		printf("\n");
-		//			printf("%s (%x): %d\n", commandName(i + 0xe0), i + 0xe0,  c[i]);
-
+		//printf("%s (%x): %d\n", commandName(i + 0xe0), i + 0xe0,  c[i]);
 	}
 };
 
