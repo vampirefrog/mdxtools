@@ -100,8 +100,8 @@ MML Commands. Each command consists of one byte, followed by specific parameters
 * `0xf1` `0x00` • Performance end.
 * `0xf1` `nn` • Loop from nn. (???)
 * `0xf0` `n` • Key-on delay. (???)
-* `0xef` `n` • Sync send on channel `n`. (???)
-* `0xee` • Sync wait. (???)
+* `0xef` `n` • Sync send on channel `n`. If channel `n` is in Sync Wait, resume playback on that channel. MML command **S#**
+* `0xee` • Sync Wait on current channel. Pause playback on this channel until resumed by a Sync Send signal (see above). MML Command **W**.
 * `0xed` `n` • ADPCM / noise frequency set to `n`. (???)
 * `0xec` `0x80` • LFO Pitch MPOF.
 * `0xec` `0x81` • LFO Pitch MPON.
