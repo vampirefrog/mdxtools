@@ -19,7 +19,7 @@ Windows:
 * Winamp plugin (source available): http://www.vesta.dti.ne.jp/~tsato/soft_sound.html
 * Foobar2000 plugin: http://www.vesta.dti.ne.jp/~tsato/soft_fb2k.html
 * Hoot: http://dmpsoft.s17.xrea.com/hoot/index.html
-* MXV: http://gorry.haun.org/mx/index_e.html
+* MXV, MXDRVg.dll, X68Sound.dll (sources available): http://gorry.haun.org/mx/index_e.html
 * MDXWin: http://www.pat.hi-ho.ne.jp/sata68/mdxwin.html#mdxwin
 * KbMedia Player: http://hwm5.gyao.ne.jp/kobarin/
 
