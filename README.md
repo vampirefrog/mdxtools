@@ -8,6 +8,8 @@ A bunch of tools for handling the MDX music format (music for the Sharp X68000).
 * mdxstat - analyze and print out some statistics and totals about given MDX files.
 * mml2mdx (TBD) - a MML compiler
 * mdx2mml (TBD) - a MML decompiler
+* mdx2midi (TBD) - a MML to MIDI file converter.
+* mdx2opm (TBD) - Extract OPM voices from MDX file (usable in [VOPM](http://www.geocities.jp/sam_kb/VOPM/)). 
 
 The rest of this document is work in progress.
 
