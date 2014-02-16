@@ -104,6 +104,7 @@ public:
 		for(int i = 0; i < num_channels; i++) {
 			s.seek(file_base + mml_offset[i]);
 			int chan_end = i < num_channels - 1 ? file_base + mml_offset[i+1] : 0;
+			handleChannelStart(i);
 			enum {
 				None = 0,
 				NoteDuration,
@@ -483,6 +484,7 @@ public:
 				}
 				if(chan_end && s.tell() >= chan_end - 1) break;
 			}
+			handleChannelEnd(i);
 		}
 	}
 	const char *commandName(uint8_t c) {
@@ -523,6 +525,8 @@ public:
 	}
 	virtual void handleHeader() {} // Called right after header is loaded
 	virtual void handleVoice(MDXVoice &v) {}
+	virtual void handleChannelStart(int chan) {}
+	virtual void handleChannelEnd(int chan) {}
 	virtual void handleRest(uint8_t duration) {}
 	virtual void handleNote(uint8_t note, uint8_t duration) {}
 	virtual void handleCommand(uint8_t c, ...) {}
