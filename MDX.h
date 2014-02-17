@@ -84,8 +84,10 @@ public:
 
 	void load(const char *filename) {
 		s.open(filename);
-		title = s.readLineIconv(0x1a, "Shift_JIS", "UTF-8");
-		pcm_file = s.readLineIconv(0, "Shift_JIS", "UTF-8");
+		title = s.readLine(0x1a);
+		char *nl = strrchr(title, '\r');
+		*nl = 0;
+		pcm_file = s.readLine(0);
 		file_base = s.tell();
 		Voice_offset = s.readUint16Big();
 		mml_offset[0] = s.readUint16Big();

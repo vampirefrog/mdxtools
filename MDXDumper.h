@@ -2,13 +2,16 @@
 #define MDXDUMPER_H_
 
 #include "MDX.h"
+#include "tools.h"
 
 class MDXDumper: public MDX {
 public:
 	MDXDumper(const char *filename) { load(filename); }
 
 	virtual void handleHeader() {
-		printf("Title: \"%s\"\n", title);
+		char *t = iconv_alloc(title, "utf-8", "Shift_JIS");
+		printf("Title: \"%s\"\n", t);
+		free(t);
 		printf("PCM file: \"%s\"\n", pcm_file);
 		printf("Voice offset: 0x%04x\n", file_base + Voice_offset);
 		printf("MML offsets (%d):\n", mml_offset[0] / 2 - 1);
