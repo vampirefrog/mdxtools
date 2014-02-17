@@ -10,7 +10,7 @@
 char *iconv_alloc(const char *str, const char *to, const char *from, int len) {
 	int chunk_size = 256, alloc_size = 0;
 	if(len < 0) {
-		char *p = (char *)rawmemchr(str, 0);
+		char *p = (char *)memchr(str, 0, 512); // FIXME: rawmemchr not available on MinGW?
 		len = p - str;
 	}
 	iconv_t cd = iconv_open(to, from);
