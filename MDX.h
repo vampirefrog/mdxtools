@@ -34,8 +34,8 @@ struct MDXVoice {
 		pan = 0xc0;
 		slot_mask = *b++;
 		for(int i = 0; i < 4; i++, b++) {
-			osc[i].dt1 = (*b >> 3) & 0x07;
-			osc[i].mul = *b & 0x07;
+			osc[i].dt1 = (*b >> 4) & 0x07;
+			osc[i].mul = *b & 0x0f;
 		}
 		for(int i = 0; i < 4; i++, b++) {
 			osc[i].tl = *b;
@@ -257,7 +257,7 @@ public:
 						}
 						break;
 					case NoteDuration:
-						handleNote(nn, b + 1);
+						handleNote(nn - 0x80, b + 1);
 						state = None;
 						break;
 					case TempoVal:
