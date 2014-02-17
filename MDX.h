@@ -45,7 +45,7 @@ struct MDXVoice {
 			osc[i].ar = *b & 0x1f;
 		}
 		for(int i = 0; i < 4; i++, b++) {
-			osc[i].ame = *b & 0x80;
+			osc[i].ame = (*b & 0x80) >> 7;
 			osc[i].d1r = *b & 0x1f;
 		}
 		for(int i = 0; i < 4; i++, b++) {

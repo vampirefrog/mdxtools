@@ -17,7 +17,7 @@ public:
 		int indices[4] = { 0, 2, 1, 3 };
 		for(int n = 0; n < 4; n++) {
 			int i = indices[n];
-			printf("%d, %d, %d, %d,  %d, %d, %d, %d,  %d, %d, %d,\n", v.osc[i].ar, v.osc[i].d1r, v.osc[i].d2r, v.osc[i].rr, v.osc[i].d1l, v.osc[i].tl, v.osc[i].ks, v.osc[i].mul, v.osc[i].dt1, v.osc[i].dt2, v.osc[i].ame >> 7);
+			printf("%d, %d, %d, %d,  %d, %d, %d, %d,  %d, %d, %d,\n", v.osc[i].ar, v.osc[i].d1r, v.osc[i].d2r, v.osc[i].rr, v.osc[i].d1l, v.osc[i].tl, v.osc[i].ks, v.osc[i].mul, v.osc[i].dt1, v.osc[i].dt2, v.osc[i].ame);
 		}
 		printf("%d, %d, %d}\n\n", v.con, v.fl, v.slot_mask);
 	}
