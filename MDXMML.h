@@ -23,7 +23,7 @@ public:
 	}
 	int cur_chan;
 	virtual void handleChannelStart(int chan) {
-		printf("\n/* Channel %d */\n\n%c ", chan, channelName(chan));
+		printf("\n/* Channel %c (%s)*/\n", channelName(chan), chan < 8 ? "FM" : "PCM");
 		cur_chan = chan;
 		col = 0;
 		repeat_stack_pointer = 0;
@@ -31,21 +31,17 @@ public:
 	virtual void handleChannelEnd(int chan) {
 		printf("\n");
 	}
-	char channelName(uint8_t chan) {
-		if(chan < 8) return 'A' + chan;
-		if(chan < 16) return 'P' + chan - 8;
-		return '!';
-	}
 	int col;
 	void mmlf(const char *fmt, ...) {
+		if(col == 0) printf("%c ", channelName(cur_chan));
 		va_list ap;
 		va_start(ap, fmt);
 		int printed = vprintf(fmt, ap);
 		va_end(ap);
 		col += printed;
 		if(col > 80) {
-			printf("\n%c ", channelName(cur_chan));
 			col = 0;
+			printf("\n");
 		}
 	}
 	int nextValidDuration(uint8_t d) {

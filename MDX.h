@@ -523,6 +523,19 @@ public:
 		const char *voiceNames[] = { "M1", "M2", "C1", "C2" };
 		return voiceNames[n & 0x03];
 	}
+	const char *noteName(int note) {
+		const char *noteNames[] = { "C", "C#", "D", "D#" , "E", "F", "F#", "G", "G#", "A", "A#", "B",  };
+		return noteNames[(note + 3) % 12];
+	}
+	int noteOctave(int note) {
+		return (note + 3) / 12 - 2;
+	}
+	char channelName(uint8_t chan) {
+		if(chan < 8) return 'A' + chan;
+		if(chan < 16) return 'P' + chan - 8;
+		return '!';
+	}
+
 	virtual void handleHeader() {} // Called right after header is loaded
 	virtual void handleVoice(MDXVoice &v) {}
 	virtual void handleChannelStart(int chan) {}

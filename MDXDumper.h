@@ -7,21 +7,13 @@ class MDXDumper: public MDX {
 public:
 	MDXDumper(const char *filename) { load(filename); }
 
-	const char *noteName(int note) {
-		const char *noteNames[] = { "C", "C#", "D", "D#" , "E", "F", "F#", "G", "G#", "A", "A#", "B",  };
-		return noteNames[(note + 3) % 12];
-	}
-	int noteOctave(int note) {
-		return (note + 3) / 12 - 2;
-	}
-
 	virtual void handleHeader() {
 		printf("Title: \"%s\"\n", title);
 		printf("PCM file: \"%s\"\n", pcm_file);
 		printf("Voice offset: 0x%04x\n", file_base + Voice_offset);
 		printf("MML offsets (%d):\n", mml_offset[0] / 2 - 1);
 		for(int i = 0; i < mml_offset[0] / 2 - 1 &&  i < 16; i++) {
-			printf("  %02u: 0x%04x\n", i, mml_offset[i]);
+			printf("  %c: 0x%04x\n", channelName(i), mml_offset[i]);
 		}
 	}
 	virtual void handleVoice(MDXVoice &v) { v.dump(); }
