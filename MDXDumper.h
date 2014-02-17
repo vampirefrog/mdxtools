@@ -9,10 +9,10 @@ public:
 
 	const char *noteName(int note) {
 		const char *noteNames[] = { "C", "C#", "D", "D#" , "E", "F", "F#", "G", "G#", "A", "A#", "B",  };
-		return noteNames[(note - 0x80 + 3) % 12];
+		return noteNames[(note + 3) % 12];
 	}
 	int noteOctave(int note) {
-		return (note - 0x80 + 3) / 12 - 2;
+		return (note + 3) / 12 - 2;
 	}
 
 	virtual void handleHeader() {
