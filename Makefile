@@ -1,4 +1,4 @@
-PROGS=mdxstat vgmtest vgmdump mdxdump
+PROGS=mdxstat vgmtest vgmdump mdxdump mdx2mml
 CFLAGS=-ggdb
 all: $(PROGS)
 
@@ -18,3 +18,4 @@ mdxstat: mdxstat.cpp MDX.h exceptionf.h FileStream.h
 vgmtest: vgmtest.cpp VGMWriter.h VGM.h exceptionf.h FileStream.h Buffer.h
 vgmdump: vgmdump.cpp VGM.h exceptionf.h FileStream.h Buffer.h
 mdxdump: mdxdump.cpp MDXDumper.h MDX.h exceptionf.h FileStream.h Buffer.h
+mdx2mml: mdx2mml.cpp MDXMML.h MDX.h exceptionf.h FileStream.h Buffer.h
