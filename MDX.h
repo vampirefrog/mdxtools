@@ -85,7 +85,7 @@ public:
 	void load(const char *filename) {
 		s.open(filename);
 		title = s.readLine(0x1a);
-		char *nl = strrchr(title, '\r');
+		char *nl = strrchr((char *)title, '\r');
 		*nl = 0;
 		pcm_file = s.readLine(0);
 		file_base = s.tell();
