@@ -526,11 +526,11 @@ public:
 		return voiceNames[n & 0x03];
 	}
 	const char *noteName(int note) {
-		const char *noteNames[] = { "C", "C#", "D", "D#" , "E", "F", "F#", "G", "G#", "A", "A#", "B",  };
+		const char *noteNames[] = { "c", "c+", "d", "d+" , "e", "f", "f+", "g", "g+", "a", "a+", "b",  };
 		return noteNames[(note + 3) % 12];
 	}
 	int noteOctave(int note) {
-		return (note + 3) / 12 - 2;
+		return (note + 3) / 12;
 	}
 	char channelName(uint8_t chan) {
 		if(chan < 8) return 'A' + chan;
