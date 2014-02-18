@@ -27,6 +27,9 @@ public:
 		cur_chan = chan;
 		col = 0;
 		repeat_stack_pointer = 0;
+		lastRest = 0;
+		lastOctave = -1;
+		nextKeyOff = false;
 	}
 	virtual void handleChannelEnd(int chan) {
 		printf("\n");
@@ -39,7 +42,7 @@ public:
 		int printed = vprintf(fmt, ap);
 		va_end(ap);
 		col += printed;
-		if(col > 80) {
+		if(col > 78) {
 			col = 0;
 			printf("\n");
 		}
@@ -54,21 +57,59 @@ public:
 		}
 		return i;
 	}
+	int lastOctave;
 	virtual void handleNote(uint8_t note, uint8_t duration) {
-		duration = duration / 3 * 4;
-		while(duration > 0) {
-			int nd = nextValidDuration(duration);
-			mmlf("n%d,%d%s", note, nd, nd != duration ? "&" : "");
-			duration -= nd;
+		if(cur_chan < 8) {
+			int oc = noteOctave(note);
+			if(lastOctave != oc) {
+				if(lastOctave == -1 || lastOctave - oc > 1 || oc - lastOctave > 1) {
+					mmlf("o%d", oc);
+				} else if(lastOctave == oc + 1) {
+					mmlf("<");
+				} else if(lastOctave == oc - 1) {
+					mmlf(">");
+				}
+			}
+			lastOctave = oc;
 		}
+		if(duration > 0) {
+			int mmlDuration;
+			bool dot = false, percent = false;
+			if(192 % duration == 0) {
+				mmlDuration = 192 / duration;
+			} else if(192 % (duration * 2 / 3) == 0 && (duration * 2) % 3 == 0) {
+				dot = true;
+				mmlDuration = 192 * 3 / duration / 2;
+			} else {
+				percent = true;
+			}
+			if(cur_chan < 8) {
+				mmlf("%s%s%d%s%s", noteName(note), percent ? "%" : "", percent ? duration : mmlDuration, dot ? "." : "", nextKeyOff ? "&" : "");
+			} else {
+				mmlf("n%d,%s%d%s%s", note, percent ? "%" : "", percent ? duration : mmlDuration, dot ? "." : "", nextKeyOff ? "&" : "");
+			}
+		}
+		nextKeyOff = false;
 	}
+	int lastRest;
 	virtual void handleRest(uint8_t duration) {
-		duration /= 64;
-		while(duration > 0) {
-			int nd = nextValidDuration(duration);
-			mmlf("r%d", nd);
-			duration -= nd;
+		if(duration == 128) {
+			lastRest += duration;
+			return;
 		}
+		duration += lastRest;
+		int mmlDuration;
+		bool dot = false, percent = false;
+		if(192 % duration == 0) {
+			mmlDuration = 192 / duration;
+		} else if(192 % (duration * 2 / 3) == 0 && (duration * 2) % 3 == 0) {
+			dot = true;
+			mmlDuration = 192 * 3 / duration / 2;
+		} else {
+			percent = true;
+		}
+		mmlf("r%s%d%s", percent ? "%" : "", percent ? duration : mmlDuration, dot ? "." : "");
+		lastRest = 0;
 	}
 	virtual void handleSetVoiceNum(uint8_t voice) {
 		mmlf("@%d", voice);
@@ -90,7 +131,7 @@ public:
 	}
 	virtual void handleSetVolume(uint8_t volume) {
 		if(volume <= 15) mmlf("v%d", volume);
-		else mmlf("@v%d", volume & 0x7f);
+		else mmlf("@v%d", 255 - volume);
 	}
 	virtual void handleVolumeInc() { mmlf(")"); }
 	virtual void handleVolumeDec() { mmlf("("); }
@@ -98,16 +139,24 @@ public:
 	int repeat_stack[5];
 	int repeat_stack_pointer;
 	virtual void handleRepeatStart(uint8_t times) {
+		lastOctave = -1;
 		if(repeat_stack_pointer < 5) {
 			repeat_stack[repeat_stack_pointer++] = times;
 		}
 		mmlf("[");
 	}
 	virtual void handleRepeatEnd(int16_t offset) {
+		lastOctave = -1;
 		if(repeat_stack_pointer >= 0) {
-			mmlf("]%d", repeat_stack[--repeat_stack_pointer]);
+			int r = repeat_stack[--repeat_stack_pointer];
+			if(r > 2) mmlf("]%d", r); else mmlf("]");
 		}
 	}
+	virtual void handleSoundLength(uint8_t l) { mmlf("q%d", l); }
+	virtual void handleOutputPhase(uint8_t p) { mmlf("p%d", p); }
+	bool nextKeyOff;
+	virtual void handleDisableKeyOff() { nextKeyOff = true; }
+	virtual void handleDetune(int16_t d) { mmlf("D%d", d); }
 };
 
 #endif /* MDXMML_H_ */
