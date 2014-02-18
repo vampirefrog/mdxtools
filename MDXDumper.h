@@ -20,8 +20,10 @@ public:
 		}
 	}
 	virtual void handleVoice(MDXVoice &v) { v.dump(); }
-	virtual void handleRest(uint8_t duration) { printf("Rest %d\n", duration); }
-	virtual void handleNote(uint8_t note, uint8_t duration) { printf("Note %d (%s%d) duration %d\n", note, noteName(note), noteOctave(note), duration); }
+	virtual void handleRest(uint8_t duration) { printf("Rest %d (192 / %d)\n", duration, duration == 0 ? 0 : 192 / duration); }
+	virtual void handleNote(uint8_t note, uint8_t duration) { printf("Note %d (%s%d) duration %d (192 / %d)\n", note, noteName(note), noteOctave(note), duration, duration == 0 ? 0 : 192 / duration); }
+	virtual void handleChannelStart(int chan) { printf("ChannelStart %c (%d)\n", channelName(chan), chan); }
+	virtual void handleChannelEnd(int chan) { printf("ChannelEnd %c (%d)\n", channelName(chan), chan); }
 	virtual void handleCommand(uint8_t c, ...) { /* printf("Command 0x%02x: %s\n", c, commandName(c)); */ }
 	virtual void handleVolumeInc() { printf("VolumeInc\n"); }
 	virtual void handleVolumeDec() { printf("VolumeDec\n"); }
