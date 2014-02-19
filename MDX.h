@@ -84,6 +84,13 @@ public:
 
 	void load(const char *filename) {
 		s.open(filename);
+		readHeader();
+		readVoices();
+		for(int i = 0; i < num_channels; i++) {
+			readChannel(i);
+		}
+	}
+	void readHeader() {
 		title = s.readLine(0x1a);
 		char *nl = strrchr(title, '\r');
 		*nl = 0;
@@ -97,397 +104,399 @@ public:
 			mml_offset[i] = s.readUint16Big();
 		}
 		handleHeader();
+	}
+	void readVoices() {
 		s.seek(file_base + Voice_offset);
 		while(!s.eof()) {
 			MDXVoice inst;
 			if(!inst.load(s)) break;
 			handleVoice(inst);
 		}
-		for(int i = 0; i < num_channels; i++) {
-			s.seek(file_base + mml_offset[i]);
-			int chan_end = i < num_channels - 1 ? file_base + mml_offset[i+1] : 0;
-			handleChannelStart(i);
-			enum {
-				None = 0,
-				NoteDuration,
-				TempoVal,
-				OPMRegisterNum,
-				OPMRegisterVal,
-				VoiceNum,
-				OutputPhaseVal,
-				VolumeVal,
-				SoundLen,
-				RepeatStartCount,
-				RepeatStartZero,
-				RepeatEndOffsetMSB,
-				RepeatEndOffsetLSB,
-				RepeatEscapeMSB,
-				RepeatEscapeLSB,
-				DetuneMSB,
-				DetuneLSB,
-				PortamentoMSB,
-				PortamentoLSB,
-				DataEndMSB,
-				DataEndLSB,
-				KeyOnDelayVal,
-				SyncSendChannel,
-				ADPCMNoiseFreqVal,
-				LFODelayVal,
-				LFOPitchB,
-				LFOPitchPeriodMSB,
-				LFOPitchPeriodLSB,
-				LFOPitchChangeMSB,
-				LFOPitchChangeLSB,
-				LFOVolumeB,
-				LFOVolumePeriodMSB,
-				LFOVolumePeriodLSB,
-				LFOVolumeChangeMSB,
-				LFOVolumeChangeLSB,
-				OPMLFOB,
-				OPMLFOPeriodMSB,
-				OPMLFOPeriodLSB,
-				OPMLFOChangeMSB,
-				OPMLFOChangeLSB,
-				FadeOutB1,
-				FadeOutValue,
-			} state = None;
-			uint8_t nn;
-			int16_t w, v;
-			bool done = false;
-			while(!s.eof() && !done) {
-				uint8_t b = s.readUint8();
-				if(s.eof()) break;
-				switch(state) {
-					case None:
-						if(b >= 0x00 && b <= 0x7f) {
-							handleRest(b + 1);
-						} else if(b >= 0x80 && b < 0xdf) {
-							nn = b;
-							state = NoteDuration;
-						} else {
-							switch(b) {
-								case 0xff: // Set tempo
-									state = TempoVal;
-									break;
-								case 0xfe:
-									state = OPMRegisterNum;
-									break;
-								case 0xfd:
-									state = VoiceNum;
-									break;
-								case 0xfc:
-									state = OutputPhaseVal;
-									break;
-								case 0xfb:
-									state = VolumeVal;
-									break;
-								case 0xfa:
-									handleVolumeDec();
-									handleCommand(b);
-									state = None;
-									break;
-								case 0xf9:
-									handleVolumeInc();
-									handleCommand(b);
-									state = None;
-									break;
-								case 0xf8:
-									state = SoundLen;
-									break;
-								case 0xf7:
-									handleDisableKeyOff();
-									handleCommand(b);
-									state = None;
-									break;
-								case 0xf6:
-									state = RepeatStartCount;
-									break;
-								case 0xf5:
-									state = RepeatEndOffsetMSB;
-									break;
-								case 0xf4:
-									state = RepeatEscapeMSB;
-									break;
-								case 0xf3:
-									state = DetuneMSB;
-									break;
-								case 0xf2:
-									state = PortamentoMSB;
-									break;
-								case 0xf1:
-									state = DataEndMSB;
-									break;
-								case 0xf0:
-									state = KeyOnDelayVal;
-									break;
-								case 0xef:
-									state = SyncSendChannel;
-									break;
-								case 0xee:
-									handleSyncWait();
-									handleCommand(b);
-									state = None;
-									break;
-								case 0xed:
-									state = ADPCMNoiseFreqVal;
-									break;
-								case 0xec:
-									state = LFOPitchB;
-									break;
-								case 0xeb:
-									state = LFOVolumeB;
-									break;
-								case 0xea:
-									state = OPMLFOB;
-									break;
-								case 0xe9:
-									state = LFODelayVal;
-									break;
-								case 0xe8:
-									handlePCM8ExpansionShift();
-									handleCommand(b);
-									state = None;
-									break;
-								case 0xe7:
-									state = FadeOutB1;
-									break;
-								default:
-									handleUndefinedCommand(b);
-									handleCommand(b);
-									break;
-							}
+	}
+	void readChannel(int i) {
+		s.seek(file_base + mml_offset[i]);
+		int chan_end = i < num_channels - 1 ? file_base + mml_offset[i+1] : 0;
+		handleChannelStart(i);
+		enum {
+			None = 0,
+			NoteDuration,
+			TempoVal,
+			OPMRegisterNum,
+			OPMRegisterVal,
+			VoiceNum,
+			OutputPhaseVal,
+			VolumeVal,
+			SoundLen,
+			RepeatStartCount,
+			RepeatStartZero,
+			RepeatEndOffsetMSB,
+			RepeatEndOffsetLSB,
+			RepeatEscapeMSB,
+			RepeatEscapeLSB,
+			DetuneMSB,
+			DetuneLSB,
+			PortamentoMSB,
+			PortamentoLSB,
+			DataEndMSB,
+			DataEndLSB,
+			KeyOnDelayVal,
+			SyncSendChannel,
+			ADPCMNoiseFreqVal,
+			LFODelayVal,
+			LFOPitchB,
+			LFOPitchPeriodMSB,
+			LFOPitchPeriodLSB,
+			LFOPitchChangeMSB,
+			LFOPitchChangeLSB,
+			LFOVolumeB,
+			LFOVolumePeriodMSB,
+			LFOVolumePeriodLSB,
+			LFOVolumeChangeMSB,
+			LFOVolumeChangeLSB,
+			OPMLFOB,
+			OPMLFOPeriodMSB,
+			OPMLFOPeriodLSB,
+			OPMLFOChangeMSB,
+			OPMLFOChangeLSB,
+			FadeOutB1,
+			FadeOutValue,
+		} state = None;
+		uint8_t nn;
+		int16_t w, v;
+		bool done = false;
+		while(!s.eof() && !done) {
+			uint8_t b = s.readUint8();
+			if(s.eof()) break;
+			switch(state) {
+				case None:
+					if(b >= 0x00 && b <= 0x7f) {
+						handleRest(b + 1);
+					} else if(b >= 0x80 && b < 0xdf) {
+						nn = b;
+						state = NoteDuration;
+					} else {
+						switch(b) {
+							case 0xff: // Set tempo
+								state = TempoVal;
+								break;
+							case 0xfe:
+								state = OPMRegisterNum;
+								break;
+							case 0xfd:
+								state = VoiceNum;
+								break;
+							case 0xfc:
+								state = OutputPhaseVal;
+								break;
+							case 0xfb:
+								state = VolumeVal;
+								break;
+							case 0xfa:
+								handleVolumeDec();
+								handleCommand(b);
+								state = None;
+								break;
+							case 0xf9:
+								handleVolumeInc();
+								handleCommand(b);
+								state = None;
+								break;
+							case 0xf8:
+								state = SoundLen;
+								break;
+							case 0xf7:
+								handleDisableKeyOff();
+								handleCommand(b);
+								state = None;
+								break;
+							case 0xf6:
+								state = RepeatStartCount;
+								break;
+							case 0xf5:
+								state = RepeatEndOffsetMSB;
+								break;
+							case 0xf4:
+								state = RepeatEscapeMSB;
+								break;
+							case 0xf3:
+								state = DetuneMSB;
+								break;
+							case 0xf2:
+								state = PortamentoMSB;
+								break;
+							case 0xf1:
+								state = DataEndMSB;
+								break;
+							case 0xf0:
+								state = KeyOnDelayVal;
+								break;
+							case 0xef:
+								state = SyncSendChannel;
+								break;
+							case 0xee:
+								handleSyncWait();
+								handleCommand(b);
+								state = None;
+								break;
+							case 0xed:
+								state = ADPCMNoiseFreqVal;
+								break;
+							case 0xec:
+								state = LFOPitchB;
+								break;
+							case 0xeb:
+								state = LFOVolumeB;
+								break;
+							case 0xea:
+								state = OPMLFOB;
+								break;
+							case 0xe9:
+								state = LFODelayVal;
+								break;
+							case 0xe8:
+								handlePCM8ExpansionShift();
+								handleCommand(b);
+								state = None;
+								break;
+							case 0xe7:
+								state = FadeOutB1;
+								break;
+							default:
+								handleUndefinedCommand(b);
+								handleCommand(b);
+								break;
 						}
-						break;
-					case NoteDuration:
-						handleNote(nn - 0x80, b + 1);
-						state = None;
-						break;
-					case TempoVal:
-						handleSetTempo(b);
-						handleCommand(0xff, b);
-						state = None;
-						break;
-					case OPMRegisterNum:
-						nn = b;
-						state = OPMRegisterVal;
-						break;
-					case OPMRegisterVal:
-						handleSetOPMRegister(nn, b);
-						handleCommand(0xfe, nn, b);
-						state = None;
-						break;
-					case VoiceNum:
-						handleSetVoiceNum(b);
-						handleCommand(0xfd, b);
-						state = None;
-						break;
-					case OutputPhaseVal:
-						handleOutputPhase(b);
-						handleCommand(0xfc, b);
-						state = None;
-						break;
-					case VolumeVal:
-						handleSetVolume(b);
-						handleCommand(0xfb, b);
-						state = None;
-						break;
-					case SoundLen:
-						handleSoundLength(b);
-						handleCommand(0xf8, b);
-						state = None;
-						break;
-					case RepeatStartCount:
-						handleRepeatStart(b);
-						handleCommand(0xf6, b);
-						state = RepeatStartZero;
-						break;
-					case RepeatStartZero:
-						state = None;
-						break;
-					case RepeatEndOffsetMSB:
-						nn = b;
-						state = RepeatEndOffsetLSB;
-						break;
-					case RepeatEndOffsetLSB:
-						handleRepeatEnd((nn << 8) | b);
-						handleCommand(0xf5, (nn << 8) | b);
-						state = None;
-						break;
-					case RepeatEscapeMSB:
-						nn = b;
-						state = RepeatEscapeLSB;
-						break;
-					case RepeatEscapeLSB:
-						handleRepeatEscape((nn << 8) | b);
-						handleCommand(0xf4, (nn << 8) | b);
-						state = None;
-						break;
-					case DetuneMSB:
-						nn = b;
-						state = DetuneLSB;
-						break;
-					case DetuneLSB:
-						handleDetune((nn << 8) | b);
-						handleCommand(0xf3, (nn << 8) | b);
-						state = None;
-						break;
-					case PortamentoMSB:
-						nn = b;
-						state = PortamentoLSB;
-						break;
-					case PortamentoLSB:
-						handlePortamento((nn << 8) | b);
-						handleCommand(0xf2, (nn << 8) | b);
-						state = None;
-						break;
-					case DataEndMSB:
-						if(b == 0) {
-							handleDataEnd();
-							handleCommand(0xf1, 0);
-							state = None;
-							done = true;
-						} else {
-							nn = b;
-							state = DataEndLSB;
-						}
-						break;
-					case DataEndLSB:
-						handleDataEnd((nn << 8) | b);
-						handleCommand(0xf1, (nn << 8) | b);
+					}
+					break;
+				case NoteDuration:
+					handleNote(nn - 0x80, b + 1);
+					state = None;
+					break;
+				case TempoVal:
+					handleSetTempo(b);
+					handleCommand(0xff, b);
+					state = None;
+					break;
+				case OPMRegisterNum:
+					nn = b;
+					state = OPMRegisterVal;
+					break;
+				case OPMRegisterVal:
+					handleSetOPMRegister(nn, b);
+					handleCommand(0xfe, nn, b);
+					state = None;
+					break;
+				case VoiceNum:
+					handleSetVoiceNum(b);
+					handleCommand(0xfd, b);
+					state = None;
+					break;
+				case OutputPhaseVal:
+					handleOutputPhase(b);
+					handleCommand(0xfc, b);
+					state = None;
+					break;
+				case VolumeVal:
+					handleSetVolume(b);
+					handleCommand(0xfb, b);
+					state = None;
+					break;
+				case SoundLen:
+					handleSoundLength(b);
+					handleCommand(0xf8, b);
+					state = None;
+					break;
+				case RepeatStartCount:
+					handleRepeatStart(b);
+					handleCommand(0xf6, b);
+					state = RepeatStartZero;
+					break;
+				case RepeatStartZero:
+					state = None;
+					break;
+				case RepeatEndOffsetMSB:
+					nn = b;
+					state = RepeatEndOffsetLSB;
+					break;
+				case RepeatEndOffsetLSB:
+					handleRepeatEnd((nn << 8) | b);
+					handleCommand(0xf5, (nn << 8) | b);
+					state = None;
+					break;
+				case RepeatEscapeMSB:
+					nn = b;
+					state = RepeatEscapeLSB;
+					break;
+				case RepeatEscapeLSB:
+					handleRepeatEscape((nn << 8) | b);
+					handleCommand(0xf4, (nn << 8) | b);
+					state = None;
+					break;
+				case DetuneMSB:
+					nn = b;
+					state = DetuneLSB;
+					break;
+				case DetuneLSB:
+					handleDetune((nn << 8) | b);
+					handleCommand(0xf3, (nn << 8) | b);
+					state = None;
+					break;
+				case PortamentoMSB:
+					nn = b;
+					state = PortamentoLSB;
+					break;
+				case PortamentoLSB:
+					handlePortamento((nn << 8) | b);
+					handleCommand(0xf2, (nn << 8) | b);
+					state = None;
+					break;
+				case DataEndMSB:
+					if(b == 0) {
+						handleDataEnd();
+						handleCommand(0xf1, 0);
 						state = None;
 						done = true;
-						break;
-					case KeyOnDelayVal:
-						handleKeyOnDelay(b);
-						handleCommand(0xf0, b);
-						break;
-					case SyncSendChannel:
-						handleSyncSend(b);
-						handleCommand(0xef, b);
+					} else {
+						nn = b;
+						state = DataEndLSB;
+					}
+					break;
+				case DataEndLSB:
+					handleDataEnd((nn << 8) | b);
+					handleCommand(0xf1, (nn << 8) | b);
+					state = None;
+					done = true;
+					break;
+				case KeyOnDelayVal:
+					handleKeyOnDelay(b);
+					handleCommand(0xf0, b);
+					break;
+				case SyncSendChannel:
+					handleSyncSend(b);
+					handleCommand(0xef, b);
+					state = None;
+					break;
+				case ADPCMNoiseFreqVal:
+					handleADPCMNoiseFreq(b);
+					handleCommand(0xed, b);
+					state = None;
+					break;
+				case LFOPitchB:
+					if(b == 0x80) {
+						handleLFOPitchMPOF();
+						handleCommand(0xec, b);
 						state = None;
-						break;
-					case ADPCMNoiseFreqVal:
-						handleADPCMNoiseFreq(b);
-						handleCommand(0xed, b);
+					} else if(b == 0x81) {
+						handleLFOPitchMPON();
+						handleCommand(0xec, b);
 						state = None;
-						break;
-					case LFOPitchB:
-						if(b == 0x80) {
-							handleLFOPitchMPOF();
-							handleCommand(0xec, b);
-							state = None;
-						} else if(b == 0x81) {
-							handleLFOPitchMPON();
-							handleCommand(0xec, b);
-							state = None;
-						} else {
-							nn = b;
-							state = LFOPitchPeriodMSB;
-						}
-						break;
-					case LFOPitchPeriodMSB:
-						w = b << 8;
-						state = LFOPitchPeriodLSB;
-						break;
-					case LFOPitchPeriodLSB:
-						w |= b;
-						state = LFOPitchChangeMSB;
-						break;
-					case LFOPitchChangeMSB:
-						v = b << 8;
-						state = LFOPitchChangeLSB;
-						break;
-					case LFOPitchChangeLSB:
-						v |= b;
-						handleLFOPitch(nn, w, v);
-						handleCommand(0xec, nn, w, v);
+					} else {
+						nn = b;
+						state = LFOPitchPeriodMSB;
+					}
+					break;
+				case LFOPitchPeriodMSB:
+					w = b << 8;
+					state = LFOPitchPeriodLSB;
+					break;
+				case LFOPitchPeriodLSB:
+					w |= b;
+					state = LFOPitchChangeMSB;
+					break;
+				case LFOPitchChangeMSB:
+					v = b << 8;
+					state = LFOPitchChangeLSB;
+					break;
+				case LFOPitchChangeLSB:
+					v |= b;
+					handleLFOPitch(nn, w, v);
+					handleCommand(0xec, nn, w, v);
+					state = None;
+					break;
+				case LFOVolumeB:
+					if(b == 0x80) {
+						handleLFOVolumeMAOF();
+						handleCommand(0xeb, b);
 						state = None;
-						break;
-					case LFOVolumeB:
-						if(b == 0x80) {
-							handleLFOVolumeMAOF();
-							handleCommand(0xeb, b);
-							state = None;
-						} else if(b == 0x81) {
-							handleLFOVolumeMAON();
-							handleCommand(0xeb, b);
-							state = None;
-						} else {
-							nn = b;
-							state = LFOVolumePeriodMSB;
-						}
-						break;
-					case LFOVolumePeriodMSB:
-						w = b << 8;
-						state = LFOVolumePeriodLSB;
-						break;
-					case LFOVolumePeriodLSB:
-						w |= b;
-						state = LFOVolumeChangeMSB;
-						break;
-					case LFOVolumeChangeMSB:
-						v = b << 8;
-						state = LFOVolumeChangeLSB;
-						break;
-					case LFOVolumeChangeLSB:
-						v |= b;
-						handleLFOVolume(nn, w, v);
-						handleCommand(0xeb, nn, w, v);
+					} else if(b == 0x81) {
+						handleLFOVolumeMAON();
+						handleCommand(0xeb, b);
 						state = None;
-						break;
-					case OPMLFOB:
-						if(b == 0x80) {
-							handleOPMLFOMHOF();
-							handleCommand(0xea, b);
-							state = None;
-						} else if(b == 0x81) {
-							handleOPMLFOMHON();
-							handleCommand(0xea, b);
-							state = None;
-						} else {
-							nn = b;
-							state = OPMLFOPeriodMSB;
-						}
-						break;
-					case OPMLFOPeriodMSB:
-						w = b << 8;
-						state = OPMLFOPeriodLSB;
-						break;
-					case OPMLFOPeriodLSB:
-						w |= b;
-						state = OPMLFOChangeMSB;
-						break;
-					case OPMLFOChangeMSB:
-						v = b << 8;
-						state = OPMLFOChangeLSB;
-						break;
-					case OPMLFOChangeLSB:
-						v |= b;
-						handleOPMLFO(nn, w, v);
-						handleCommand(0xea, nn, w, v);
+					} else {
+						nn = b;
+						state = LFOVolumePeriodMSB;
+					}
+					break;
+				case LFOVolumePeriodMSB:
+					w = b << 8;
+					state = LFOVolumePeriodLSB;
+					break;
+				case LFOVolumePeriodLSB:
+					w |= b;
+					state = LFOVolumeChangeMSB;
+					break;
+				case LFOVolumeChangeMSB:
+					v = b << 8;
+					state = LFOVolumeChangeLSB;
+					break;
+				case LFOVolumeChangeLSB:
+					v |= b;
+					handleLFOVolume(nn, w, v);
+					handleCommand(0xeb, nn, w, v);
+					state = None;
+					break;
+				case OPMLFOB:
+					if(b == 0x80) {
+						handleOPMLFOMHOF();
+						handleCommand(0xea, b);
 						state = None;
-						break;
-					case LFODelayVal:
-						handleLFODelaySetting(b);
-						handleCommand(0xe9, b);
+					} else if(b == 0x81) {
+						handleOPMLFOMHON();
+						handleCommand(0xea, b);
 						state = None;
-						break;
-					case FadeOutB1:
-						state = FadeOutValue;
-						break;
-					case FadeOutValue:
-						handleFadeOut(b);
-						handleCommand(0xe7, b);
-						state = None;
-						break;
-					default:
-						printf("Unknown state %d\n", state);
-						break;
-				}
-				if(chan_end && s.tell() >= chan_end) break;
+					} else {
+						nn = b;
+						state = OPMLFOPeriodMSB;
+					}
+					break;
+				case OPMLFOPeriodMSB:
+					w = b << 8;
+					state = OPMLFOPeriodLSB;
+					break;
+				case OPMLFOPeriodLSB:
+					w |= b;
+					state = OPMLFOChangeMSB;
+					break;
+				case OPMLFOChangeMSB:
+					v = b << 8;
+					state = OPMLFOChangeLSB;
+					break;
+				case OPMLFOChangeLSB:
+					v |= b;
+					handleOPMLFO(nn, w, v);
+					handleCommand(0xea, nn, w, v);
+					state = None;
+					break;
+				case LFODelayVal:
+					handleLFODelaySetting(b);
+					handleCommand(0xe9, b);
+					state = None;
+					break;
+				case FadeOutB1:
+					state = FadeOutValue;
+					break;
+				case FadeOutValue:
+					handleFadeOut(b);
+					handleCommand(0xe7, b);
+					state = None;
+					break;
+				default:
+					printf("Unknown state %d\n", state);
+					break;
 			}
-			handleChannelEnd(i);
+			if(chan_end && s.tell() >= chan_end) break;
 		}
+		handleChannelEnd(i);
 	}
 	const char *commandName(uint8_t c) {
 		const char *cmdNames[] = {
