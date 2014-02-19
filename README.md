@@ -17,7 +17,7 @@ Download music library
 ----------------------
 
 * See zip file near end of page - http://www.gamesx.com/wiki/doku.php?id=x68000:sxsi_disk_image_with_games_and_lots_of_mdx_files
-* Also this (not sure if same collection) http://nfggames.com/forum2/index.php?topic=4813.0
+* Another collection (to open, use [DiskExplorer](http://hp.vector.co.jp/authors/VA013937/editdisk/index_e.html)) http://nfggames.com/forum2/index.php?topic=4813.0
 
 Ways to listen to MDX files
 ---------------------------
