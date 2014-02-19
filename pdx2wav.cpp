@@ -42,7 +42,7 @@ static void compute_tables(void) {
 	return;
 }
 
-static INT16 clock_adpcm(uint8_t nibble) {
+static int16_t clock_adpcm(uint8_t nibble) {
 	int32_t max = (1 << (O6258_output_bits - 1)) - 1;
 	int32_t min = -(1 << (O6258_output_bits - 1));
 	int32_t final;
