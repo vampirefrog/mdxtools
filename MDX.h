@@ -352,8 +352,8 @@ public:
 						}
 						break;
 					case DataEndLSB:
-						handleDataEnd((nn << 8) & b);
-						handleCommand(0xf1, (nn << 8) & b);
+						handleDataEnd((nn << 8) | b);
+						handleCommand(0xf1, (nn << 8) | b);
 						state = None;
 						done = true;
 						break;
@@ -484,7 +484,7 @@ public:
 						printf("Unknown state %d\n", state);
 						break;
 				}
-				if(chan_end && s.tell() >= chan_end - 1) break;
+				if(chan_end && s.tell() >= chan_end) break;
 			}
 			handleChannelEnd(i);
 		}
