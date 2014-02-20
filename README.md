@@ -9,7 +9,8 @@ A bunch of tools for handling the MDX music format (music for the Sharp X68000).
 * mml2mdx (TBD) - a MML compiler
 * mdx2mml - a MML decompiler
 * mdx2midi (TBD) - a MML to MIDI file converter.
-* mdx2opm (TBD) - Extract OPM voices from MDX file (usable in [VOPM](http://www.geocities.jp/sam_kb/VOPM/)). 
+* mdx2opm (TBD) - Extract OPM voices from MDX file (usable in [VOPM](http://www.geocities.jp/sam_kb/VOPM/)).
+* pdx2wav - extract the samples from a PDX file, into 16-bit WAV files.
 
 The rest of this document is work in progress.
 
@@ -17,7 +18,7 @@ Download music library
 ----------------------
 
 * See zip file near end of page - http://www.gamesx.com/wiki/doku.php?id=x68000:sxsi_disk_image_with_games_and_lots_of_mdx_files
-* Also this (not sure if same collection) http://nfggames.com/forum2/index.php?topic=4813.0
+* Another collection (to open, use [DiskExplorer](http://hp.vector.co.jp/authors/VA013937/editdisk/index_e.html)) http://nfggames.com/forum2/index.php?topic=4813.0
 
 Ways to listen to MDX files
 ---------------------------

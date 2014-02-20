@@ -1,4 +1,4 @@
-PROGS=mdxstat vgmtest vgmdump mdxdump mdx2mml
+PROGS=mdxstat vgmtest vgmdump mdxdump mdx2mml pdx2wav
 CFLAGS=-ggdb
 all: $(PROGS)
 
@@ -26,3 +26,4 @@ mdxstat.o: mdxstat.cpp MDX.h exceptionf.h FileStream.h Buffer.h
 tools.o: tools.cpp tools.h
 vgmdump.o: vgmdump.cpp VGM.h exceptionf.h FileStream.h Buffer.h
 vgmtest.o: vgmtest.cpp VGMWriter.h VGM.h exceptionf.h FileStream.h Buffer.h
+pdx2wav.o: pdx2wav.cpp PDX.h FileStream.h exceptionf.h Buffer.h WAVWriter.h

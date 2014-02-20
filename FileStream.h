@@ -30,6 +30,7 @@ struct FileStream {
 	}
 
 	void open(const char *filename, const char *mode="rb") {
+		zf = 0;
 		if(strchr(mode, 'r')) {
 			f = fopen(filename, mode);
 			if(!f) throw new exceptionf("Could not open %s: %s (%d)", filename, strerror(errno), errno);
@@ -39,7 +40,7 @@ struct FileStream {
 			if(head[0] == 0x1f && head[1] == 0x8b) { // detected a gzip file
 				zf = gzdopen(fileno(f), mode);
 				if(!zf) throw new exceptionf("Could not open %s: %s (%d)", filename, strerror(errno), errno);
-			} else zf = 0;
+			}
 		} else f = fopen(filename, mode);
 	}
 	void close() {

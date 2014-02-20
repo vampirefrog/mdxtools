@@ -6,8 +6,16 @@
 *.mdx
 *.PDX
 *.pdx
+*.mus
+*.MUS
+*.mml
+*.MML
 *.P
 mdxstat
 vgmtest
 vgmdump
 mdxdump
+*.mid
+*.opm
+*.wav
+data/
