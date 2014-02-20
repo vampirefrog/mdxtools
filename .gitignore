@@ -15,7 +15,7 @@ mdxstat
 vgmtest
 vgmdump
 mdxdump
-
 *.mid
 *.opm
 *.wav
+data/
