@@ -9,7 +9,8 @@ A bunch of tools for handling the MDX music format (music for the Sharp X68000).
 * mml2mdx (TBD) - a MML compiler
 * mdx2mml - a MML decompiler
 * mdx2midi (TBD) - a MML to MIDI file converter.
-* mdx2opm (TBD) - Extract OPM voices from MDX file (usable in [VOPM](http://www.geocities.jp/sam_kb/VOPM/)). 
+* mdx2opm (TBD) - Extract OPM voices from MDX file (usable in [VOPM](http://www.geocities.jp/sam_kb/VOPM/)).
+* pdx2wav - extract the samples from a PDX file, into 16-bit WAV files.
 
 The rest of this document is work in progress.
 
