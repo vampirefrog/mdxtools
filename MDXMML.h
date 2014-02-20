@@ -13,17 +13,17 @@ public:
 		cur_chan = 0;
 	}
 	virtual void handleVoice(MDXVoice &v) {
-		printf("@%d={\n", v.number);
+		printf("@%d={\n\t/* AR DR SR RR SL OL KS ML DT1 DT2 AME */\n", v.number);
 		int indices[4] = { 0, 2, 1, 3 };
 		for(int n = 0; n < 4; n++) {
 			int i = indices[n];
-			printf("%d, %d, %d, %d,  %d, %d, %d, %d,  %d, %d, %d,\n", v.osc[i].ar, v.osc[i].d1r, v.osc[i].d2r, v.osc[i].rr, v.osc[i].d1l, v.osc[i].tl, v.osc[i].ks, v.osc[i].mul, v.osc[i].dt1, v.osc[i].dt2, v.osc[i].ame);
+			printf("\t%d, %d, %d, %d,  %d, %d, %d, %d,  %d, %d, %d,\n", v.osc[i].ar, v.osc[i].d1r, v.osc[i].d2r, v.osc[i].rr, v.osc[i].d1l, v.osc[i].tl, v.osc[i].ks, v.osc[i].mul, v.osc[i].dt1, v.osc[i].dt2, v.osc[i].ame);
 		}
-		printf("%d, %d, %d}\n\n", v.con, v.fl, v.slot_mask);
+		printf("\t%d, %d, %d\n}\n\n", v.con, v.fl, v.slot_mask);
 	}
 	int cur_chan;
 	virtual void handleChannelStart(int chan) {
-		printf("\n/* Channel %c (%s)*/\n", channelName(chan), chan < 8 ? "FM" : "PCM");
+		printf("\n/* Channel %c (%s) */\n", channelName(chan), chan < 8 ? "FM" : "PCM");
 		cur_chan = chan;
 		col = 0;
 		repeat_stack_pointer = 0;
@@ -118,9 +118,6 @@ public:
 		mmlf("@t%d", tempo);
 	}
 	virtual void handleLFOPitch(uint8_t b, uint16_t period, uint16_t change) {
-		if(b == 0) { change = period * change / 512; period /= 4; }
-		if(b == 1) { change = period * change / 256; period /= 2; }
-		if(b == 2) { change = period * change / 256; period /= 2; }
 		mmlf("MP%d,%d,%d", b, period, change);
 	}
 	virtual void handleLFOPitchMPON() {
@@ -128,6 +125,15 @@ public:
 	}
 	virtual void handleLFOPitchMPOF() {
 		mmlf("MPOF");
+	}
+	virtual void handleLFOVolume(uint8_t b, uint16_t period, uint16_t change) {
+		mmlf("MA%d,%d,%d", b, period, change);
+	}
+	virtual void handleLFOVolumeMAON() {
+		mmlf("MAON");
+	}
+	virtual void handleLFOVolumeMAOF() {
+		mmlf("MAOF");
 	}
 	virtual void handleSetVolume(uint8_t volume) {
 		if(volume <= 15) mmlf("v%d", volume);
@@ -157,6 +163,11 @@ public:
 	bool nextKeyOff;
 	virtual void handleDisableKeyOff() { nextKeyOff = true; }
 	virtual void handleDetune(int16_t d) { mmlf("D%d", d); }
+	virtual void handleOPMLFO(uint8_t sync_wave, uint8_t lfrq, uint8_t pmd, uint8_t amd, uint8_t pms_ams) {
+		mmlf("MH%d,%d,%d,%d,%d,%d,%d", sync_wave & 0x1f, lfrq, pmd-128, amd, (pms_ams & 0xf0) >> 4, pms_ams & 0x0f, (sync_wave & 0x40) >> 6);
+	}
+	virtual void handleOPMLFOMHON() { mmlf("MHON"); }
+	virtual void handleOPMLFOMHOF() { mmlf("MHOF"); }
 };
 
 #endif /* MDXMML_H_ */

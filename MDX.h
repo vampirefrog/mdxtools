@@ -143,25 +143,25 @@ public:
 			SyncSendChannel,
 			ADPCMNoiseFreqVal,
 			LFODelayVal,
-			LFOPitchB,
+			LFOPitchWave,
 			LFOPitchPeriodMSB,
 			LFOPitchPeriodLSB,
 			LFOPitchChangeMSB,
 			LFOPitchChangeLSB,
-			LFOVolumeB,
+			LFOVolumeWave,
 			LFOVolumePeriodMSB,
 			LFOVolumePeriodLSB,
 			LFOVolumeChangeMSB,
 			LFOVolumeChangeLSB,
-			OPMLFOB,
-			OPMLFOPeriodMSB,
-			OPMLFOPeriodLSB,
-			OPMLFOChangeMSB,
-			OPMLFOChangeLSB,
+			OPMLFOSyncWave,
+			OPMLFOLFRQ,
+			OPMLFOPMD,
+			OPMLFOAMD,
+			OPMLFOPMSAMS,
 			FadeOutB1,
 			FadeOutValue,
 		} state = None;
-		uint8_t nn;
+		uint8_t nn, n2, n3, n4, n5;
 		int16_t w, v;
 		bool done = false;
 		while(!s.eof() && !done) {
@@ -242,13 +242,13 @@ public:
 								state = ADPCMNoiseFreqVal;
 								break;
 							case 0xec:
-								state = LFOPitchB;
+								state = LFOPitchWave;
 								break;
 							case 0xeb:
-								state = LFOVolumeB;
+								state = LFOVolumeWave;
 								break;
 							case 0xea:
-								state = OPMLFOB;
+								state = OPMLFOSyncWave;
 								break;
 							case 0xe9:
 								state = LFODelayVal;
@@ -381,7 +381,7 @@ public:
 					handleCommand(0xed, b);
 					state = None;
 					break;
-				case LFOPitchB:
+				case LFOPitchWave:
 					if(b == 0x80) {
 						handleLFOPitchMPOF();
 						handleCommand(0xec, b);
@@ -409,11 +409,14 @@ public:
 					break;
 				case LFOPitchChangeLSB:
 					v |= b;
-					handleLFOPitch(nn, w, v);
-					handleCommand(0xec, nn, w, v);
+					printf("handleLFOPitch %d %d %d  ->  %d\n", nn, w, v, 0);
+					{
+						handleLFOPitch(nn, nn == 0 ? w>>2 : w>>1, nn == 1 ? (v + 255) >> 8 : (v * w + 511) >> 9);
+						handleCommand(0xec, nn, w, v);
+					}
 					state = None;
 					break;
-				case LFOVolumeB:
+				case LFOVolumeWave:
 					if(b == 0x80) {
 						handleLFOVolumeMAOF();
 						handleCommand(0xeb, b);
@@ -441,11 +444,11 @@ public:
 					break;
 				case LFOVolumeChangeLSB:
 					v |= b;
-					handleLFOVolume(nn, w, v);
+					handleLFOVolume(nn, nn == 0 ? w>>2 : w>>1, nn == 1 ? (v + 255) >> 8 : (v * w + 255) >> 8);
 					handleCommand(0xeb, nn, w, v);
 					state = None;
 					break;
-				case OPMLFOB:
+				case OPMLFOSyncWave:
 					if(b == 0x80) {
 						handleOPMLFOMHOF();
 						handleCommand(0xea, b);
@@ -456,25 +459,24 @@ public:
 						state = None;
 					} else {
 						nn = b;
-						state = OPMLFOPeriodMSB;
+						state = OPMLFOLFRQ;
 					}
 					break;
-				case OPMLFOPeriodMSB:
-					w = b << 8;
-					state = OPMLFOPeriodLSB;
+				case OPMLFOLFRQ:
+					n2 = b;
+					state = OPMLFOPMD;
 					break;
-				case OPMLFOPeriodLSB:
-					w |= b;
-					state = OPMLFOChangeMSB;
+				case OPMLFOPMD:
+					n3 = b;
+					state = OPMLFOAMD;
 					break;
-				case OPMLFOChangeMSB:
-					v = b << 8;
-					state = OPMLFOChangeLSB;
+				case OPMLFOAMD:
+					n4 = b;
+					state = OPMLFOPMSAMS;
 					break;
-				case OPMLFOChangeLSB:
-					v |= b;
-					handleOPMLFO(nn, w, v);
-					handleCommand(0xea, nn, w, v);
+				case OPMLFOPMSAMS:
+					handleOPMLFO(nn, n2, n3, n4, b);
+					handleCommand(0xea, nn, n2, n3, n4, b);
 					state = None;
 					break;
 				case LFODelayVal:
@@ -582,7 +584,7 @@ public:
 	virtual void handleLFOVolume(uint8_t b, uint16_t period, uint16_t change) {}
 	virtual void handleLFOVolumeMAON() {}
 	virtual void handleLFOVolumeMAOF() {}
-	virtual void handleOPMLFO(uint8_t b, uint16_t period, uint16_t change) {}
+	virtual void handleOPMLFO(uint8_t sync_wave, uint8_t lfrq, uint8_t pmd, uint8_t amd, uint8_t pms_ams) {}
 	virtual void handleOPMLFOMHON() {}
 	virtual void handleOPMLFOMHOF() {}
 	virtual void handleFadeOut(uint8_t f) {}

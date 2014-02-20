@@ -53,7 +53,7 @@ public:
 	virtual void handleLFOVolume(uint8_t b, uint16_t period, uint16_t change) { printf("LFOVolume %d %d %d\n", b, period, change); }
 	virtual void handleLFOVolumeMAON() { printf("LFOVolumeMAON\n"); }
 	virtual void handleLFOVolumeMAOF() { printf("LFOVolumeMAOF\n"); }
-	virtual void handleOPMLFO(uint8_t b, uint16_t period, uint16_t change) { printf("OPMLFO %d %d %d\n", b, period, change); }
+	virtual void handleOPMLFO(uint8_t sync_wave, uint8_t lfrq, uint8_t pmd, uint8_t amd, uint8_t pms_ams) { printf("OPMLFO %d %d %d %d %d\n", sync_wave, lfrq, pmd, amd, pms_ams); }
 	virtual void handleOPMLFOMHON() { printf("OPMLFOMHON\n"); }
 	virtual void handleOPMLFOMHOF() { printf("OPMLFOMHOF\n"); }
 	virtual void handleFadeOut(uint8_t f) { printf("FadeOut %d\n", f); }
