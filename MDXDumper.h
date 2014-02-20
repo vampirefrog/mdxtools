@@ -4,26 +4,9 @@
 #include "MDX.h"
 #include "tools.h"
 
-class MDXDumper: public MDX {
-public:
-	MDXDumper(const char *filename) { load(filename); }
-
-	virtual void handleHeader() {
-		char *t = iconv_alloc(title, "utf-8", "Shift_JIS");
-		printf("Title: \"%s\"\n", t);
-		free(t);
-		printf("PCM file: \"%s\"\n", pcm_file);
-		printf("Voice offset: 0x%04x\n", file_base + Voice_offset);
-		printf("MML offsets (%d):\n", mml_offset[0] / 2 - 1);
-		for(int i = 0; i < mml_offset[0] / 2 - 1 &&  i < 16; i++) {
-			printf("  %c: 0x%04x\n", channelName(i), mml_offset[i]);
-		}
-	}
-	virtual void handleVoice(MDXVoice &v) { v.dump(); }
+class MDXDumperParser: public MDXChannelParser {
 	virtual void handleRest(uint8_t duration) { printf("Rest %d (192 / %d)\n", duration, duration == 0 ? 0 : 192 / duration); }
-	virtual void handleNote(uint8_t note, uint8_t duration) { printf("Note %d (%s%d) duration %d (192 / %d)\n", note, noteName(note), noteOctave(note), duration, duration == 0 ? 0 : 192 / duration); }
-	virtual void handleChannelStart(int chan) { printf("ChannelStart %c (%d)\n", channelName(chan), chan); }
-	virtual void handleChannelEnd(int chan) { printf("ChannelEnd %c (%d)\n", channelName(chan), chan); }
+	virtual void handleNote(uint8_t note, uint8_t duration) { printf("Note %d (%s%d) duration %d (192 / %d)\n", note, MDX::noteName(note), MDX::noteOctave(note), duration, duration == 0 ? 0 : 192 / duration); }
 	virtual void handleCommand(uint8_t c, ...) { /* printf("Command 0x%02x: %s\n", c, commandName(c)); */ }
 	virtual void handleVolumeInc() { printf("VolumeInc\n"); }
 	virtual void handleVolumeDec() { printf("VolumeDec\n"); }
@@ -59,6 +42,29 @@ public:
 	virtual void handleFadeOut(uint8_t f) { printf("FadeOut %d\n", f); }
 	virtual void handlePCM8ExpansionShift() { printf("PCM8ExpansionShift\n"); }
 	virtual void handleUndefinedCommand(uint8_t b) { printf("UndefinedCommand %d\n", b); }
+	virtual void handleChannelStart(int chan) { printf("ChannelStart %c (%d)\n", MDX::channelName(chan), chan); }
+	virtual void handleChannelEnd(int chan) { printf("ChannelEnd %c (%d)\n", MDX::channelName(chan), chan); }
+};
+
+class MDXDumper: public MDX {
+public:
+	MDXDumper(const char *filename) {
+		MDXDumperParser p;
+		load(filename, p);
+	}
+
+	virtual void handleHeader() {
+		char *t = iconv_alloc(title, "utf-8", "Shift_JIS");
+		printf("Title: \"%s\"\n", t);
+		free(t);
+		printf("PCM file: \"%s\"\n", pcm_file);
+		printf("Voice offset: 0x%04x\n", file_base + Voice_offset);
+		printf("MML offsets (%d):\n", mml_offset[0] / 2 - 1);
+		for(int i = 0; i < mml_offset[0] / 2 - 1 &&  i < 16; i++) {
+			printf("  %c: 0x%04x\n", channelName(i), mml_offset[i]);
+		}
+	}
+	virtual void handleVoice(MDXVoice &v) { v.dump(); }
 };
 
 #endif /* MDXDUMPER_H_ */
