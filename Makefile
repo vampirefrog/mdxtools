@@ -1,4 +1,4 @@
-PROGS=mdxstat vgmtest vgmdump mdxdump mdx2mml pdx2wav
+PROGS=mdxstat vgmtest vgmdump mdxdump mdx2mml pdx2wav pdx2sf2
 CFLAGS=-ggdb
 all: $(PROGS)
 
@@ -9,13 +9,17 @@ LIBS=-lz
 endif
 
 .SECONDEXPANSION:
-mdxdump_SRCS=mdxdump.cpp tools.cpp
+mdxdump_SRCS=tools.cpp
+pdx2wav_SRCS=tools.cpp
+pdx2sf2_SRCS=tools.cpp Soundfont.c
 
 $(PROGS): $$(sort $$@.o $$(patsubst %.cpp,%.o,$$($$@_SRCS)))
 	$(CXX) $^ -o $@ $(CFLAGS) $(LIBS)
 
 %.o: %.cpp
 	$(CXX) -c $< -o $@ $(CFLAGS)
+%.o: %.c
+	$(CC) -c $< -o $@ $(CFLAGS)
 
 clean:
 	rm -f $(PROGS) $(addsuffix .exe,$(PROGS)) *.o
@@ -26,4 +30,5 @@ mdxstat.o: mdxstat.cpp MDX.h exceptionf.h FileStream.h Buffer.h
 tools.o: tools.cpp tools.h
 vgmdump.o: vgmdump.cpp VGM.h exceptionf.h FileStream.h Buffer.h
 vgmtest.o: vgmtest.cpp VGMWriter.h VGM.h exceptionf.h FileStream.h Buffer.h
-pdx2wav.o: pdx2wav.cpp PDX.h FileStream.h exceptionf.h Buffer.h WAVWriter.h
+pdx2wav.o: pdx2wav.cpp PDX.h FileStream.h exceptionf.h Buffer.h WAVWriter.h tools.h
+pdx2sf2.o: pdx2sf2.cpp PDX.h FileStream.h exceptionf.h Buffer.h Soundfont.h tools.h
