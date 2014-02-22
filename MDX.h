@@ -530,8 +530,10 @@ public:
 	}
 	void readHeader() {
 		title = s.readLine(0x1a);
-		char *nl = strrchr((char *)title, '\r');
-		*nl = 0;
+		if(title && *title) {
+			char *nl = strrchr((char *)title, '\r');
+			if(nl) *nl = 0;
+		}
 		pcm_file = s.readLine(0);
 		file_base = s.tell();
 		Voice_offset = s.readUint16Big();
