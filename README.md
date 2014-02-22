@@ -11,6 +11,7 @@ A bunch of tools for handling the MDX music format (music for the Sharp X68000).
 * mdx2midi (TBD) - a MML to MIDI file converter.
 * mdx2opm (TBD) - Extract OPM voices from MDX file (usable in [VOPM](http://www.geocities.jp/sam_kb/VOPM/)).
 * pdx2wav - extract the samples from a PDX file, into 16-bit WAV files.
+* pdx2sf2 - generate a SoundFont file with the samples from the PDX file. Useful for importing a song into a DAW.
 
 The rest of this document is work in progress.
 
@@ -34,7 +35,7 @@ Windows:
 
 Unix:
 
-* MDXPlay: http://homepage3.nifty.com/StudioBreeze/software/mdxplay-e.html
+* MDXPlay (command line player): http://homepage3.nifty.com/StudioBreeze/software/mdxplay-e.html
 
 X68000:
 
@@ -101,7 +102,7 @@ MML Commands. Each command consists of one byte, followed by specific parameters
 
 * `0x00-0x7f` • Rest +1 clock cycles
 * `0x80-0xdf` `n` • Note data, followed by duration `n` + 1. Corresponds to MML command **n#,#**. 0x80 corresponds to MML **o0d+**, which means octave 0, note D♯. 0xdf corresponds to **o8d**, octave 8, D. To calculate the MIDI equivalent note, subtract 0x80 and add 3. For the PCM channels, P through W, this represents data number (???).
-* `0xff` `n` • Set tempo to `n`.
+* `0xff` `n` • Set tempo to `n`. Equivalent to mml command **@t#**. Tempo applies to all tracks at the same time, not just current track.
 * `0xfe` `n` `m` • Set OPM register `n` to value `m`.
 * `0xfd` `n` • Set current voice.
 * `0xfc` `n` • Set output phase.
@@ -121,8 +122,8 @@ MML Commands. Each command consists of one byte, followed by specific parameters
 * `0xef` `n` • Sync send on channel `n`. If channel `n` is in Sync Wait, resume playback on that channel. MML command **S#**
 * `0xee` • Sync Wait on current channel. Pause playback on this channel until resumed by a Sync Send signal (see above). MML Command **W**.
 * `0xed` `n` • ADPCM / noise frequency set to `n`. (???)
-* `0xec` `0x80` • LFO Pitch MPOF.
-* `0xec` `0x81` • LFO Pitch MPON.
+* `0xec` `0x80` • Pitch LFO disable (**MPOF**).
+* `0xec` `0x81` • Pitch LFO enable (**MPON**).
 * `0xec` `m` `nn` `aa` • LFO Pitch control. `m` controls the waveform (0=sawtooth, 1=square, 2=triangle), `nn` is the frequency, expressed in clock cycles / 4, and `aa` is the amplitude.
 * `0xeb` `0x80` • LFO Volume MAOF.
 * `0xeb` `0x81` • LFO Volume MAON.
