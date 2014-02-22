@@ -7,6 +7,7 @@ class MDXSerialParser;
 template <class T=MDXSerialParser> class MDXSerializer;
 class MDXSerialParser: public MDXChannelParser {
 friend class MDXSerializer<MDXSerialParser>;
+public:
 	uint8_t *data;
 	int dataLen, dataPos;
 	bool ended;
@@ -15,9 +16,9 @@ friend class MDXSerializer<MDXSerialParser>;
 	int loopIterations;
 	int repeatStack[5];
 	int repeatStackPos;
-
+public:
 	MDXSerialParser(): data(0), dataLen(0), dataPos(0), ended(false), ticks(0), loopIterations(0), repeatStackPos(0) {}
-
+private:
 	virtual void handleDataEnd() {
 		ended = true;
 	}
@@ -27,11 +28,9 @@ friend class MDXSerializer<MDXSerialParser>;
 	}
 	virtual void handleRepeatStart(uint8_t iterations) {
 		repeatStack[repeatStackPos++] = iterations - 1;
-		printf("repeat start repeatStackPos=%d\n", repeatStackPos);
 		if(repeatStackPos >= 5) repeatStackPos = 4;
 	}
 	virtual void handleRepeatEnd(int16_t ofs) {
-		printf("repeat end ofs=%d repeatStackPos=%d\n", ofs, repeatStackPos);
 		if(repeatStack[repeatStackPos-1]-- > 0) {
 			dataPos += ofs;
 			if(dataPos < 0) dataPos = 0;
@@ -41,7 +40,7 @@ friend class MDXSerializer<MDXSerialParser>;
 	virtual void handleSetTempo(uint8_t tempo);
 	virtual void handleNote(uint8_t n, uint8_t duration);
 	virtual void handleRest(uint8_t duration);
-
+public:
 	void feed() {
 		eat(data[dataPos++]);
 		if(dataPos >= dataLen) ended = true;
@@ -89,14 +88,17 @@ public:
 					if(parsers[i].ticks < minTicks) minTicks = parsers[i].ticks;
 				}
 			}
+			bool tickEnded = false;
 			for(int i = 0; i < num_channels; i++) {
 				if(parsers[i].ticks > 0) {
 					parsers[i].ticks -= minTicks;
 					if(parsers[i].ticks <= 0) {
-						printf("tick end on %d, minTicks=%d\n", i, minTicks);
+						tickEnded = true;
+//						printf("tick end on %d, minTicks=%d\n", i, minTicks);
 					}
 				}
 			}
+			if(tickEnded) handleRest(minTicks);
 			// Check if we're done
 			done = true;
 			for(int i = 0; i < num_channels; i++) {
@@ -104,22 +106,23 @@ public:
 			}
 		}
 	}
+
+	virtual void handleRest(int r) {}
 };
 
 void MDXSerialParser::handleSetTempo(uint8_t tempo) {
-	printf("%d: setTempo %d\n", channel, tempo);
 	mdx->tempo = tempo;
 }
 
 void MDXSerialParser::handleNote(uint8_t n, uint8_t duration) {
 	ticks = duration;
-	printf("%d: note %s, %d ticks=%d\n", channel, MDX::noteName(n), duration, ticks);
+	printf("%d: note %s\n", channel, MDX::noteName(n));
 	note = n;
 }
 
 void MDXSerialParser::handleRest(uint8_t duration) {
 	ticks = duration;
-	printf("%d: rest %d ticks=%d\n", channel, duration, ticks);
+	//printf("%d: rest %d ticks=%d\n", channel, duration, ticks);
 	note = -1;
 }
 
