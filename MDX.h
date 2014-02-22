@@ -535,6 +535,7 @@ public:
 		pcm_file = s.readLine(0);
 		file_base = s.tell();
 		Voice_offset = s.readUint16Big();
+		memset(mml_offset, 0, sizeof(mml_offset));
 		mml_offset[0] = s.readUint16Big();
 		num_channels = mml_offset[0] / 2 - 1;
 		if(num_channels > 16) num_channels = 16;
