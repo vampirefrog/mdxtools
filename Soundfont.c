@@ -5,7 +5,6 @@
 #include <stddef.h>	// for NULL
 #include <time.h>
 
-#include "stdtype.h"
 #include "Soundfont.h"
 
 
