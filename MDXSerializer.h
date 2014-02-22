@@ -3,15 +3,14 @@
 
 #include "MDX.h"
 
-class MDXSerialParser;
-template <class T=MDXSerialParser> class MDXSerializer;
+class MDXSerializer;
 class MDXSerialParser: public MDXChannelParser {
-friend class MDXSerializer<MDXSerialParser>;
+friend class MDXSerializer;
 public:
 	uint8_t *data;
 	int dataLen, dataPos;
 	bool ended;
-	MDXSerializer<MDXSerialParser> *mdx;
+	MDXSerializer *mdx;
 	int ticks, note;
 	int loopIterations;
 	int repeatStack[5];
@@ -52,12 +51,14 @@ public:
 	}
 };
 
-template <class T>
 class MDXSerializer: public MDX {
-	T parsers[16];
+friend class MDXSerialParser;
+	MDXSerialParser parsers[16];
+	int loopCount;
 public:
 	int tempo;
-	MDXSerializer(const char *filename): tempo(200) {
+	MDXSerializer() {}
+	MDXSerializer(const char *filename): loopCount(0), tempo(200) {
 		load(filename);
 	}
 	void load(const char *filename) {
@@ -67,6 +68,7 @@ public:
 		for(int i = 0; i < num_channels; i++) {
 			parsers[i].mdx = this;
 			parsers[i].channel = i;
+			parsers[i].loopIterations = loopCount;
 			parsers[i].dataLen = (i < num_channels - 1 ? mml_offset[i+1] : Voice_offset) - mml_offset[i];
 			if(parsers[i].dataLen > 0) {
 				parsers[i].data = new uint8_t[parsers[i].dataLen];
@@ -94,7 +96,6 @@ public:
 					parsers[i].ticks -= minTicks;
 					if(parsers[i].ticks <= 0) {
 						tickEnded = true;
-//						printf("tick end on %d, minTicks=%d\n", i, minTicks);
 					}
 				}
 			}
@@ -106,8 +107,9 @@ public:
 			}
 		}
 	}
-
-	virtual void handleRest(int r) {}
+private:
+	virtual void handleRest(int r) { printf("handleRest %d\n", r); }
+	virtual void handleNote(int chan, int note) {}
 };
 
 void MDXSerialParser::handleSetTempo(uint8_t tempo) {
@@ -116,13 +118,12 @@ void MDXSerialParser::handleSetTempo(uint8_t tempo) {
 
 void MDXSerialParser::handleNote(uint8_t n, uint8_t duration) {
 	ticks = duration;
-	printf("%d: note %s\n", channel, MDX::noteName(n));
 	note = n;
+	mdx->handleNote(channel, n);
 }
 
 void MDXSerialParser::handleRest(uint8_t duration) {
 	ticks = duration;
-	//printf("%d: rest %d ticks=%d\n", channel, duration, ticks);
 	note = -1;
 }
 
