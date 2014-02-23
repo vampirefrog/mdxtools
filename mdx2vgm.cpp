@@ -26,7 +26,7 @@ private:
 	virtual void handleSetVoiceNum(MDXSerialParser *p, uint8_t voice) {
 		if(p->channel >= 8) return;
 		MDXVoice &v = voices[voice];
-		w.writeYM2151(0x20 + p->channel, ((p->pan & 0xc0)) | ((v.getFL() & 0x07) << 3) | (v.getCON() & 0x07));
+		w.writeYM2151(0x20 + p->channel, (p->pan << 6) | ((v.getFL() & 0x07) << 3) | (v.getCON() & 0x07));
 		for(int i = 0; i < 4; i++) {
 			MDXVoiceOsc &o = v.osc[i];
 			w.writeYM2151(0x40 + i * 8 + p->channel, (o.getDT1() << 4) | (o.getMUL())); // DT1 & MUL
