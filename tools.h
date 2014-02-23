@@ -2,9 +2,9 @@
 #define TOOLS_H_
 
 #include <math.h>
+#include <stdint.h>
 
 char *iconv_alloc(const char *str, const char *to, const char *from, int len = -1);
-void okim6258_decode(uint32_t SampleCnt, int16_t* OutData, const uint8_t* InData);
 
 // ADPCM conversion code adapted from MAME
 struct ADPCMDecoder {
