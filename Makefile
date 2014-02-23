@@ -1,4 +1,4 @@
-CFLAGS=-ggdb
+CFLAGS=-ggdb -Wall
 
 PROGS=mdxstat vgmtest vgmdump mdxdump mdx2mml pdx2wav pdx2sf2 mdx2vgm mdx2opm
 all: $(PROGS)

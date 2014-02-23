@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
 		0x43, 0x42, 0x41, 0x40
 	};
 
-	for(int i = 0; i < sizeof(notes); i++) {
+	for(uint32_t i = 0; i < sizeof(notes); i++) {
 		w.writeYM2151(0x28, ((notes[i] / 12) << 4) | ((notes[i] % 12) * 16 / 12)); // Channel 1: KC (Key Code)
 		w.writeYM2151(0x08, 0x78); // Key ON/OFF
 		w.writeWait(11025);

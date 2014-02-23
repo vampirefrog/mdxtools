@@ -15,7 +15,7 @@ char *iconv_alloc(const char *str, const char *to, const char *from, int len) {
 	}
 	iconv_t cd = iconv_open(to, from);
 	if(cd < 0) {
-		fprintf(stderr, "Could not open iconv from=%d to=%d\n", from, to);
+		fprintf(stderr, "Could not open iconv from=%s to=%s\n", from, to);
 		return NULL;
 	}
 	char *ret = 0;

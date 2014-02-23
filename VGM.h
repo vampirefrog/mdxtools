@@ -213,7 +213,7 @@ struct VGM {
 		uint16_t *data = new uint16_t[data_length];
 		f.read(data, data_length);
 		uint16_t *p = data;
-		int n = 0;
+		uint32_t n = 0;
 		track_name_en = p;
 		while(*p && n < data_length) { p++; n++; }; track_name_jp = p;
 		while(*p && n < data_length) { p++; n++; }; game_name_en = p;
@@ -225,6 +225,7 @@ struct VGM {
 		while(*p && n < data_length) { p++; n++; }; release_date = p;
 		while(*p && n < data_length) { p++; n++; }; converter = p;
 		while(*p && n < data_length) { p++; n++; }; notes = p;
+		return true;
 	}
 
 	void dumpInfo() {
