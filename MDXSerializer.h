@@ -16,6 +16,7 @@ public:
 	int repeatStack[5];
 	int repeatStackPos;
 	int curVoice;
+	MDXVoice curVoiceData;
 	uint8_t pan;
 public:
 	MDXSerialParser(): data(0), dataLen(0), dataPos(0), ended(false), ticks(0), loopIterations(0), repeatStackPos(0), curVoice(0), pan(3) {}
@@ -64,6 +65,7 @@ friend class MDXSerialParser;
 	int loopCount;
 public:
 	int tempo;
+	MDXVoice voices[256]; // FIXME
 	MDXSerializer() {}
 	MDXSerializer(const char *filename): loopCount(1), tempo(200) {
 		load(filename);
@@ -116,6 +118,9 @@ public:
 		}
 	}
 private:
+	virtual void handleVoice(MDXVoice &v) {
+		voices[v.number] = v;
+	}
 	virtual void handleRest(int r) {}
 	virtual void handleNote(MDXSerialParser *p, int n) {}
 	virtual void handleNoteEnd(MDXSerialParser *p) {}
@@ -141,6 +146,7 @@ void MDXSerialParser::handleRest(uint8_t duration) {
 
 void MDXSerialParser::handleSetVoiceNum(uint8_t t) {
 	curVoice = t;
+	curVoiceData = mdx->voices[t];
 	mdx->handleSetVoiceNum(this, t);
 }
 
