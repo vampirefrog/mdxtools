@@ -13,8 +13,6 @@ struct VGM {
 	}
 	~VGM() {}
 	
-	FileStream f;
-	
 	// These fields correspond to the file header
 	uint32_t
 		eof_offset, version, sn76489_clock,
@@ -71,7 +69,7 @@ struct VGM {
 	}
 
 	void load(const char *filename) {
-		f.open(filename);
+		FileStream f(filename);
 		if(!f.readCompare("Vgm ")) {
 			throw new exceptionf("File header not \"Vgm \": %s", filename);
 		}
@@ -185,7 +183,7 @@ struct VGM {
 			READ_OFFSET(extra_header_offset);
 		}
 #undef READ_OFFSET
-		if(gd3_offset) loadGD3();
+		if(gd3_offset) loadGD3(f);
 
 		f.seek(vgm_data_offset);
 	}
@@ -197,7 +195,7 @@ struct VGM {
 	uint16_t *release_date, *converter;
 	uint16_t *notes;
 
-	bool loadGD3() {
+	bool loadGD3(FileStream &f) {
 		if(track_name_en) delete[] track_name_en;
 		track_name_en = track_name_jp = 0;
 		game_name_en = game_name_jp = 0;
