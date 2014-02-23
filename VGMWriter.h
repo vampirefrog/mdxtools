@@ -41,7 +41,7 @@ struct VGMWriter: VGM {
 		total_samples += len;
 	}
 	void write(const char *filename) {
-		FileStream f(filename, "w");
+		FileStream f(filename, "wb");
 
 		buf.putUint8(0x66); // EOF
 
