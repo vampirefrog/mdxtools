@@ -1,5 +1,5 @@
-#ifndef EXCEPTION_H__
-#define EXCEPTION_H__
+#ifndef EXCEPTIONF_H_
+#define EXCEPTIONF_H_
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -20,4 +20,4 @@ public:
 	}
 };
 
-#endif /* EXCEPTION_H__ */
+#endif /* EXCEPTIONF_H_ */

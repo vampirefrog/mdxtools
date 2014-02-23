@@ -6,74 +6,72 @@
 #include <iconv.h>
 
 struct MDXVoiceOsc {
-	uint8_t dt1, dt2;
-	uint8_t mul, tl;
-	uint8_t ks, ar;
-	uint8_t ame, rr;
-	uint8_t d1r, d2r;
-	uint8_t d1l;
+	uint8_t dt1_mul;
+	uint8_t tl;
+	uint8_t ks_ar;
+	uint8_t ame_d1r;
+	uint8_t dt2_d2r;
+	uint8_t d1l_rr;
 
 	void dump() {
-		printf("\tdt1=%d dt2=%d mul=%d \n", dt1, dt2, mul);
-		printf("\ttl=%d ks=%d ar=%d\n", tl, ks, ar);
-		printf("\tame=%d rr=%d\n", ame, rr);
-		printf("\td1r=%d d2r=%d d1l=%d\n", d1r, d2r, d1l);
+		printf("dt1_mul=0x%02x dt1=%d mul=%d", dt1_mul, getDT1(), getMUL());
+		printf("tl=0x%02x tl=%d", tl, getTL());
+		printf("ks_ar=0x%02x ks=%d ar=%d", ks_ar, getKS(), getAR());
 	}
+
+	inline uint8_t getDT1() { return (dt1_mul >> 4) & 0x07; } // DeTune 1
+	inline uint8_t getMUL() { return dt1_mul & 0x0f; }        // detune MULtiplier
+	inline uint8_t getTL()  { return tl & 0x7f; }             // Total Level (envelope)
+	inline uint8_t getKS()  { return ks_ar >> 6; }            // Key Scaling
+	inline uint8_t getAR()  { return ks_ar & 0x1f; }          // Attack Rate (envelope)
+	inline uint8_t getAME() { return ame_d1r >> 7; }          // AMS Enable
+	inline uint8_t getD1R() { return ame_d1r & 0x1f; }        // Decay Rate 1
+	inline uint8_t getDT2() { return dt2_d2r >> 6; }          // DeTune 2
+	inline uint8_t getD2R() { return dt2_d2r & 0x1f; }        // Decay Rate 2
+	inline uint8_t getD1L() { return d1l_rr >> 4; }           // Decay Level 1
+	inline uint8_t getRR()  { return d1l_rr & 0x0f; }         // Release Rate
 };
 
 struct MDXVoice {
-	uint8_t number, fl, con, pan, slot_mask;
+	uint8_t number, fl_con, slot_mask;
 	MDXVoiceOsc osc[4];
 
 	bool load(FileStream &s) {
 		uint8_t buf[27];
-		if(s.read(buf, sizeof(buf)) < sizeof(buf)) return false;
+		if((unsigned long)s.read(buf, sizeof(buf)) < sizeof(buf)) return false;
 		uint8_t *b = buf;
 		number = *b++;
-		fl = (*b >> 3) & 0x07; con = (*b++ & 0x07);
-		pan = 0xc0;
+		fl_con = *b++;
 		slot_mask = *b++;
-		for(int i = 0; i < 4; i++, b++) {
-			osc[i].dt1 = (*b >> 4) & 0x07;
-			osc[i].mul = *b & 0x0f;
-		}
-		for(int i = 0; i < 4; i++, b++) {
-			osc[i].tl = *b;
-		}
-		for(int i = 0; i < 4; i++, b++) {
-			osc[i].ks = (*b >> 6) & 0x03;
-			osc[i].ar = *b & 0x1f;
-		}
-		for(int i = 0; i < 4; i++, b++) {
-			osc[i].ame = (*b & 0x80) >> 7;
-			osc[i].d1r = *b & 0x1f;
-		}
-		for(int i = 0; i < 4; i++, b++) {
-			osc[i].dt2 = (*b >> 6) & 0x03;
-			osc[i].d2r = *b & 0x1f;
-		}
-		for(int i = 0; i < 4; i++, b++) {
-			osc[i].d1l = (*b >> 4) & 0x0f;
-			osc[i].rr = *b & 0x0f;
-		}
+		for(int i = 0; i < 4; i++, b++) osc[i].dt1_mul = *b;
+		for(int i = 0; i < 4; i++, b++) osc[i].tl = *b;
+		for(int i = 0; i < 4; i++, b++) osc[i].ks_ar = *b;
+		for(int i = 0; i < 4; i++, b++) osc[i].ame_d1r = *b;
+		for(int i = 0; i < 4; i++, b++) osc[i].dt2_d2r = *b;
+		for(int i = 0; i < 4; i++, b++) osc[i].d1l_rr = *b;
 		return true;
 	}
 
 	void dump() {
 		printf("Voice %d\n", number);
-		printf("fl=%d con=%d pan=%d slot_mask=0x%02x\n", fl, con, pan, slot_mask);
+		printf("fl_con=0x%02x fl=%d con=%d slot_mask=0x%02x\n", fl_con, getFL(), getCON(), slot_mask);
 		for(int i = 0; i < 4; i++) {
 			printf("Osc %d\n", i);
 			osc[i].dump();
 		}
 	}
+
+	uint8_t getFL() { return (fl_con >> 3) & 0x07; }
+	uint8_t getCON() { return fl_con & 0x07; }
 };
 
 class MDX;
 class MDXChannelParser {
 	friend class MDX;
+public:
+	int channel;
 protected:
-	int channel, channelLength, pos;
+	int channelLength, pos;
 	uint8_t nn, n2, n3, n4, n5;
 	int16_t w, v;
 	enum {

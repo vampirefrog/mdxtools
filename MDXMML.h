@@ -193,9 +193,13 @@ public:
 		int indices[4] = { 0, 2, 1, 3 };
 		for(int n = 0; n < 4; n++) {
 			int i = indices[n];
-			printf("\t%d, %d, %d, %d,  %d, %d, %d, %d,  %d, %d, %d,\n", v.osc[i].ar, v.osc[i].d1r, v.osc[i].d2r, v.osc[i].rr, v.osc[i].d1l, v.osc[i].tl, v.osc[i].ks, v.osc[i].mul, v.osc[i].dt1, v.osc[i].dt2, v.osc[i].ame);
+			printf("\t%d, %d, %d, %d,  %d, %d, %d, %d,  %d, %d, %d,\n",
+				v.osc[i].getAR(), v.osc[i].getD1R(), v.osc[i].getD2R(),
+				v.osc[i].getRR(), v.osc[i].getD1L(), v.osc[i].getTL(), v.osc[i].getKS(),
+				v.osc[i].getMUL(), v.osc[i].getDT1(), v.osc[i].getDT2(), v.osc[i].getAME()
+			);
 		}
-		printf("\t%d, %d, %d\n}\n\n", v.con, v.fl, v.slot_mask);
+		printf("\t%d, %d, %d\n}\n\n", v.getCON(), v.getFL(), v.slot_mask);
 	}
 	int nextValidDuration(uint8_t d) {
 		if(d <= 4) return d;

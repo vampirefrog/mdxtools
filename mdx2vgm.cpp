@@ -6,7 +6,7 @@
 
 class MDXVGM: public MDXSerializer {
 	VGMWriter w;
-	MDXVoice voices[256];
+	MDXVoice voices[256]; // FIXME
 	int currentVoices[16];
 public:
 	MDXVGM() {}
@@ -17,45 +17,41 @@ public:
 		w.version = 0x150;
 		w.ym2151_clock = 4000000;
 		w.rate = 60; // japanese
-		printf("writing %s\n", outfile);
 		w.write(outfile);
 	}
 private:
 	virtual void handleVoice(MDXVoice &v) {
 		voices[v.number] = v;
 	}
-	virtual void handleSetVoiceNum(int chan, uint8_t voice) {
-		if(chan >= 8) return;
-		currentVoices[chan] = voice;
+	virtual void handleSetVoiceNum(MDXSerialParser *p, uint8_t voice) {
+		if(p->channel >= 8) return;
 		MDXVoice &v = voices[voice];
-		w.writeYM2151(0x20 + chan, ((v.pan & 0xc0)) | ((v.fl & 0x07) << 3) | (v.con & 0x07));
+		w.writeYM2151(0x20 + p->channel, ((p->pan & 0xc0)) | ((v.getFL() & 0x07) << 3) | (v.getCON() & 0x07));
 		for(int i = 0; i < 4; i++) {
 			MDXVoiceOsc &o = v.osc[i];
-			w.writeYM2151(0x40 + i * 8 + chan, ((o.dt1 & 0x07) << 4) | ((o.mul & 0x0f))); // DT1 & MUL
-			w.writeYM2151(0x60 + i * 8 + chan, o.tl & 0x7f); // TL
-			w.writeYM2151(0x80 + i * 8 + chan, ((o.ks & 0x03) << 6) | (o.ar & 0x1f));
-			w.writeYM2151(0xa0 + i * 8 + chan, ((o.ame & 0x01) << 7) | (o.d1r & 0x1f));
-			w.writeYM2151(0xc0 + i * 8 + chan, ((o.dt2 & 0x03) << 6) | (o.d2r & 0x1f));
-			w.writeYM2151(0xe0 + i * 8 + chan, ((o.d1l & 0x0f) << 4) | (0x0f));
+			w.writeYM2151(0x40 + i * 8 + p->channel, (o.getDT1() << 4) | (o.getMUL())); // DT1 & MUL
+			w.writeYM2151(0x60 + i * 8 + p->channel, o.getTL()); // TL
+			w.writeYM2151(0x80 + i * 8 + p->channel, (o.getKS() << 6) | o.getAR());
+			w.writeYM2151(0xa0 + i * 8 + p->channel, (o.getAME() << 7) | o.getD1R());
+			w.writeYM2151(0xc0 + i * 8 + p->channel, (o.getDT2() << 6) | o.getD2R());
+			w.writeYM2151(0xe0 + i * 8 + p->channel, (o.getD1L() << 4) | o.getRR());
 		}
-
-
 	}
-	virtual void handleNote(int chan, int n) {
-		if(chan >= 8) return;
-		w.writeYM2151(0x28 + chan, ((n / 12) << 4) | ((n % 12) * 16 / 12));
-		w.writeYM2151(0x08, (voices[currentVoices[chan]].slot_mask << 3) + (chan & 0x07)); // Key ON/OFF
+	virtual void handleNote(MDXSerialParser *p, int n) {
+		if(p->channel >= 8) return;
+		w.writeYM2151(0x28 + p->channel, ((n / 12) << 4) | ((n % 12) * 16 / 12));
+		w.writeYM2151(0x08, (voices[p->curVoice].slot_mask << 3) + (p->channel & 0x07)); // Key ON/OFF
 	}
-	virtual void handleNoteEnd(int chan) {
-		if(chan >= 8) return;
-		w.writeYM2151(0x08, chan & 0x07);
+	virtual void handleNoteEnd(MDXSerialParser *p) {
+		if(p->channel >= 8) return;
+		w.writeYM2151(0x08, p->channel & 0x07);
 	}
 	virtual void handleRest(int r) {
 		// divided 44100 and 4000000 by 100, to avoid int overflow
 		int samples = r * 441 * 1024 * (256 - tempo) / 40000;
 		w.writeWait(samples);
 	}
-	virtual void handleSetVolume(int channel, uint8_t v) {
+	virtual void handleSetVolume(MDXSerialParser *p, uint8_t v) {
 		int vol_conv[] = {
 			85,  87,  90,  93,  95,  98, 101, 103,
 			106, 109, 111, 114, 117, 119, 122, 125
@@ -63,7 +59,7 @@ private:
 
 		int vol = v < 16 ? vol_conv[v] : 255 - v;
 		for(int i = 0; i < 4; i++) {
-			w.writeYM2151(0x60 + i * 8 + channel, 127 - (127 - voices[currentVoices[channel]].osc[i].tl) * vol / 127);
+			w.writeYM2151(0x60 + i * 8 + p->channel, 127 - (127 - voices[p->curVoice].osc[i].getTL()) * vol / 127);
 		}
 	}
 };
