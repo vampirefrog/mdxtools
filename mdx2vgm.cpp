@@ -54,8 +54,9 @@ private:
 		};
 
 		int vol = v < 16 ? vol_conv[v] : 255 - v;
+		if(v > 127) v = 127;
 		for(int i = 0; i < 4; i++) {
-			w.writeYM2151(0x60 + i * 8 + p->channel, 127 - (127 - voices[p->curVoice].osc[i].getTL()) * vol / 127);
+			w.writeYM2151(0x60 + i * 8 + p->channel, 127 - (127 - p->curVoiceData.osc[i].getTL()) * vol / 127);
 		}
 	}
 	virtual void handleDetune(MDXSerialParser *p, int16_t d) {
