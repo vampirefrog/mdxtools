@@ -604,7 +604,7 @@ public:
 		return "Unknown";
 	}
 	static const char *voiceName(uint8_t n) {
-		const char *voiceNames[] = { "M1", "M2", "C1", "C2" };
+		const char *voiceNames[] = { "M1", "C1", "M2", "C2" };
 		return voiceNames[n & 0x03];
 	}
 	static const char *noteName(int note) {

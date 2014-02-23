@@ -1,6 +1,6 @@
 CFLAGS=-ggdb
 
-PROGS=mdxstat vgmtest vgmdump mdxdump mdx2mml pdx2wav pdx2sf2 mdx2vgm
+PROGS=mdxstat vgmtest vgmdump mdxdump mdx2mml pdx2wav pdx2sf2 mdx2vgm mdx2opm
 all: $(PROGS)
 
 ifneq (,$(findstring MINGW,$(shell uname -s)))

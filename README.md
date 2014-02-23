@@ -3,13 +3,13 @@ mdxtools
 
 A bunch of tools for handling the MDX music format (music for the Sharp X68000). The tools are as follows:
 
-* mdx2vgm (TBD) - convert to VGM format
+* mdx2vgm (WIP) - convert to VGM format
 * mdxdump - dump all the information in a MDX file.
 * mdxstat - analyze and print out some statistics and totals about given MDX files.
 * mml2mdx (TBD) - a MML compiler
 * mdx2mml - a MML decompiler
-* mdx2midi (TBD) - a MML to MIDI file converter.
-* mdx2opm (TBD) - Extract OPM voices from MDX file (usable in [VOPM](http://www.geocities.jp/sam_kb/VOPM/)).
+* mdx2midi (TBD) - a MML to MIDI file converter. Use in conjunction with pdx2sf2 to hear the samples too.
+* mdx2opm (WIP) - Extract OPM voices from MDX file (usable in [VOPM](http://www.geocities.jp/sam_kb/VOPM/)).
 * pdx2wav - extract the samples from a PDX file, into 16-bit WAV files.
 * pdx2sf2 - generate a SoundFont file with the samples from the PDX file. Useful for importing a song into a DAW.
 
