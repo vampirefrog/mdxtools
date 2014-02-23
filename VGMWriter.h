@@ -16,11 +16,19 @@ struct VGMWriter: VGM {
 		buf.putUint8(0x50);
 		buf.putUint8(nn);
 	}
-	void writePSGTone(uint8_t channel, uint8_t vol, uint16_t freq) {
+	void writePSGVolume(int channel, uint8_t vol) {
 		uint8_t chan_bits = (channel & 0x03) << 5;
 		writePSG(0b10010000 | chan_bits | (vol & 0x0f));
+	}
+	void writePSGTone(uint8_t channel, uint16_t freq) {
+		uint8_t chan_bits = (channel & 0x03) << 5;
 		writePSG(0b10000000 | chan_bits | (freq & 0x0f));
 		writePSG(0b00000000 | ((freq & 0x3f0) >> 4));
+	}
+	void writeYM2151(uint8_t reg, uint8_t val) {
+		buf.putUint8(0x54);
+		buf.putUint8(reg);
+		buf.putUint8(val);
 	}
 	void writeWait(uint16_t len) {
 		if(len == 735) buf.putUint8(0x62);
