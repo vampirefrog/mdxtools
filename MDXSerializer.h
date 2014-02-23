@@ -63,7 +63,7 @@ friend class MDXSerialParser;
 public:
 	int tempo;
 	MDXSerializer() {}
-	MDXSerializer(const char *filename): loopCount(0), tempo(200) {
+	MDXSerializer(const char *filename): loopCount(1), tempo(200) {
 		load(filename);
 	}
 	void load(const char *filename) {
@@ -100,12 +100,12 @@ public:
 				if(parsers[i].ticks > 0) {
 					parsers[i].ticks -= minTicks;
 					if(parsers[i].ticks <= 0) {
+						if(!tickEnded) handleRest(minTicks);
 						tickEnded = true;
 						handleNoteEnd(i);
 					}
 				}
 			}
-			if(tickEnded) handleRest(minTicks);
 			// Check if we're done
 			done = true;
 			for(int i = 0; i < num_channels; i++) {
