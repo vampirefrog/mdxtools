@@ -24,24 +24,22 @@ private:
 	virtual void handleVoice(MDXVoice &v) {
 		voices[v.number] = v;
 	}
-	void loadVoice(int chan, uint8_t voice, int volume = 127) {
+	virtual void handleSetVoiceNum(int chan, uint8_t voice) {
+		if(chan >= 8) return;
 		currentVoices[chan] = voice;
 		MDXVoice &v = voices[voice];
-		printf("v.pan = %d\n", v.pan);
-		w.writeYM2151(0x20 + chan, ((v.pan & 0xa0)) | ((v.fl & 0x07) << 3) | (v.con & 0x07));
+		w.writeYM2151(0x20 + chan, ((v.pan & 0xc0)) | ((v.fl & 0x07) << 3) | (v.con & 0x07));
 		for(int i = 0; i < 4; i++) {
 			MDXVoiceOsc &o = v.osc[i];
 			w.writeYM2151(0x40 + i * 8 + chan, ((o.dt1 & 0x07) << 4) | ((o.mul & 0x0f))); // DT1 & MUL
-			w.writeYM2151(0x60 + i * 8 + chan, ((o.tl * volume) / 127) & 0x7f); // TL
+			w.writeYM2151(0x60 + i * 8 + chan, o.tl & 0x7f); // TL
 			w.writeYM2151(0x80 + i * 8 + chan, ((o.ks & 0x03) << 6) | (o.ar & 0x1f));
 			w.writeYM2151(0xa0 + i * 8 + chan, ((o.ame & 0x01) << 7) | (o.d1r & 0x1f));
 			w.writeYM2151(0xc0 + i * 8 + chan, ((o.dt2 & 0x03) << 6) | (o.d2r & 0x1f));
-			w.writeYM2151(0xe0 + i * 8 + chan, ((o.d1l & 0x0f) << 4) | (o.rr & 0x0f));
+			w.writeYM2151(0xe0 + i * 8 + chan, ((o.d1l & 0x0f) << 4) | (0x0f));
 		}
-	}
-	virtual void handleSetVoiceNum(int chan, uint8_t voice) {
-		if(chan >= 8) return;
-		loadVoice(chan, voice);
+
+
 	}
 	virtual void handleNote(int chan, int n) {
 		if(chan >= 8) return;
@@ -64,8 +62,9 @@ private:
 		};
 
 		int vol = v < 16 ? vol_conv[v] : 255 - v;
-		loadVoice(channel, currentVoices[channel], vol);
-		printf("Set volume %d %d -> %d\n", channel, v, 127 - vol);
+		for(int i = 0; i < 4; i++) {
+			w.writeYM2151(0x60 + i * 8 + channel, 127 - (127 - voices[currentVoices[channel]].osc[i].tl) * vol / 127);
+		}
 	}
 };
 
