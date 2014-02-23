@@ -18,8 +18,14 @@ public:
 	int curVoice;
 	MDXVoice curVoiceData;
 	uint8_t pan;
+	int16_t detune;
 public:
-	MDXSerialParser(): data(0), dataLen(0), dataPos(0), ended(false), ticks(0), loopIterations(0), repeatStackPos(0), curVoice(0), pan(3) {}
+	MDXSerialParser():
+		data(0), dataLen(0), dataPos(0), ended(false),
+		ticks(0), loopIterations(0), repeatStackPos(0),
+		curVoice(0), pan(3), detune(0) {
+
+	}
 private:
 	virtual void handleDataEnd() {
 		ended = true;
@@ -136,7 +142,7 @@ void MDXSerialParser::handleSetTempo(uint8_t tempo) { mdx->tempo = tempo; }
 void MDXSerialParser::handleNote(uint8_t n, uint8_t duration) {
 	ticks = duration;
 	note = n;
-	mdx->handleNote(this, n);
+	mdx->handleNote(this, n + (detune >> 6));
 }
 
 void MDXSerialParser::handleRest(uint8_t duration) {
@@ -153,6 +159,6 @@ void MDXSerialParser::handleSetVoiceNum(uint8_t t) {
 void MDXSerialParser::handleVolumeInc() { mdx->handleVolumeInc(this); }
 void MDXSerialParser::handleVolumeDec() { mdx->handleVolumeDec(this); }
 void MDXSerialParser::handleSetVolume(uint8_t v) { mdx->handleSetVolume(this, v); }
-void MDXSerialParser::handleDetune(int16_t d) { mdx->handleDetune(this, d); }
+void MDXSerialParser::handleDetune(int16_t d) { detune = d; mdx->handleDetune(this, d); }
 
 #endif /* MDXSERIALIZER_H_ */

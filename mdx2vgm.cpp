@@ -59,13 +59,7 @@ private:
 		}
 	}
 	virtual void handleDetune(MDXSerialParser *p, int16_t d) {
-		for(int i = 0; i < 4; i++) {
-			MDXVoiceOsc &o = p->curVoiceData.osc[i];
-			o.dt1_mul = (d & 0x78) | o.getMUL();
-			w.writeYM2151(0x60 + i * 8 + p->channel, o.dt1_mul);
-			o.dt2_d2r = (d & 0x03) | o.getD2R();
-			w.writeYM2151(0xC0 + i * 8 + p->channel, o.dt2_d2r);
-		}
+		w.writeYM2151(0x30 + p->channel, (d & 0x3f) << 2);
 	}
 };
 
