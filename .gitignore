@@ -11,6 +11,12 @@
 *.mml
 *.MML
 *.P
+*.mid
+*.opm
+*.wav
+
+data/
+
 mdxstat
 vgmtest
 vgmdump
@@ -19,7 +25,4 @@ mdx2mml
 mdx2vgm
 pdx2sf2
 pdx2wav
-*.mid
-*.opm
-*.wav
-data/
+mdx2opm
