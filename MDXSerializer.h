@@ -15,8 +15,9 @@ public:
 	int loopIterations;
 	int repeatStack[5];
 	int repeatStackPos;
+	int curVoice;
 public:
-	MDXSerialParser(): data(0), dataLen(0), dataPos(0), ended(false), ticks(0), loopIterations(0), repeatStackPos(0) {}
+	MDXSerialParser(): data(0), dataLen(0), dataPos(0), ended(false), ticks(0), loopIterations(0), repeatStackPos(0), curVoice(0) {}
 private:
 	virtual void handleDataEnd() {
 		ended = true;
@@ -39,6 +40,10 @@ private:
 	virtual void handleSetTempo(uint8_t tempo);
 	virtual void handleNote(uint8_t n, uint8_t duration);
 	virtual void handleRest(uint8_t duration);
+	virtual void handleSetVoiceNum(uint8_t voice);
+	virtual void handleVolumeInc();
+	virtual void handleVolumeDec();
+	virtual void handleSetVolume(uint8_t v);
 public:
 	void feed() {
 		eat(data[dataPos++]);
@@ -96,6 +101,7 @@ public:
 					parsers[i].ticks -= minTicks;
 					if(parsers[i].ticks <= 0) {
 						tickEnded = true;
+						handleNoteEnd(i);
 					}
 				}
 			}
@@ -108,8 +114,13 @@ public:
 		}
 	}
 private:
-	virtual void handleRest(int r) { printf("handleRest %d\n", r); }
+	virtual void handleRest(int r) {}
 	virtual void handleNote(int chan, int note) {}
+	virtual void handleNoteEnd(int chan) {}
+	virtual void handleSetVoiceNum(int chan, uint8_t t) {}
+	virtual void handleVolumeInc(int chan) {}
+	virtual void handleVolumeDec(int chan) {}
+	virtual void handleSetVolume(int chan, uint8_t v) {}
 };
 
 void MDXSerialParser::handleSetTempo(uint8_t tempo) {
@@ -126,5 +137,14 @@ void MDXSerialParser::handleRest(uint8_t duration) {
 	ticks = duration;
 	note = -1;
 }
+
+void MDXSerialParser::handleSetVoiceNum(uint8_t t) {
+	curVoice = t;
+	mdx->handleSetVoiceNum(channel, t);
+}
+
+void MDXSerialParser::handleVolumeInc() { mdx->handleVolumeInc(channel); }
+void MDXSerialParser::handleVolumeDec() { mdx->handleVolumeDec(channel); }
+void MDXSerialParser::handleSetVolume(uint8_t v) { mdx->handleSetVolume(channel, v); }
 
 #endif /* MDXSERIALIZER_H_ */
