@@ -6,6 +6,11 @@ extern "C" {
 #include "windef.h"
 #include "mmsystem.h"
 #else
+#include <stdint.h>
+typedef uint8_t UINT8;
+typedef int16_t INT16;
+typedef uint16_t UINT16;
+typedef uint32_t UINT32;
 typedef char	CHAR;
 typedef UINT8	BYTE;
 typedef INT16	SHORT;
