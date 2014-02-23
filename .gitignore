@@ -15,6 +15,10 @@ mdxstat
 vgmtest
 vgmdump
 mdxdump
+mdx2mml
+mdx2vgm
+pdx2sf2
+pdx2wav
 *.mid
 *.opm
 *.wav
