@@ -3,30 +3,26 @@
 
 #include "MDX.h"
 
-class MDXSerializer;
-class MDXSerialParser: public MDXChannelParser {
-friend class MDXSerializer;
+class MDXMemParser: public MDXChannelParser {
 public:
 	uint8_t *data;
-	int dataLen, dataPos;
 	bool ended;
-	MDXSerializer *mdx;
-	int ticks, note;
+	int dataLen;
 	int loopIterations;
-	int repeatStack[5];
-	int repeatStackPos;
-	int curVoice;
-	MDXVoice curVoiceData;
-	uint8_t pan;
-	int16_t detune;
-public:
-	MDXSerialParser():
-		data(0), dataLen(0), dataPos(0), ended(false),
-		ticks(0), loopIterations(0), repeatStackPos(0),
-		curVoice(0), pan(3), detune(0) {
+
+	MDXMemParser(): data(0), ended(false), dataLen(0), loopIterations(0), dataPos(0), repeatStackPos(0) {
 
 	}
+
+	void feed() {
+		eat(data[dataPos++]);
+		if(dataPos >= dataLen) ended = true;
+	}
+
 private:
+	int dataPos;
+	int repeatStack[5];
+	int repeatStackPos;
 	virtual void handleDataEnd() {
 		ended = true;
 	}
@@ -45,6 +41,31 @@ private:
 		} else repeatStackPos--;
 		if(repeatStackPos < 0) repeatStackPos = 0;
 	}
+
+};
+
+class MDXSerializer;
+class MDXSerialParser: public MDXMemParser {
+friend class MDXSerializer;
+public:
+	MDXSerializer *mdx;
+	int ticks, note;
+	int curVoice;
+	MDXVoice curVoiceData;
+	uint8_t pan, volume;
+	int16_t detune;
+public:
+	MDXSerialParser(): MDXMemParser(),
+		ticks(0), curVoice(0), pan(3), volume(127), detune(0) {
+
+	}
+
+	void nextRest() {
+		ticks = 0;
+		while(ticks <= 0 && !ended) feed();
+	}
+
+private:
 	virtual void handleSetTempo(uint8_t tempo);
 	virtual void handleNote(uint8_t n, uint8_t duration);
 	virtual void handleRest(uint8_t duration);
@@ -54,15 +75,6 @@ private:
 	virtual void handleSetVolume(uint8_t v);
 	virtual void handleDetune(int16_t d);
 public:
-	void feed() {
-		eat(data[dataPos++]);
-		if(dataPos >= dataLen) ended = true;
-	}
-
-	void nextRest() {
-		ticks = 0;
-		while(ticks <= 0 && !ended) feed();
-	}
 };
 
 class MDXSerializer: public MDX {
