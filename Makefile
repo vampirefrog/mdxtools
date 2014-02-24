@@ -27,7 +27,7 @@ clean:
 
 mdx2mml.o: mdx2mml.cpp MDXMML.h MDX.h exceptionf.h FileStream.h Buffer.h
 mdx2opm.o: mdx2opm.cpp MDX.h exceptionf.h FileStream.h Buffer.h
-mdx2vgm.o: mdx2vgm.cpp exceptionf.h MDXSerializer.h MDX.h FileStream.h Buffer.h VGMWriter.h VGM.h
+mdx2vgm.o: mdx2vgm.cpp exceptionf.h MDXVGM.h MDXSerializer.h MDX.h FileStream.h Buffer.h VGMWriter.h VGM.h
 mdxdump.o: mdxdump.cpp MDXDumper.h MDX.h exceptionf.h FileStream.h Buffer.h tools.h
 mdxstat.o: mdxstat.cpp MDX.h exceptionf.h FileStream.h Buffer.h
 pdx2sf2.o: pdx2sf2.cpp PDX.h FileStream.h exceptionf.h Buffer.h Soundfont.h tools.h
