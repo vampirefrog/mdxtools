@@ -12,10 +12,18 @@ public:
 	MDXVGM(const char *filename, const char *outfile) {
 		memset(&voices, 0, sizeof(voices));
 		memset(currentVoices, 0, sizeof(currentVoices));
-		load(filename);
 		w.version = 0x150;
 		w.ym2151_clock = 4000000;
 		w.rate = 60; // japanese
+		w.writeYM2151(0x01, 0x00);
+		w.writeYM2151(0x0f, 0x00);
+		w.writeYM2151(0x14, 0x00);
+		w.writeYM2151(0x18, 0x00);
+		w.writeYM2151(0x19, 0x80);
+		w.writeYM2151(0x1b, 0x00);
+
+		load(filename);
+
 		w.write(outfile);
 	}
 private:
