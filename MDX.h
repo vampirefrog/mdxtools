@@ -258,10 +258,19 @@ public:
 				handleCommand(0xfc, b);
 				state = None;
 				break;
-			case VolumeVal:
-				handleSetVolume(b);
-				handleCommand(0xfb, b);
-				state = None;
+			case VolumeVal: {
+					int vol_conv[] = {
+						85,  87,  90,  93,  95,  98, 101, 103,
+						106, 109, 111, 114, 117, 119, 122, 125
+					};
+
+					int vol = b < 16 ? vol_conv[b] : 255 - b;
+					if(vol > 127) vol = 127;
+
+					handleSetVolume(vol);
+					handleCommand(0xfb, b);
+					state = None;
+				}
 				break;
 			case SoundLen:
 				handleSoundLength(b);
