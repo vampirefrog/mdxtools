@@ -6,12 +6,10 @@
 
 class MDXVGM: public MDXSerializer {
 	VGMWriter w;
-	int currentVoices[16];
 public:
 	MDXVGM() {}
 	MDXVGM(const char *filename, const char *outfile) {
 		memset(&voices, 0, sizeof(voices));
-		memset(currentVoices, 0, sizeof(currentVoices));
 		w.version = 0x150;
 		w.ym2151_clock = 4000000;
 		w.rate = 60; // japanese
@@ -29,12 +27,11 @@ public:
 private:
 	virtual void handleSetVoiceNum(MDXSerialParser *p, uint8_t voice) {
 		if(p->channel >= 8) return;
-		MDXVoice &v = voices[voice];
-		w.writeYM2151(0x20 + p->channel, (p->pan << 6) | ((v.getFL() & 0x07) << 3) | (v.getCON() & 0x07));
+		w.writeYM2151(0x20 + p->channel, (p->pan << 6) | ((p->curVoiceData.getFL() & 0x07) << 3) | (p->curVoiceData.getCON() & 0x07));
 		for(int i = 0; i < 4; i++) {
-			MDXVoiceOsc &o = v.osc[i];
+			MDXVoiceOsc &o = p->curVoiceData.osc[i];
 			w.writeYM2151(0x40 + i * 8 + p->channel, (o.getDT1() << 4) | (o.getMUL()));
-			w.writeYM2151(0x60 + i * 8 + p->channel, o.getTL());
+			w.writeYM2151(0x60 + i * 8 + p->channel, 127 - (127 - o.getTL()) * p->volume / 127);
 			w.writeYM2151(0x80 + i * 8 + p->channel, (o.getKS() << 6) | o.getAR());
 			w.writeYM2151(0xa0 + i * 8 + p->channel, (o.getAME() << 7) | o.getD1R());
 			w.writeYM2151(0xc0 + i * 8 + p->channel, (o.getDT2() << 6) | o.getD2R());
@@ -56,15 +53,8 @@ private:
 		w.writeWait(samples);
 	}
 	virtual void handleSetVolume(MDXSerialParser *p, uint8_t v) {
-		int vol_conv[] = {
-			85,  87,  90,  93,  95,  98, 101, 103,
-			106, 109, 111, 114, 117, 119, 122, 125
-		};
-
-		int vol = v < 16 ? vol_conv[v] : 255 - v;
-		if(v > 127) v = 127;
-		for(int i = 0; i < 4; i++) {
-			w.writeYM2151(0x60 + i * 8 + p->channel, 127 - (127 - p->curVoiceData.osc[i].getTL()) * vol / 127);
+		for(int i = 1; i < 4; i++) {
+			w.writeYM2151(0x60 + i * 8 + p->channel, 127 - (127 - p->curVoiceData.osc[i].getTL()) * p->volume / 127);
 		}
 	}
 	virtual void handleDetune(MDXSerialParser *p, int16_t d) {
