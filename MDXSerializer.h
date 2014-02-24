@@ -3,47 +3,6 @@
 
 #include "MDX.h"
 
-class MDXMemParser: public MDXChannelParser {
-public:
-	uint8_t *data;
-	bool ended;
-	int dataLen;
-	int loopIterations;
-
-	MDXMemParser(): data(0), ended(false), dataLen(0), loopIterations(0), dataPos(0), repeatStackPos(0) {
-
-	}
-
-	void feed() {
-		eat(data[dataPos++]);
-		if(dataPos >= dataLen) ended = true;
-	}
-
-private:
-	int dataPos;
-	int repeatStack[5];
-	int repeatStackPos;
-	virtual void handleDataEnd() {
-		ended = true;
-	}
-	virtual void handleDataEnd(int16_t ofs) {
-		if(loopIterations-- > 0) dataPos -= ofs + 3;
-		else ended = true;
-	}
-	virtual void handleRepeatStart(uint8_t iterations) {
-		repeatStack[repeatStackPos++] = iterations - 1;
-		if(repeatStackPos >= 5) repeatStackPos = 4;
-	}
-	virtual void handleRepeatEnd(int16_t ofs) {
-		if(repeatStack[repeatStackPos-1]-- > 0) {
-			dataPos += ofs;
-			if(dataPos < 0) dataPos = 0;
-		} else repeatStackPos--;
-		if(repeatStackPos < 0) repeatStackPos = 0;
-	}
-
-};
-
 class MDXSerializer;
 class MDXSerialParser: public MDXMemParser {
 friend class MDXSerializer;
