@@ -4,6 +4,7 @@
 #include "MDX.h"
 
 class MDXMidi: public MDX {
+
 };
 
 #endif /* MDXMIDI_H_ */
