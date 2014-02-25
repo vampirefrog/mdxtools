@@ -127,7 +127,7 @@ void MDXSerialParser::handleSetVoiceNum(uint8_t t) {
 
 void MDXSerialParser::handleVolumeInc() { mdx->handleVolumeInc(this); }
 void MDXSerialParser::handleVolumeDec() { mdx->handleVolumeDec(this); }
-void MDXSerialParser::handleSetVolume(uint8_t v) { volume = v; mdx->handleSetVolume(this, v); }
+void MDXSerialParser::handleSetVolume(uint8_t v) { volume = MDX::volumeVal(v); mdx->handleSetVolume(this, v); }
 void MDXSerialParser::handleDetune(int16_t d) { detune = d; mdx->handleDetune(this, d); }
 
 #endif /* MDXSERIALIZER_H_ */

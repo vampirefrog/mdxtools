@@ -3,6 +3,7 @@
 
 #include "MDXSerializer.h"
 #include "VGMWriter.h"
+#include "tools.h"
 
 class MDXVGM: public MDXSerializer {
 	VGMWriter w;
@@ -53,11 +54,15 @@ private:
 		w.writeWait(samples);
 	}
 	virtual void handleSetVolume(MDXSerialParser *p, uint8_t v) {
+		if(p->channel >= 8) return;
 		for(int i = 1; i < 4; i++) {
-			w.writeYM2151(0x60 + i * 8 + p->channel, 127 - (127 - p->curVoiceData.osc[i].getTL()) * p->volume / 127);
+			uint8_t nvol = p->curVoiceData.osc[i].getTL() + (127 - p->volume);
+			if(nvol > 127) nvol = 127;
+			w.writeYM2151(0x60 + i * 8 + p->channel, nvol);
 		}
 	}
 	virtual void handleDetune(MDXSerialParser *p, int16_t d) {
+		if(p->channel >= 8) return;
 		w.writeYM2151(0x30 + p->channel, (d & 0x3f) << 2);
 	}
 };

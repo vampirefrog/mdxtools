@@ -124,8 +124,8 @@ friend class MDXMML;
 		mmlf("MAOF");
 	}
 	virtual void handleSetVolume(uint8_t volume) {
-		if(volume <= 15) mmlf("v%d", volume);
-		else mmlf("@v%d", 255 - volume);
+		if(volume < 16) mmlf("v%u", volume);
+		else mmlf("@v%u", 255 - volume);
 	}
 	virtual void handleVolumeInc() { mmlf(")"); }
 	virtual void handleVolumeDec() { mmlf("("); }
