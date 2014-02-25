@@ -15,7 +15,7 @@ class MDXDumperParser: public MDXChannelParser {
 	virtual void handlePCM8Enable() { printf("PCM8Enable\n"); }
 	virtual void handleSetTempo(uint8_t t) { printf("SetTempo %d\n", t); }
 	virtual void handleSetVoiceNum(uint8_t t) { printf("SetVoiceNum %d\n", t); }
-	virtual void handleOutputPhase(uint8_t p) { printf("OutputPhase %d\n", p); }
+	virtual void handlePan(uint8_t p) { printf("Pan %d\n", p); }
 	virtual void handleSetVolume(uint8_t v) { printf("SetVolume %d\n", v); }
 	virtual void handleSoundLength(uint8_t l) { printf("SoundLength %d\n", l); }
 	virtual void handleKeyOnDelay(uint8_t d) { printf("KeyOnDelay %d\n", d); }

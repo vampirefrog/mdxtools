@@ -85,7 +85,7 @@ protected:
 		OPMRegisterNum,
 		OPMRegisterVal,
 		VoiceNum,
-		OutputPhaseVal,
+		PanVal,
 		VolumeVal,
 		SoundLen,
 		RepeatStartCount,
@@ -152,7 +152,7 @@ public:
 							state = VoiceNum;
 							break;
 						case 0xfc:
-							state = OutputPhaseVal;
+							state = PanVal;
 							break;
 						case 0xfb:
 							state = VolumeVal;
@@ -257,8 +257,8 @@ public:
 				handleCommand(0xfd, b);
 				state = None;
 				break;
-			case OutputPhaseVal:
-				handleOutputPhase(b);
+			case PanVal:
+				handlePan(b);
 				handleCommand(0xfc, b);
 				state = None;
 				break;
@@ -482,7 +482,7 @@ public:
 	virtual void handlePCM8Enable() {}
 	virtual void handleSetTempo(uint8_t t) {}
 	virtual void handleSetVoiceNum(uint8_t t) {}
-	virtual void handleOutputPhase(uint8_t p) {}
+	virtual void handlePan(uint8_t p) {}
 	virtual void handleSetVolume(uint8_t v) {}
 	virtual void handleSoundLength(uint8_t l) {}
 	virtual void handleKeyOnDelay(uint8_t d) {}

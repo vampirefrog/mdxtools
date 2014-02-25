@@ -145,7 +145,7 @@ friend class MDXMML;
 		}
 	}
 	virtual void handleSoundLength(uint8_t l) { mmlf("q%d", l); }
-	virtual void handleOutputPhase(uint8_t p) { mmlf("p%d", p); }
+	virtual void handlePan(uint8_t p) { mmlf("p%d", p); }
 	virtual void handleDisableKeyOff() { nextKeyOff = true; }
 	virtual void handleDetune(int16_t d) { mmlf("D%d", d); }
 	virtual void handleOPMLFO(uint8_t sync_wave, uint8_t lfrq, uint8_t pmd, uint8_t amd, uint8_t pms_ams) {
