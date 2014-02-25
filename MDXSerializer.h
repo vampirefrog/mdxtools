@@ -15,9 +15,7 @@ public:
 	int16_t detune;
 public:
 	MDXSerialParser(): MDXMemParser(),
-		ticks(0), curVoice(0), pan(3), volume(127), detune(0) {
-
-	}
+		ticks(0), curVoice(0), pan(3), volume(127), detune(0) {}
 
 	void nextRest() {
 		ticks = 0;

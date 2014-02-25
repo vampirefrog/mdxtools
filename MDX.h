@@ -520,9 +520,7 @@ public:
 	int dataLen;
 	int loopIterations;
 
-	MDXMemParser(): data(0), ended(false), dataLen(0), loopIterations(0), dataPos(0), repeatStackPos(0) {
-
-	}
+	MDXMemParser(): data(0), ended(false), dataLen(0), loopIterations(0), dataPos(0), repeatStackPos(0) {}
 
 	void feed() {
 		eat(data[dataPos++]);
