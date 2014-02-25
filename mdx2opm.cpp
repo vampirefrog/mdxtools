@@ -27,7 +27,7 @@ private:
 		printf("CH: %d %d 4 0 0 %d 0\n", v.getFL(), v.getCON(), v.slot_mask);
 		for(int i = 0; i < 4; i++) {
 			printf("%s: %d %d %d %d %d %d %d %d %d %d %d\n",
-				MDX::voiceName(i), v.osc[i].getAR(), v.osc[i].getD1R(), v.osc[i].getD2R(),
+				MDXVoice::oscName(i), v.osc[i].getAR(), v.osc[i].getD1R(), v.osc[i].getD2R(),
 				v.osc[i].getRR(), v.osc[i].getD1L(), v.osc[i].getTL(), v.osc[i].getKS(),
 				v.osc[i].getMUL(), v.osc[i].getDT1(), v.osc[i].getDT2(), v.osc[i].getAME());
 		}

@@ -14,8 +14,8 @@ struct MDXVoiceOsc {
 	uint8_t d1l_rr;
 
 	void dump() {
-		printf("dt1_mul=0x%02x dt1=%d mul=%d\n", dt1_mul, getDT1(), getMUL());
-		printf("tl=0x%02x tl=%d\n", tl, getTL());
+		printf("dt1_mul=0x%02x dt1=%d mul=%d ", dt1_mul, getDT1(), getMUL());
+		printf("tl=0x%02x tl=%d ", tl, getTL());
 		printf("ks_ar=0x%02x ks=%d ar=%d\n", ks_ar, getKS(), getAR());
 	}
 
@@ -52,11 +52,15 @@ struct MDXVoice {
 		return true;
 	}
 
+	static const char *oscName(uint8_t n) {
+		const char *oscNames[] = { "M1", "C1", "M2", "C2" };
+		return oscNames[n & 0x03];
+	}
+
 	void dump() {
-		printf("Voice %d\n", number);
-		printf("fl_con=0x%02x fl=%d con=%d slot_mask=0x%02x\n", fl_con, getFL(), getCON(), slot_mask);
+		printf("Voice %d: fl_con=0x%02x fl=%d con=%d slot_mask=0x%02x\n", number, fl_con, getFL(), getCON(), slot_mask);
 		for(int i = 0; i < 4; i++) {
-			printf("Osc %d\n", i);
+			printf("%s: ", oscName(i));
 			osc[i].dump();
 		}
 	}
@@ -650,10 +654,6 @@ public:
 		};
 		if(c >= 0xe6 && c <= 0xff) return cmdNames[c - 0xe6];
 		return "Unknown";
-	}
-	static const char *voiceName(uint8_t n) {
-		const char *voiceNames[] = { "M1", "C1", "M2", "C2" };
-		return voiceNames[n & 0x03];
 	}
 	static const char *noteName(int note) {
 		const char *noteNames[] = { "c", "c+", "d", "d+" , "e", "f", "f+", "g", "g+", "a", "a+", "b",  };
