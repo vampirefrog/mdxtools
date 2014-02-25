@@ -25,13 +25,14 @@ $(PROGS): $$(sort $$@.o $$(patsubst %.cpp,%.o,$$($$@_SRCS)))
 clean:
 	rm -f $(PROGS) $(addsuffix .exe,$(PROGS)) *.o
 
+mdx2midi.o: mdx2midi.cpp MDXMidi.h MDX.h exceptionf.h FileStream.h Buffer.h
 mdx2mml.o: mdx2mml.cpp MDXMML.h MDX.h exceptionf.h FileStream.h Buffer.h
 mdx2opm.o: mdx2opm.cpp MDX.h exceptionf.h FileStream.h Buffer.h
 mdx2vgm.o: mdx2vgm.cpp exceptionf.h MDXVGM.h MDXSerializer.h MDX.h FileStream.h Buffer.h VGMWriter.h VGM.h
 mdxdump.o: mdxdump.cpp MDXDumper.h MDX.h exceptionf.h FileStream.h Buffer.h tools.h
 mdxstat.o: mdxstat.cpp MDX.h exceptionf.h FileStream.h Buffer.h
-pdx2sf2.o: pdx2sf2.cpp PDX.h FileStream.h exceptionf.h Buffer.h Soundfont.h tools.h
-pdx2wav.o: pdx2wav.cpp PDX.h FileStream.h exceptionf.h Buffer.h WAVWriter.h tools.h
+pdx2sf2.o: pdx2sf2.cpp PDX.h FileStream.h exceptionf.h Buffer.h Soundfont.h ADPCMDecoder.h
+pdx2wav.o: pdx2wav.cpp PDX.h FileStream.h exceptionf.h Buffer.h WAVWriter.h ADPCMDecoder.h
 tools.o: tools.cpp tools.h
+vgmdump.o: vgmdump.cpp VGM.h exceptionf.h FileStream.h Buffer.h
 vgmtest.o: vgmtest.cpp VGMWriter.h VGM.h exceptionf.h FileStream.h Buffer.h
-Soundfont.o: Soundfont.c Soundfont.h
