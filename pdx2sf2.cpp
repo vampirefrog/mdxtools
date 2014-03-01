@@ -3,6 +3,7 @@
 #include "ADPCMDecoder.h"
 
 int main(int argc, char **argv) {
+	ADPCMDecoder d; // initialize once
 	for(int i = 1; i < argc; i++) {
 		PDXLoader p(argv[i]);
 		SF2_DATA* s = CreateSF2Base(argv[i]);
@@ -20,7 +21,6 @@ int main(int argc, char **argv) {
 		int curPos = 0;
 		printf("%s: %d samples\n", argv[i], totalSamples);
 		sfSample *sampleHeaders = (sfSample *)malloc((totalSamples + 1) * sizeof(sfSample));
-		ADPCMDecoder d;
 		int x = 0;
 		for(int j = 0; j < PDX_NUM_SAMPLES; j++) {
 			if(p.samples[j].length > 0) {
@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
 		presetGenOpers[1].sfGenOper = 0;
 		presetGenOpers[1].genAmount.wAmount = 0;
 		ItmChk = Item_MakeChunk(FCC_pgen, sizeof(presetGenOpers), presetGenOpers, 0);
-		List_AddItem(LstChk, ItmChk);		
+		List_AddItem(LstChk, ItmChk);
 
 		sfModList presetModList;
 		memset(&presetModList, 0, sizeof(sfModList));
