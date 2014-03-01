@@ -111,7 +111,7 @@ public:
 		}
 	}
 	using WriteStream::write;
-	size_t write(void *p, size_t dataLen) {
+	size_t write(const void *p, size_t dataLen) {
 		extend(dataLen);
 		memcpy(data + len - dataLen, p, dataLen);
 		return dataLen;
