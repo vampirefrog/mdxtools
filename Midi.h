@@ -62,7 +62,7 @@ public:
 			uint8_t channel = 0;
 			for(int j = track_length; j > 0 && !s.eof(); j--) {
 				uint8_t b = s.readUint8();
-//				printf("MIDI [%02x]\n", b);
+				printf("MIDI [%02x]\n", b);
 				switch(state) {
 					case None:
 						duration = 0;
@@ -218,7 +218,7 @@ public:
 						state = None;
 						break;
 					case PitchWheelChangeT:
-						handlePitchWheelChange(channel, duration, nn | (b << 8));
+						handlePitchWheelChange(channel, duration, nn | (b << 7));
 						state = None;
 						break;
 					default:
@@ -247,13 +247,13 @@ public:
 	}
 
 	virtual void handleTrack(int number, int length) {}
-	virtual void handleNoteOn(int channel, int duration, int note, int vel) {}
-	virtual void handleNoteOff(int channel, int duration, int note, int vel) {}
-	virtual void handleKeyAfterTouch(int channel, int duration, int note, int vel) {}
-	virtual void handleControlChange(int channel, int duration, int controller, int value) {}
-	virtual void handleProgramChange(int channel, int duration, int program) {}
-	virtual void handleChannelAfterTouch(int channel, int duration, int value) {}
-	virtual void handlePitchWheelChange(int channel, int duration, uint16_t value) {}
+	virtual void handleNoteOn(uint8_t channel, int duration, int note, int vel) {}
+	virtual void handleNoteOff(uint8_t channel, int duration, int note, int vel) {}
+	virtual void handleKeyAfterTouch(uint8_t channel, int duration, int note, int vel) {}
+	virtual void handleControlChange(uint8_t channel, int duration, int controller, int value) {}
+	virtual void handleProgramChange(uint8_t channel, int duration, int program) {}
+	virtual void handleChannelAfterTouch(uint8_t channel, int duration, int value) {}
+	virtual void handlePitchWheelChange(uint8_t channel, uint32_t duration, uint16_t value) {}
 	virtual void handleMetaEvent(int duration, int cmd, int len, uint8_t *data) {}
 	virtual void handleMetaSequenceNumber(int duration, uint16_t seq) {}
 	virtual void handleTextEvent(int duration, const char *txt) {}
@@ -281,31 +281,31 @@ private:
 		printf("Track %d (%db)\n", number, length);
 	}
 
-	virtual void handleNoteOn(int channel, int duration, int note, int vel) {
+	virtual void handleNoteOn(uint8_t channel, int duration, int note, int vel) {
 		uint8_t octave;
 		const char *noteN = noteName(note, &octave);
 		printf("%08x %02u NoteOn %s%d (%d) %d\n", duration, channel, noteN, octave, note, vel);
 	}
 
-	virtual void handleNoteOff(int channel, int duration, int note, int vel) {
+	virtual void handleNoteOff(uint8_t channel, int duration, int note, int vel) {
 		uint8_t octave = 0;
 		const char *noteN = noteName(note, &octave);
 		printf("%08x %02u NoteOff %s%d (%d) %d\n", duration, channel, noteN, octave, note, vel);
 	}
 
-	virtual void handleKeyAfterTouch(int channel, int duration, int note, int vel) {
+	virtual void handleKeyAfterTouch(uint8_t channel, int duration, int note, int vel) {
 		printf("%08x %02u AfterTouch %d %d);\n", duration, channel, note, vel);
 	}
 
-	virtual void handleControlChange(int channel, int duration, int controller, int value) {
+	virtual void handleControlChange(uint8_t channel, int duration, int controller, int value) {
 		printf("%08x %02u ControlChange controller=%d value=%d\n", duration, channel, controller, value);
 	}
 
-	virtual void handleProgramChange(int channel, int duration, int program) {
+	virtual void handleProgramChange(uint8_t channel, int duration, int program) {
 		printf("%08x %02u ProgramChange program=%d;\n", duration, channel, program);
 	}
 
-	virtual void handleChannelAfterTouch(int channel, int duration, int value) {
+	virtual void handleChannelAfterTouch(uint8_t channel, int duration, int value) {
 		printf("%08x %02u AfterTouch value=%d\n", duration, channel, value);
 	}
 
@@ -356,6 +356,72 @@ private:
 
 	virtual void handleTrackEnd(int duration) {
 		printf("%08x TrackEnd\n", duration);
+	}
+};
+
+class MidiWriteChannel: public Buffer {
+	uint8_t lastCmd;
+public:
+	MidiWriteChannel(): lastCmd(0) {}
+	void writeDeltaTime(uint32_t t) {
+		if(t > 0x1fffff) writeUint8(0x80 | ((t >> 21) & 0x7f));
+		if(t > 0x3fff) writeUint8(0x80 | ((t >> 14) & 0x7f));
+		if(t > 0x7f) writeUint8(0x80 | ((t >> 7) & 0x7f));
+		writeUint8(t & 0x7f);
+	}
+	void writeCmd(uint8_t cmd) {
+		if(lastCmd != cmd) {
+			lastCmd = cmd;
+			writeUint8(cmd);
+		}
+	}
+	void writeNoteOn(uint32_t deltaTime, uint8_t channel, uint8_t note, uint8_t velocity) {
+		writeDeltaTime(deltaTime);
+		writeCmd(0x90 | (channel & 0x0f));
+		writeUint8(note & 0x7f);
+		writeUint8(velocity & 0x7f);
+	}
+	void writeTempo(uint32_t deltaTime, uint32_t tempo) {
+		writeDeltaTime(deltaTime);
+		writeCmd(0xff);
+		writeUint8(0x51);
+		writeUint8(0x03);
+		writeUint8((tempo >> 16) & 0xff);
+		writeUint8((tempo >> 8) & 0xff);
+		writeUint8((tempo >> 0) & 0xff);
+	}
+	void writeTrackEnd(uint32_t deltaTime) {
+		writeDeltaTime(deltaTime);
+		writeCmd(0xff);
+		writeUint8(0x2f);
+		writeUint8(0x00);
+	}
+	void writeProgramChange(uint32_t deltaTime, uint8_t channel, uint8_t program) {
+		writeDeltaTime(deltaTime);
+		uint8_t cmd = 0xc0 | (channel & 0x0f);
+		writeCmd(cmd);
+		writeUint8(program & 0x7f);
+	}
+	void writeTextEvent(uint8_t event, uint32_t deltaTime, const char *text, int len = -1) {
+		if(len < 0) len = strlen(text);
+		if(len > 127) len = 127;
+		writeDeltaTime(deltaTime);
+		writeCmd(0xff);
+		writeUint8(event);
+		writeUint8(len);
+		write(text, len);
+	}
+	void writeText(uint32_t deltaTime, const char *text, int len = -1) {
+		writeTextEvent(0x01, deltaTime, text, len);
+	}
+	void writeTrackName(uint32_t deltaTime, const char *text, int len = -1) {
+		writeTextEvent(0x03, deltaTime, text, len);
+	}
+	void writePitchBend(uint32_t deltaTime, uint8_t channel, uint16_t bend) {
+		writeDeltaTime(deltaTime);
+		writeCmd(0xe0 | (channel & 0x0f));
+		writeUint8(bend & 0x7f);
+		writeUint8((bend >> 7) & 0x7f);
 	}
 };
 
