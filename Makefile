@@ -26,13 +26,13 @@ $(PROGS): $$(sort $$@.o $$(patsubst %.cpp,%.o,$$($$@_SRCS)))
 clean:
 	rm -f $(PROGS) $(addsuffix .exe,$(PROGS)) *.o
 
-mdx2midi.o: mdx2midi.cpp MDXMidi.h MDX.h exceptionf.h Stream.h FS.h
+mdx2midi.o: mdx2midi.cpp MDXMidi.h MDX.h exceptionf.h Stream.h FS.h Midi.h tools.h
 mdx2mml.o: mdx2mml.cpp MDXMML.h MDX.h exceptionf.h Stream.h FS.h
 mdx2opm.o: mdx2opm.cpp MDX.h exceptionf.h Stream.h FS.h
 mdx2vgm.o: mdx2vgm.cpp exceptionf.h MDXVGM.h MDXSerializer.h MDX.h Stream.h FS.h VGMWriter.h VGM.h PDX.h tools.h
 mdxdump.o: mdxdump.cpp MDXDumper.h MDX.h exceptionf.h Stream.h FS.h tools.h
 mdxstat.o: mdxstat.cpp MDX.h exceptionf.h Stream.h FS.h
-mididump.o: mididump.cpp Midi.h FS.h Stream.h exceptionf.h
+mididump.o: mididump.cpp Midi.h FS.h Stream.h exceptionf.h tools.h
 pdx2sf2.o: pdx2sf2.cpp PDX.h FS.h Stream.h exceptionf.h Soundfont.h ADPCMDecoder.h
 pdx2wav.o: pdx2wav.cpp PDX.h FS.h Stream.h exceptionf.h WAVWriter.h ADPCMDecoder.h
 testStream.o: testStream.cpp
