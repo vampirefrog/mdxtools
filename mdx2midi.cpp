@@ -2,10 +2,10 @@
 
 int main(int argc, char **argv) {
 	for(int i = 1; i < argc; i++) {
-		MDXMidi m(argv[i]);
 		char buf[256];
 		snprintf(buf, sizeof(buf), "%s.mid", argv[i]);
-		m.write(buf);
+		MDXMidi m;
+		m.open(argv[i], buf);
 	}
 	return 0;
 }
