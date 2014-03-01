@@ -1,7 +1,8 @@
 #ifndef PDX_H_
 #define PDX_H_
 
-#include "FileStream.h"
+#include "FS.h"
+#include "exceptionf.h"
 
 #define PDX_NUM_SAMPLES 96
 
@@ -12,7 +13,7 @@ struct PDXLoaderSample {
 
 class PDXLoader {
 private:
-	FileStream s;
+	FileReadStream s;
 
 public:
 	PDXLoaderSample samples[PDX_NUM_SAMPLES];
@@ -23,10 +24,10 @@ public:
 	}
 
 	void open(const char *filename) {
-		s.open(filename, "rb");
+		s.openCaseInsensitive(filename);
 		for(int i = 0; i < PDX_NUM_SAMPLES; i++) {
-			samples[i].offset = s.readUint32Big();
-			samples[i].length = s.readUint32Big();
+			samples[i].offset = s.readBigUint32();
+			samples[i].length = s.readBigUint32();
 		}
 	}
 

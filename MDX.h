@@ -2,7 +2,8 @@
 #define MDX_H_
 
 #include "exceptionf.h"
-#include "FileStream.h"
+#include "Stream.h"
+#include "FS.h"
 #include <iconv.h>
 
 struct MDXVoiceOsc {
@@ -36,7 +37,7 @@ struct MDXVoice {
 	uint8_t number, fl_con, slot_mask;
 	MDXVoiceOsc osc[4];
 
-	bool load(FileStream &s) {
+	bool load(ReadStream &s) {
 		uint8_t buf[27];
 		if((unsigned long)s.read(buf, sizeof(buf)) < sizeof(buf)) return false;
 		uint8_t *b = buf;
@@ -540,14 +541,13 @@ private:
 		} else repeatStackPos--;
 		if(repeatStackPos < 0) repeatStackPos = 0;
 	}
-
 };
 
 class MDX {
 protected:
 	uint16_t file_base, Voice_offset, mml_offset[16];
 	uint8_t num_channels;
-	FileStream s;
+	FileReadStream s;
 public:
 	const char *title, *pcm_file;
 	MDX(const char *filename) {
@@ -577,13 +577,13 @@ public:
 		}
 		pcm_file = s.readLine(0);
 		file_base = s.tell();
-		Voice_offset = s.readUint16Big();
+		Voice_offset = s.readBigUint16();
 		memset(mml_offset, 0, sizeof(mml_offset));
-		mml_offset[0] = s.readUint16Big();
+		mml_offset[0] = s.readBigUint16();
 		num_channels = mml_offset[0] / 2 - 1;
 		if(num_channels > 16) num_channels = 16;
 		for(int i = 1; i < num_channels; i++) {
-			mml_offset[i] = s.readUint16Big();
+			mml_offset[i] = s.readBigUint16();
 		}
 		handleHeader();
 	}
@@ -597,8 +597,8 @@ public:
 	}
 	void readChannel(int i, MDXChannelParser &p) {
 		s.seek(file_base + mml_offset[i]);
-		int chan_endoff = i < num_channels - 1 ? mml_offset[i+1] : Voice_offset;
-		int chan_end = file_base + chan_endoff;
+		size_t chan_endoff = i < num_channels - 1 ? mml_offset[i+1] : Voice_offset;
+		size_t chan_end = file_base + chan_endoff;
 		bool done = false;
 		p.reset();
 		p.channel = i;

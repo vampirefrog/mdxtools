@@ -2,7 +2,7 @@
 #define VGM_H__
 
 #include "exceptionf.h"
-#include "FileStream.h"
+#include "FS.h"
 #include "wchar.h"
 
 struct VGM {
@@ -12,7 +12,7 @@ struct VGM {
 		load(filename);
 	}
 	~VGM() {}
-	
+
 	// These fields correspond to the file header
 	uint32_t
 		eof_offset, version, sn76489_clock,
@@ -69,26 +69,26 @@ struct VGM {
 	}
 
 	void load(const char *filename) {
-		FileStream f(filename);
+		FileReadStream f(filename);
 		if(!f.readCompare("Vgm ")) {
 			throw new exceptionf("File header not \"Vgm \": %s", filename);
 		}
-#define READ_OFFSET(a) { z_off_t of = f.tell(); a = f.readUint32(); if(a) a += of; }
+#define READ_OFFSET(a) { z_off_t of = f.tell(); a = f.readLittleUint32(); if(a) a += of; }
 		READ_OFFSET(eof_offset);
-		version = f.readUint32();
-		sn76489_clock = f.readUint32();
-		ym2413_clock = f.readUint32();
+		version = f.readLittleUint32();
+		sn76489_clock = f.readLittleUint32();
+		ym2413_clock = f.readLittleUint32();
 		READ_OFFSET(gd3_offset);
-		total_samples = f.readUint32();
+		total_samples = f.readLittleUint32();
 		READ_OFFSET(loop_offset);
-		loop_samples = f.readUint32();
+		loop_samples = f.readLittleUint32();
 		if(version >= 0x101) {
-			rate = f.readUint32();
+			rate = f.readLittleUint32();
 		} else {
 			rate = 0;
 		}
 		if(version >= 0x110) {
-			sn76489_feedback = f.readUint16();
+			sn76489_feedback = f.readLittleUint16();
 			sn76489_shift_reg_width = f.readUint8();
 		} else {
 			sn76489_feedback = 0;
@@ -101,8 +101,8 @@ struct VGM {
 			sn76489_flags = 0;
 		}
 		if(version >= 0x110) {
-			ym2612_clock = f.readUint32();
-			ym2151_clock = f.readUint32();
+			ym2612_clock = f.readLittleUint32();
+			ym2151_clock = f.readLittleUint32();
 		} else {
 			ym2612_clock = 0;
 			ym2151_clock = 0;
@@ -115,22 +115,22 @@ struct VGM {
 			vgm_data_offset = 0x40;
 		}
 		if(version >= 0x151) {
-			sega_pcm_clock = f.readUint32();
-			sega_pcm_interface_reg = f.readUint32();
-			rf5c68_clock = f.readUint32();
-			ym2203_clock = f.readUint32();
-			ym2608_clock = f.readUint32();
-			ym2610b_clock = f.readUint32();
-			ym3812_clock = f.readUint32();
-			ym3526_clock = f.readUint32();
-			ym8950_clock = f.readUint32();
-			ymf262_clock = f.readUint32();
-			ymf278b_clock = f.readUint32();
-			ymf271_clock = f.readUint32();
-			ymz280b_clock = f.readUint32();
-			rf5c164_clock = f.readUint32();
-			pwm_clock = f.readUint32();
-			ay8910_clock = f.readUint32();
+			sega_pcm_clock = f.readLittleUint32();
+			sega_pcm_interface_reg = f.readLittleUint32();
+			rf5c68_clock = f.readLittleUint32();
+			ym2203_clock = f.readLittleUint32();
+			ym2608_clock = f.readLittleUint32();
+			ym2610b_clock = f.readLittleUint32();
+			ym3812_clock = f.readLittleUint32();
+			ym3526_clock = f.readLittleUint32();
+			ym8950_clock = f.readLittleUint32();
+			ymf262_clock = f.readLittleUint32();
+			ymf278b_clock = f.readLittleUint32();
+			ymf271_clock = f.readLittleUint32();
+			ymz280b_clock = f.readLittleUint32();
+			rf5c164_clock = f.readLittleUint32();
+			pwm_clock = f.readLittleUint32();
+			ay8910_clock = f.readLittleUint32();
 			ay8910_chip_type = f.readUint8();
 			ay_flags = f.readUint8() | (f.readUint8() << 8) | (f.readUint8() << 16);
 		} else {
@@ -156,23 +156,23 @@ struct VGM {
 			f.readUint8();
 		}
 		if(version >= 0x161) {
-			gb_dmg_clock = f.readUint32();
-			nes_apu_clock = f.readUint32();
-			multipcm_clock = f.readUint32();
-			upd7759_clock = f.readUint32();
-			okim6258_clock = f.readUint32();
+			gb_dmg_clock = f.readLittleUint32();
+			nes_apu_clock = f.readLittleUint32();
+			multipcm_clock = f.readLittleUint32();
+			upd7759_clock = f.readLittleUint32();
+			okim6258_clock = f.readLittleUint32();
 			okim6258_flags = f.readUint8();
 			k051649_flags = f.readUint8();
 			c140_chip_type = f.readUint8();
 			f.readUint8();
-			okim6295_clock = f.readUint32();
-			k051649_clock = f.readUint32();
-			k054539_clock = f.readUint32();
-			huc6280_clock = f.readUint32();
-			c140_clock = f.readUint32();
-			k053260_clock = f.readUint32();
-			pokey_clock = f.readUint32();
-			qsound_clock = f.readUint32();
+			okim6295_clock = f.readLittleUint32();
+			k051649_clock = f.readLittleUint32();
+			k054539_clock = f.readLittleUint32();
+			huc6280_clock = f.readLittleUint32();
+			c140_clock = f.readLittleUint32();
+			k053260_clock = f.readLittleUint32();
+			pokey_clock = f.readLittleUint32();
+			qsound_clock = f.readLittleUint32();
 		} else {
 			loop_modifier = gb_dmg_clock = nes_apu_clock = multipcm_clock =
 			upd7759_clock = okim6258_clock = okim6258_flags = k051649_flags =
@@ -195,7 +195,7 @@ struct VGM {
 	uint16_t *release_date, *converter;
 	uint16_t *notes;
 
-	bool loadGD3(FileStream &f) {
+	bool loadGD3(FileReadStream &f) {
 		if(track_name_en) delete[] track_name_en;
 		track_name_en = track_name_jp = 0;
 		game_name_en = game_name_jp = 0;
@@ -207,8 +207,8 @@ struct VGM {
 			printf("Not a GD3\n");
 			return false;
 		}
-		uint32_t version = f.readUint32();
-		uint32_t data_length = f.readUint32();
+		uint32_t version = f.readLittleUint32();
+		uint32_t data_length = f.readLittleUint32();
 		printf("gd3 version 0x%08x data_length=0x%08x\n", version, data_length);
 		uint16_t *data = new uint16_t[data_length];
 		f.read(data, data_length);
