@@ -8,6 +8,7 @@
 class exceptionf: public std::exception {
 	char buf[512];
 public:
+	exceptionf() {}
 	exceptionf(const char *fmt, ...) {
 		va_list ap;
 		va_start(ap, fmt);
