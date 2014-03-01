@@ -13,7 +13,7 @@ class MDXDumperParser: public MDXChannelParser {
 	virtual void handleDisableKeyOff() { printf("DisableKeyOff\n"); }
 	virtual void handleSyncWait() { printf("SyncWait\n"); }
 	virtual void handlePCM8Enable() { printf("PCM8Enable\n"); }
-	virtual void handleSetTempo(uint8_t t) { printf("SetTempo %d\n", t); }
+	virtual void handleSetTempo(uint8_t t) { printf("SetTempo %d BPM (%d)\n", 60 * 4000000 / (48 * 1024 * (256 - t)), t); }
 	virtual void handleSetVoiceNum(uint8_t t) { printf("SetVoiceNum %d\n", t); }
 	virtual void handlePan(uint8_t p) { printf("Pan %d\n", p); }
 	virtual void handleSetVolume(uint8_t v) { printf("SetVolume %d\n", v); }
@@ -54,7 +54,7 @@ public:
 	}
 
 	virtual void handleHeader() {
-		char *t = iconv_alloc(title, "utf-8", "Shift_JIS");
+		char *t = iconvAlloc(title, "utf-8", "Shift_JIS");
 		printf("Title: \"%s\"\n", t);
 		free(t);
 		printf("PCM file: \"%s\"\n", pcm_file);

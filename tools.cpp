@@ -7,7 +7,7 @@
 
 #include "tools.h"
 
-char *iconv_alloc(const char *str, const char *to, const char *from, int len) {
+char *iconvAlloc(const char *str, const char *to, const char *from, int len) {
 	int chunk_size = 256, alloc_size = 0;
 	if(len < 0) {
 		char *p = (char *)memchr(str, 0, 512); // FIXME: rawmemchr not available on MinGW?
@@ -36,4 +36,9 @@ char *iconv_alloc(const char *str, const char *to, const char *from, int len) {
 	}
 	iconv_close(cd);
 	return ret;
+}
+
+void hexDump(const uint8_t *data, size_t len) {
+	for(size_t i = 0; i < len; i++) printf("%02x", data[i]);
+	printf("\n");
 }
