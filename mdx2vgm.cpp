@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
 			char buf[256];
 			snprintf(buf, sizeof(buf), "%s.vgm", argv[i]);
 			MDXVGM s(argv[i], buf);
-		} catch(exceptionf &e) {
+		} catch(exceptionf e) {
 			fprintf(stderr, "Error: %s\n", e.what());
 		}
 	}
