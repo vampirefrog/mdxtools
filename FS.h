@@ -52,7 +52,7 @@ public:
 
 	void open(const char *filename) {
 		f = fopen(filename, "rb");
-		if(!f) throw new exceptionf("Could not open %s: %s (%d)", filename, strerror(errno), errno);
+		if(!f) throw exceptionf("Could not open %s: %s (%d)", filename, strerror(errno), errno);
 	}
 	void close() { fclose(f); }
 	size_t read(void *ptr, size_t len) { return fread(ptr, 1, len, f); }

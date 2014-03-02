@@ -76,7 +76,7 @@ public:
 		char buf[256];
 		memset(buf, c, size);
 		while(size) {
-			int writeSize = sizeof(buf);
+			size_t writeSize = sizeof(buf);
 			if(size < writeSize) writeSize = size;
 			write(buf, writeSize);
 			size -= writeSize;
@@ -109,7 +109,7 @@ public:
 		if(len > allocLen) {
 			while(len > allocLen) allocLen += chunkSize;
 			data = (uint8_t *)realloc(data, allocLen);
-			if(!data) throw new exceptionf("Could not reallocate %d bytes", allocLen);
+			if(!data) throw exceptionf("Could not reallocate %d bytes", allocLen);
 		}
 	}
 	using WriteStream::write;

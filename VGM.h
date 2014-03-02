@@ -71,7 +71,7 @@ struct VGM {
 	void load(const char *filename) {
 		FileReadStream f(filename);
 		if(!f.readCompare("Vgm ")) {
-			throw new exceptionf("File header not \"Vgm \": %s", filename);
+			throw exceptionf("File header not \"Vgm \": %s", filename);
 		}
 #define READ_OFFSET(a) { z_off_t of = f.tell(); a = f.readLittleUint32(); if(a) a += of; }
 		READ_OFFSET(eof_offset);
