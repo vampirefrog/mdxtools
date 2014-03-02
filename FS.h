@@ -47,14 +47,14 @@ class FileReadStream: public FSReadStream {
 	FILE *f;
 public:
 	FileReadStream(const char *filename) { open(filename); }
-	FileReadStream() {}
+	FileReadStream(): f(0) {}
 	~FileReadStream() { close(); }
 
 	void open(const char *filename) {
 		f = fopen(filename, "rb");
 		if(!f) throw exceptionf("Could not open %s: %s (%d)", filename, strerror(errno), errno);
 	}
-	void close() { fclose(f); }
+	void close() { if(f) fclose(f); }
 	size_t read(void *ptr, size_t len) { return fread(ptr, 1, len, f); }
 	uint8_t readUint8() { return fgetc(f); }
 	size_t tell() { return ftell(f); }
