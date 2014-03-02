@@ -9,6 +9,8 @@
 
 class MDXVGM: public MDXSerializer {
 	VGMWriter w;
+	PDXLoader pdx;
+	uint8_t sampleIndex[PDX_NUM_SAMPLES];
 public:
 	MDXVGM() {}
 	MDXVGM(const char *filename, const char *outfile) {
@@ -19,24 +21,23 @@ public:
 		w.okim6258_flags = 0x06;
 		w.rate = 60; // japanese
 
+		memset(sampleIndex, 0xff, sizeof(sampleIndex));
+
 		load(filename);
 
 		w.write(outfile);
 	}
 private:
-	PDXLoader pdx;
 	virtual void handleHeader() {
 		if(pcm_file && *pcm_file) {
 			try {
 				pdx.open(pcm_file);
+				uint8_t sampleNum = 0;
 				for(int i = 0; i < PDX_NUM_SAMPLES; i++) {
-						w.buf.writeUint8(0x67);
-						w.buf.writeUint8(0x66);
-						w.buf.writeUint8(0x04); // OKIM6295 ROM data
-						w.buf.writeLittleUint32(pdx.samples[i].length);
 					if(pdx.samples[i].length > 0) {
+						sampleIndex[i] = sampleNum++;
 						uint8_t *s = pdx.loadSample(i);
-						w.buf.write(s, pdx.samples[i].length);
+						w.writeDataBlock(0x04, pdx.samples[i].length, s);
 						delete s;
 					}
 				}
@@ -50,13 +51,8 @@ private:
 		w.writeYM2151(0x18, 0x00);
 		w.writeYM2151(0x19, 0x80);
 		w.writeYM2151(0x1b, 0x00);
-		uint8_t pcm_cmds[] = {
-			0x90, 0x00, 0x17, 0x00, 0x01, // Stream #0 - Setup Chip: OKIM6258: Reg 00 01
-			0x91, 0x00, 0x04, 0x01, 0x00, // DAC Ctrl:	Stream #0 - Set Data: Bank n (note value), Step Size 01, Step Base 00
-		};
-		for(unsigned int i = 0; i < sizeof(pcm_cmds); i++) {
-			w.buf.writeUint8(pcm_cmds[i]);
-		}
+		w.writeSetupStreamControl(0x00, VGM_OKIM6258, 0x00, 0x01);
+		w.writeSetStreamData(0x00, 0x04, 0x01, 0x00);
 	}
 	virtual void handleSetVoiceNum(MDXSerialParser *p, uint8_t voice) {
 		if(p->channel >= 8) return;
@@ -73,37 +69,22 @@ private:
 	}
 	virtual void handleNote(MDXSerialParser *p, int n) {
 		if(p->channel == 8) {
-			uint8_t pcm_cmds[] = {
-				0xb7, 0x02, 0x00, // OKIM6258:	Pan Write: LR
-				0xb7, 0x00, 0x02, // OKIM6258:	Control Write: Play: On, Record: Off
-				0xb7, 0x0c, 0x02, // OKIM6258:	Set Clock Divider to 512
-			};
-			for(unsigned int i = 0; i < sizeof(pcm_cmds); i++) {
-				w.buf.writeUint8(pcm_cmds[i]);
+			if(sampleIndex[n] != 0xff) {
+				w.writeOKIM6258Pan(0x00);
+				w.writeOKIM6258(0x00, 0x02);
+				w.writeOKIM6258(0x0c, 0x02);
+				w.writeSetStreamFrequency(0x00, 7813);
+				w.writeStartStream(0x00, uint16_t(sampleIndex[n] & 0xff), 0x00);
 			}
-			w.buf.writeUint8(0x92);
-			w.buf.writeUint8(0x00);
-			w.buf.writeLittleUint32(7813); // Set Stream Frequency
-
-			w.buf.writeUint8(0x95);
-			w.buf.writeUint8(0x00);
-			w.buf.writeLittleUint16(uint16_t(n & 0xff));
-			w.buf.writeUint8(0x00); // DAC Ctrl:	Stream #0 - Play: Block 0x00
-
 		} else if(p->channel >= 8) return;
 		w.writeYM2151(0x28 + p->channel, ((n / 12) << 4) | ((n % 12) * 16 / 12));
 		w.writeYM2151(0x08, (voices[p->curVoice].slot_mask << 3) + (p->channel & 0x07)); // Key ON/OFF
 	}
 	virtual void handleNoteEnd(MDXSerialParser *p) {
 		if(p->channel == 8) {
-			uint8_t pcm_cmds[] = {
-				0x94, 0x00, //      DAC Ctrl:	Stream #0 - Stop Stream
-				0xB7, 0x01, 0x80, //   OKIM6258:	Data Write: 0x80
-				0xB7, 0x02, 0x03, //   OKIM6258:	Pan Write: --
-			};
-			for(unsigned int i = 0; i < sizeof(pcm_cmds); i++) {
-				w.buf.writeUint8(pcm_cmds[i]);
-			}
+			w.writeStopStream(0x00);
+			w.writeOKIM6258Data(0x80);
+			w.writeOKIM6258Pan(0x03);
 		} else if(p->channel >= 8) return;
 		w.writeYM2151(0x08, p->channel & 0x07);
 	}

@@ -4,6 +4,10 @@
 #include "VGM.h"
 #include "FS.h"
 
+enum VGMChipType {
+	VGM_OKIM6258 = 0x17,
+};
+
 struct VGMWriter: VGM {
 	Buffer buf;
 	VGMWriter() { reset(); }
@@ -28,6 +32,53 @@ struct VGMWriter: VGM {
 		buf.writeUint8(0x54);
 		buf.writeUint8(reg);
 		buf.writeUint8(val);
+	}
+	void writeOKIM6258(uint8_t reg, uint8_t data) {
+		buf.writeUint8(0xb7);
+		buf.writeUint8(reg);
+		buf.writeUint8(data);
+	}
+	void writeOKIM6258Data(uint8_t data) {
+		writeOKIM6258(0x01, data);
+	}
+	void writeOKIM6258Pan(uint8_t pan) {
+		writeOKIM6258(0x02, pan);
+	}
+	void writeDataBlock(uint8_t type, uint32_t size, uint8_t *data) {
+		buf.writeUint8(0x67);
+		buf.writeUint8(0x66);
+		buf.writeUint8(type);
+		buf.writeLittleUint32(size);
+		buf.write(data, size);
+	}
+	void writeSetupStreamControl(uint8_t streamId, VGMChipType chipType, uint8_t port, uint8_t reg) {
+		buf.writeUint8(0x90);
+		buf.writeUint8(streamId);
+		buf.writeUint8(chipType);
+		buf.writeUint8(port);
+		buf.writeUint8(reg);
+	}
+	void writeSetStreamData(uint8_t streamId, uint8_t dataBankId, uint8_t stepSize, uint8_t stepBase) {
+		buf.writeUint8(0x91);
+		buf.writeUint8(streamId);
+		buf.writeUint8(dataBankId);
+		buf.writeUint8(stepSize);
+		buf.writeUint8(stepBase);
+	}
+	void writeSetStreamFrequency(uint8_t streamId, uint32_t freq) {
+		buf.writeUint8(0x92);
+		buf.writeUint8(streamId);
+		buf.writeLittleUint32(freq);
+	}
+	void writeStartStream(uint8_t streamId, uint16_t blockId, uint8_t flags) {
+		buf.writeUint8(0x95);
+		buf.writeUint8(streamId);
+		buf.writeLittleUint16(blockId);
+		buf.writeUint8(flags);
+	}
+	void writeStopStream(uint8_t streamId) {
+		buf.writeUint8(0x94);
+		buf.writeUint8(streamId); // 0xff stops all streams
 	}
 	void writeWait(uint16_t len) {
 		if(len == 735) buf.writeUint8(0x62);
