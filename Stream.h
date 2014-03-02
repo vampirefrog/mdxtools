@@ -73,11 +73,13 @@ public:
 	virtual size_t write(const void *p, size_t n) { return 0; }
 	virtual void writeUint8(uint8_t i) { }
 	virtual void fill(size_t size, int c = 0) {
-		unsigned char *buf = (unsigned char *)malloc(size);
-		if(buf) {
-			memset(buf, c, size);
-			write(buf, size);
-			free(buf);
+		char buf[256];
+		memset(buf, c, size);
+		while(size) {
+			int writeSize = sizeof(buf);
+			if(size < writeSize) writeSize = size;
+			write(buf, writeSize);
+			size -= writeSize;
 		}
 	}
 	size_t write(const char *p) { return write((void *)p, strlen(p)); }
