@@ -557,6 +557,34 @@ public:
 		writeUint8(bend & 0x7f);
 		writeUint8((bend >> 7) & 0x7f);
 	}
+	void writeControlChange(uint32_t deltaTime, uint8_t channel, uint8_t controller, uint8_t value) {
+		writeDeltaTime(deltaTime);
+		writeCmd(0xb0 | (channel & 0x0f));
+		writeUint8(controller & 0x7f);
+		writeUint8(value & 0x7f);
+	}
+	void writeRPN(uint32_t deltaTime, uint8_t channel, uint16_t number, uint8_t value_msb) {
+		writeControlChange(deltaTime, channel, 99, (number >> 7) & 0x7f);
+		writeControlChange(0, channel, 98, number & 0x7f);
+		writeControlChange(0, channel, 6, value_msb & 0x7f);
+	}
+	void writeRPN(uint32_t deltaTime, uint8_t channel, uint16_t number, uint8_t value_msb, uint8_t value_lsb) {
+		writeControlChange(deltaTime, channel, 99, (number >> 7) & 0x7f);
+		writeControlChange(0, channel, 98, number & 0x7f);
+		writeControlChange(0, channel, 6, value_msb & 0x7f);
+		writeControlChange(0, channel, 38, value_msb & 0x7f);
+	}
+	void writeNRPN(uint32_t deltaTime, uint8_t channel, uint16_t number, uint8_t value_msb) {
+		writeControlChange(deltaTime, channel, 101, (number >> 7) & 0x7f);
+		writeControlChange(0, channel, 100, number & 0x7f);
+		writeControlChange(0, channel, 6, value_msb & 0x7f);
+	}
+	void writeNRPN(uint32_t deltaTime, uint8_t channel, uint16_t number, uint8_t value_msb, uint8_t value_lsb) {
+		writeControlChange(deltaTime, channel, 101, (number >> 7) & 0x7f);
+		writeControlChange(0, channel, 100, number & 0x7f);
+		writeControlChange(0, channel, 6, value_msb & 0x7f);
+		writeControlChange(0, channel, 38, value_msb & 0x7f);
+	}
 };
 
 #endif /* MIDI_H_ */
