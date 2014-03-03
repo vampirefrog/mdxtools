@@ -186,7 +186,7 @@ public:
 
 	virtual void handleHeader() {
 		printf("#title \"%s\"\n", title);
-		printf("#pcmfile \"%s\"\n", pcm_file);
+		if(pcm_file && *pcm_file) printf("#pcmfile \"%s\"\n", pcm_file);
 	}
 	virtual void handleVoice(MDXVoice &v) {
 		printf("@%d={\n\t/* AR DR SR RR SL OL KS ML DT1 DT2 AME */\n", v.number);
