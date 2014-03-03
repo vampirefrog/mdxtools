@@ -12,11 +12,14 @@
 class MidiReadStream {
 private:
 	FileReadStream s;
+	uint8_t rpn_msb, rpn_lsb;
+	bool nrpn;
 public:
-	MidiReadStream(const char *filename) {
+	bool dumpBytes;
+	MidiReadStream(const char *filename): rpn_msb(127), rpn_lsb(127), nrpn(false), dumpBytes(false) {
 		load(filename);
 	}
-	MidiReadStream() {}
+	MidiReadStream(): rpn_msb(127), rpn_lsb(127), nrpn(false), dumpBytes(false) {}
 	~MidiReadStream() {}
 
 	void load(const char *filename) {
@@ -62,7 +65,7 @@ public:
 			uint8_t channel = 0;
 			for(int j = track_length; j > 0 && !s.eof(); j--) {
 				uint8_t b = s.readUint8();
-				printf("MIDI [%02x]\n", b);
+				if(dumpBytes) printf("MIDI [%02x]\n", b);
 				switch(state) {
 					case None:
 						duration = 0;
@@ -215,6 +218,36 @@ public:
 						break;
 					case ControlChangeV:
 						handleControlChange(channel, duration, nn, b);
+						switch(nn) {
+							case 98:
+								rpn_lsb = b;
+								nrpn = true;
+								break;
+							case 99:
+								rpn_msb = b;
+								nrpn = true;
+								break;
+							case 100:
+								rpn_lsb = b;
+								nrpn = false;
+								break;
+							case 101:
+								rpn_msb = b;
+								nrpn = false;
+								break;
+							case 6:
+								if(rpn_lsb < 127 && rpn_msb < 127) {
+									if(nrpn) handleNRPN(duration, channel, ((rpn_msb & 0x7f) << 7) | (rpn_lsb & 0x7f), b);
+									else handleRPN(duration, channel, ((rpn_msb & 0x7f) << 7) | (rpn_lsb & 0x7f), b);
+								}
+								break;
+							case 38:
+								if(rpn_lsb < 127 && rpn_msb < 127) {
+									if(nrpn) handleNRPNLSB(duration, channel, ((rpn_msb & 0x7f) << 7) | (rpn_lsb & 0x7f), b);
+									else handleRPNLSB(duration, channel, ((rpn_msb & 0x7f) << 7) | (rpn_lsb & 0x7f), b);
+								}
+								break;
+						}
 						state = None;
 						break;
 					case PitchWheelChangeT:
@@ -380,6 +413,18 @@ public:
 		return CCNames[cc & 0x7f];
 	}
 
+	static const char *RPNName(uint16_t rpn) {
+		const char *names[] = {
+			"Pitch Bend Sensitivity",
+			"Fine Tuning",
+			"Coarse Tuning",
+			"Tuning Program Select",
+			"Tuning Bank Select",
+		};
+		if(rpn < 5) return names[rpn];
+		return "Unknown";
+	}
+
 	virtual void handleTrack(int number, int length) {}
 	virtual void handleNoteOn(uint8_t channel, int duration, int note, int vel) {}
 	virtual void handleNoteOff(uint8_t channel, int duration, int note, int vel) {}
@@ -399,6 +444,10 @@ public:
 	virtual void handleTempo(int duration, uint32_t tempo) {}
 	virtual void handleTimeSignature(int duration, uint8_t numerator, uint8_t denominator, uint8_t ticksPerClick, uint8_t quarterNote32ndNotes) {}
 	virtual void handleTrackEnd(int duration) {}
+	virtual void handleRPN(uint8_t channel, int duration, uint16_t number, uint8_t msb) {}
+	virtual void handleRPNLSB(uint8_t channel, int duration, uint16_t number, uint8_t lsb) {}
+	virtual void handleNRPN(uint8_t channel, int duration, uint16_t number, uint8_t msb) {}
+	virtual void handleNRPNLSB(uint8_t channel, int duration, uint16_t number, uint8_t lsb) {}
 
 	void beginSave() {
 	}
@@ -491,6 +540,19 @@ private:
 	virtual void handleTrackEnd(int duration) {
 		printf("%08x TrackEnd\n", duration);
 	}
+
+	virtual void handleRPN(uint8_t channel, int duration, uint16_t number, uint8_t msb) {
+		printf("%08x %02d RPN %d (%s) = %d\n", channel, duration, number, RPNName(number), msb);
+	}
+	virtual void handleRPNLSB(uint8_t channel, int duration, uint16_t number, uint8_t lsb) {
+		printf("%08x %02d RPN %d (%s) LSB = %d\n", channel, duration, number, RPNName(number), lsb);
+	}
+	virtual void handleNRPN(uint8_t channel, int duration, uint16_t number, uint8_t msb) {
+		printf("%08x %02d NRPN %d = %d\n", channel, duration, number, msb);
+	}
+	virtual void handleNRPNLSB(uint8_t channel, int duration, uint16_t number, uint8_t lsb) {
+		printf("%08x %02d NRPN %d LSB = %d\n", channel, duration, number, lsb);
+	}
 };
 
 class MidiWriteChannel: public Buffer {
@@ -563,23 +625,23 @@ public:
 		writeUint8(controller & 0x7f);
 		writeUint8(value & 0x7f);
 	}
-	void writeRPN(uint32_t deltaTime, uint8_t channel, uint16_t number, uint8_t value_msb) {
+	void writeNRPN(uint32_t deltaTime, uint8_t channel, uint16_t number, uint8_t value_msb) {
 		writeControlChange(deltaTime, channel, 99, (number >> 7) & 0x7f);
 		writeControlChange(0, channel, 98, number & 0x7f);
 		writeControlChange(0, channel, 6, value_msb & 0x7f);
 	}
-	void writeRPN(uint32_t deltaTime, uint8_t channel, uint16_t number, uint8_t value_msb, uint8_t value_lsb) {
+	void writeNRPN(uint32_t deltaTime, uint8_t channel, uint16_t number, uint8_t value_msb, uint8_t value_lsb) {
 		writeControlChange(deltaTime, channel, 99, (number >> 7) & 0x7f);
 		writeControlChange(0, channel, 98, number & 0x7f);
 		writeControlChange(0, channel, 6, value_msb & 0x7f);
 		writeControlChange(0, channel, 38, value_msb & 0x7f);
 	}
-	void writeNRPN(uint32_t deltaTime, uint8_t channel, uint16_t number, uint8_t value_msb) {
+	void writeRPN(uint32_t deltaTime, uint8_t channel, uint16_t number, uint8_t value_msb) {
 		writeControlChange(deltaTime, channel, 101, (number >> 7) & 0x7f);
 		writeControlChange(0, channel, 100, number & 0x7f);
 		writeControlChange(0, channel, 6, value_msb & 0x7f);
 	}
-	void writeNRPN(uint32_t deltaTime, uint8_t channel, uint16_t number, uint8_t value_msb, uint8_t value_lsb) {
+	void writeRPN(uint32_t deltaTime, uint8_t channel, uint16_t number, uint8_t value_msb, uint8_t value_lsb) {
 		writeControlChange(deltaTime, channel, 101, (number >> 7) & 0x7f);
 		writeControlChange(0, channel, 100, number & 0x7f);
 		writeControlChange(0, channel, 6, value_msb & 0x7f);
