@@ -31,6 +31,7 @@ private:
 	virtual void handleVolumeDec();
 	virtual void handleSetVolume(uint8_t v);
 	virtual void handleDetune(int16_t d);
+	virtual void handleDisableKeyOff();
 public:
 };
 
@@ -104,6 +105,7 @@ private:
 	virtual void handleVolumeDec(MDXSerialParser *p) {}
 	virtual void handleSetVolume(MDXSerialParser *p, uint8_t v) {}
 	virtual void handleDetune(MDXSerialParser *p, int16_t d) {}
+	virtual void handleDisableKeyOff(MDXSerialParser *p) {}
 };
 
 void MDXSerialParser::handleSetTempo(uint8_t tempo) { mdx->tempo = tempo; }
@@ -129,5 +131,6 @@ void MDXSerialParser::handleVolumeInc() { mdx->handleVolumeInc(this); }
 void MDXSerialParser::handleVolumeDec() { mdx->handleVolumeDec(this); }
 void MDXSerialParser::handleSetVolume(uint8_t v) { volume = MDX::volumeVal(v); mdx->handleSetVolume(this, v); }
 void MDXSerialParser::handleDetune(int16_t d) { detune = d; mdx->handleDetune(this, d); }
+void MDXSerialParser::handleDisableKeyOff() { mdx->handleDisableKeyOff(this); }
 
 #endif /* MDXSERIALIZER_H_ */

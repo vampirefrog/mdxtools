@@ -11,9 +11,10 @@ class MDXVGM: public MDXSerializer {
 	VGMWriter w;
 	PDXLoader pdx;
 	uint8_t sampleIndex[PDX_NUM_SAMPLES];
+	bool nextKeyOff;
 public:
 	MDXVGM() {}
-	MDXVGM(const char *filename, const char *outfile) {
+	MDXVGM(const char *filename, const char *outfile): nextKeyOff(false) {
 		memset(&voices, 0, sizeof(voices));
 		w.version = 0x150;
 		w.ym2151_clock = 4000000;
@@ -76,17 +77,20 @@ private:
 				w.writeSetStreamFrequency(0x00, 7813);
 				w.writeStartStream(0x00, uint16_t(sampleIndex[n] & 0xff), 0x00);
 			}
-		} else if(p->channel >= 8) return;
-		w.writeYM2151(0x28 + p->channel, ((n / 12) << 4) | ((n % 12) * 16 / 12));
-		w.writeYM2151(0x08, (voices[p->curVoice].slot_mask << 3) + (p->channel & 0x07)); // Key ON/OFF
+		} else if(p->channel < 8) {
+			w.writeYM2151(0x28 + p->channel, ((n / 12) << 4) | ((n % 12) * 16 / 12));
+			w.writeYM2151(0x08, (voices[p->curVoice].slot_mask << 3) + (p->channel & 0x07)); // Key ON/OFF
+		}
 	}
 	virtual void handleNoteEnd(MDXSerialParser *p) {
 		if(p->channel == 8) {
 			w.writeStopStream(0x00);
 			w.writeOKIM6258Data(0x80);
 			w.writeOKIM6258Pan(0x03);
-		} else if(p->channel >= 8) return;
-		w.writeYM2151(0x08, p->channel & 0x07);
+		} else if(p->channel < 8) {
+			w.writeYM2151(0x08, p->channel & 0x07);
+			nextKeyOff = false;
+		}
 	}
 	virtual void handleRest(int r) {
 		// divided 44100 and 4000000 by 100, to avoid int overflow
@@ -104,6 +108,9 @@ private:
 	virtual void handleDetune(MDXSerialParser *p, int16_t d) {
 		if(p->channel >= 8) return;
 		w.writeYM2151(0x30 + p->channel, (d & 0x3f) << 2);
+	}
+	virtual void handleDisableKeyOff(MDXSerialParser *p) {
+		nextKeyOff = true;
 	}
 };
 
