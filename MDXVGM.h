@@ -11,10 +11,9 @@ class MDXVGM: public MDXSerializer {
 	VGMWriter w;
 	PDXLoader pdx;
 	uint8_t sampleIndex[PDX_NUM_SAMPLES];
-	bool nextKeyOff;
 public:
 	MDXVGM() {}
-	MDXVGM(const char *filename, const char *outfile): nextKeyOff(false) {
+	MDXVGM(const char *filename, const char *outfile) {
 		memset(&voices, 0, sizeof(voices));
 		w.version = 0x150;
 		w.ym2151_clock = 4000000;
@@ -31,8 +30,20 @@ public:
 private:
 	virtual void handleHeader() {
 		if(pcm_file && *pcm_file) {
+			bool opened = true;
 			try {
 				pdx.open(pcm_file);
+			} catch(exceptionf e) {
+				char buf[512];
+				snprintf(buf, sizeof(buf), "%s.pdx", pcm_file);
+				try {
+					pdx.open(buf);
+				} catch(exceptionf e) {
+					opened = false;
+					printf("PDX Error: %s\n", e.what());
+				}
+			}
+			if(opened) {
 				uint8_t sampleNum = 0;
 				for(int i = 0; i < PDX_NUM_SAMPLES; i++) {
 					if(pdx.samples[i].length > 0) {
@@ -42,8 +53,6 @@ private:
 						delete s;
 					}
 				}
-			} catch(exceptionf e) {
-				printf("PDX Error: %s\n", e.what());
 			}
 		}
 		w.writeYM2151(0x01, 0x00);
@@ -79,7 +88,11 @@ private:
 			}
 		} else if(p->channel < 8) {
 			w.writeYM2151(0x28 + p->channel, ((n / 12) << 4) | ((n % 12) * 16 / 12));
-			w.writeYM2151(0x08, (voices[p->curVoice].slot_mask << 3) + (p->channel & 0x07)); // Key ON/OFF
+			if(p->nextKeyOn) {
+				p->nextKeyOn = false;
+			} else {
+				w.writeYM2151(0x08, (voices[p->curVoice].slot_mask << 3) + (p->channel & 0x07)); // Key ON/OFF
+			}
 		}
 	}
 	virtual void handleNoteEnd(MDXSerialParser *p) {
@@ -88,8 +101,12 @@ private:
 			w.writeOKIM6258Data(0x80);
 			w.writeOKIM6258Pan(0x03);
 		} else if(p->channel < 8) {
-			w.writeYM2151(0x08, p->channel & 0x07);
-			nextKeyOff = false;
+			if(p->nextKeyOff) {
+				p->nextKeyOn = true;
+				p->nextKeyOff = false;
+			} else {
+				w.writeYM2151(0x08, p->channel & 0x07);
+			}
 		}
 	}
 	virtual void handleRest(int r) {
@@ -108,9 +125,6 @@ private:
 	virtual void handleDetune(MDXSerialParser *p, int16_t d) {
 		if(p->channel >= 8) return;
 		w.writeYM2151(0x30 + p->channel, (d & 0x3f) << 2);
-	}
-	virtual void handleDisableKeyOff(MDXSerialParser *p) {
-		nextKeyOff = true;
 	}
 };
 

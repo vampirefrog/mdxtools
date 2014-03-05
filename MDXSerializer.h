@@ -13,9 +13,10 @@ public:
 	MDXVoice curVoiceData;
 	uint8_t pan, volume;
 	int16_t detune;
+	bool nextKeyOn, nextKeyOff;
 public:
 	MDXSerialParser(): MDXMemParser(),
-		ticks(0), curVoice(0), pan(3), volume(127), detune(0) {}
+		ticks(0), curVoice(0), pan(3), volume(127), detune(0), nextKeyOn(false), nextKeyOff(false) {}
 
 	void nextRest() {
 		ticks = 0;
@@ -31,7 +32,10 @@ private:
 	virtual void handleVolumeDec();
 	virtual void handleSetVolume(uint8_t v);
 	virtual void handleDetune(int16_t d);
-	virtual void handleDisableKeyOff();
+	virtual void handleDisableKeyOff() {
+		nextKeyOff = true;
+		nextKeyOn = false;
+	}
 public:
 };
 
@@ -131,6 +135,5 @@ void MDXSerialParser::handleVolumeInc() { mdx->handleVolumeInc(this); }
 void MDXSerialParser::handleVolumeDec() { mdx->handleVolumeDec(this); }
 void MDXSerialParser::handleSetVolume(uint8_t v) { volume = MDX::volumeVal(v); mdx->handleSetVolume(this, v); }
 void MDXSerialParser::handleDetune(int16_t d) { detune = d; mdx->handleDetune(this, d); }
-void MDXSerialParser::handleDisableKeyOff() { mdx->handleDisableKeyOff(this); }
 
 #endif /* MDXSERIALIZER_H_ */
