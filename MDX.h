@@ -70,13 +70,85 @@ struct MDXVoice {
 	uint8_t getCON() { return fl_con & 0x07; }
 };
 
-class MDX;
-class MDXChannelParser {
-	friend class MDX;
+struct MDXChannelPos {
+	uint16_t offset, length;
+};
+
+struct MDXHeader {
+	const char *title, *pcmFile;
+	uint16_t fileBase;
+	MDXChannelPos channels[16];
+	uint8_t numChannels;
+	uint16_t voiceOffset;
+	MDXVoice *voices[256];
+
+	MDXHeader(): title(0), pcmFile(0), fileBase(0), numChannels(0), voiceOffset(0) {
+		memset(channels, 0, sizeof(channels));
+		memset(voices, 0, sizeof(voices));
+	}
+
+	~MDXHeader() {
+		if(title) delete title;
+		if(pcmFile) delete pcmFile;
+		for(size_t i = 0; i < 256; i++) {
+			if(voices[i]) delete voices[i];
+		}
+	}
+
+	void read(FileReadStream &s) {
+		// Read in the title and PDX file
+		title = s.readLine(0x1a);
+		if(title && *title) {
+			char *nl = strrchr((char *)title, '\r');
+			if(nl) *nl = 0;
+		}
+		pcmFile = s.readLine(0);
+		fileBase = s.tell();
+		voiceOffset = s.readBigUint16();
+
+		// Read in the channel positions
+		memset(channels, 0, sizeof(channels));
+		channels[0].offset = s.readBigUint16();
+		numChannels = channels[0].offset / 2 - 1;
+		if(numChannels > 16) numChannels = 16;
+		for(int i = 1; i < numChannels; i++) {
+			channels[i].offset = s.readBigUint16();
+		}
+		for(int i = 0; i < numChannels; i++) {
+			channels[i].length = ((i == numChannels - 1) ? voiceOffset : channels[i + 1].offset) - channels[i].offset;
+		}
+
+		// Read in the voices
+		memset(voices, 0, sizeof(voices));
+		s.seek(fileBase + voiceOffset);
+		while(!s.eof()) {
+			MDXVoice inst;
+			if(!inst.load(s)) break;
+			if(!voices[inst.number]) // Do not allocate twice the same voice
+				voices[inst.number] = new MDXVoice(inst);
+		}
+	}
+
+	void dump() {
+		if(title && *title) printf("Title: \"%s\"\n", title);
+		if(pcmFile && *pcmFile) printf("PCM File: \"%s\"\n", pcmFile);
+		printf("fileBase=%x\n", fileBase);
+		printf("numChannels=%d\n", numChannels);
+		for(uint i = 0; i < numChannels; i++) {
+			printf("%u: offset=%d length=%d\n", i, channels[i].offset, channels[i].length);
+		}
+		printf("voiceOffset=%d\n", voiceOffset);
+		for(uint i = 0; i <= 255; i++) {
+			if(voices[i]) voices[i]->dump();
+		}
+	}
+};
+
+class MDXParser {
 public:
 	int channel;
 protected:
-	int channelLength, pos;
+	int pos;
 	uint8_t nn, n2, n3, n4, n5;
 	int16_t w, v;
 	enum {
@@ -124,13 +196,9 @@ protected:
 		FadeOutValue,
 	} state;
 public:
-	MDXChannelParser() { reset(); }
-	void reset() {
-		nn = n2 = n3 = n4 = n5 = w = v = pos = 0;
-		state = None;
-		cleanup();
-	}
-	virtual void cleanup() {}
+	MDXParser(): pos(0), nn(0), n2(0), n3(0), n4(0), n5(0), w(0), v(0), state(None) {}
+	~MDXParser() {}
+
 	bool eat(uint8_t b) {
 		handleByte(b);
 		pos++;
@@ -463,6 +531,65 @@ public:
 		return false;
 	}
 
+	static const char *commandName(uint8_t c) {
+		const char *cmdNames[] = {
+			"Informal command",   // 0xe6
+			"Extended MML",       // 0xe7
+			"PCM4/8 enable",      // 0xe8
+			"LFO delay setting",  // 0xe9
+			"OPM LFO control",    // 0xea
+			"LFO volume control", // 0xeb
+			"LFO pitch control",  // 0xec
+			"ADPCM/noise freq",   // 0xed
+			"Sync signal wait",   // 0xee
+			"Sync signal send",   // 0xef
+			"Key on delay",       // 0xf0
+			"Data end",           // 0xf1
+			"Portamento time",    // 0xf2
+			"Detune",             // 0xf3
+			"Repeat escape",      // 0xf4
+			"Repeat end",         // 0xf5
+			"Repeat start",       // 0xf6
+			"Disable key-off",    // 0xf7
+			"Sound length",       // 0xf8
+			"Volume decrement",   // 0xf9
+			"Volume increment",   // 0xfa
+			"Set volume",         // 0xfb
+			"Output phase",       // 0xfc
+			"Set voice #",        // 0xfd
+			"Set OPM register",   // 0xfe
+			"Set tempo",          // 0xff
+		};
+		if(c >= 0xe6 && c <= 0xff) return cmdNames[c - 0xe6];
+		return "Unknown";
+	}
+
+	static const char *noteName(int note) {
+		const char *noteNames[] = { "c", "c+", "d", "d+" , "e", "f", "f+", "g", "g+", "a", "a+", "b",  };
+		return noteNames[(note + 3) % 12];
+	}
+
+	static int noteOctave(int note) {
+		return (note + 3) / 12;
+	}
+
+	static char channelName(uint8_t chan) {
+		if(chan < 8) return 'A' + chan;
+		if(chan < 16) return 'P' + chan - 8;
+		return '!';
+	}
+
+	static int volumeVal(uint8_t v) {
+		int vol_conv[] = {
+			85,  87,  90,  93,  95,  98, 101, 103,
+			106, 109, 111, 114, 117, 119, 122, 125
+		};
+
+		if(v < 16) return vol_conv[v];
+		return 255 - v;
+	}
+
+	// Callbacks
 	virtual void handleByte(uint8_t b) {}
 	virtual void handleRest(uint8_t duration) {}
 	virtual void handleNote(uint8_t note, uint8_t duration) {}
@@ -505,24 +632,25 @@ public:
 	virtual void handleChannelEnd(int chan) {}
 };
 
-class MDXMemParser: public MDXChannelParser {
+class MDXMemParser: public MDXParser {
 public:
 	uint8_t *data;
 	bool ended;
 	int dataLen;
 	int loopIterations;
-
-	MDXMemParser(): data(0), ended(false), dataLen(0), loopIterations(0), dataPos(0), repeatStackPos(0) {}
+protected:
+	int dataPos;
+private:
+	int repeatStack[5];
+	int repeatStackPos;
+public:
+	MDXMemParser(): MDXParser(), data(0), ended(false), dataLen(0), loopIterations(0), dataPos(0), repeatStackPos(0) {}
 
 	void feed() {
 		eat(data[dataPos++]);
 		if(dataPos >= dataLen) ended = true;
 	}
 
-private:
-	int dataPos;
-	int repeatStack[5];
-	int repeatStackPos;
 	virtual void handleDataEnd() {
 		ended = true;
 	}
@@ -541,133 +669,6 @@ private:
 		} else repeatStackPos--;
 		if(repeatStackPos < 0) repeatStackPos = 0;
 	}
-};
-
-class MDX {
-protected:
-	uint16_t file_base, Voice_offset, mml_offset[16];
-	uint8_t num_channels;
-	FileReadStream s;
-public:
-	const char *title, *pcm_file;
-	MDX(const char *filename) {
-		load(filename);
-	}
-	MDX() {}
-	~MDX() {}
-
-	void load(const char *filename, MDXChannelParser &p) {
-		s.open(filename);
-		readHeader();
-		readVoices();
-		for(int i = 0; i < num_channels; i++) {
-			p.channel = i;
-			readChannel(i, p);
-		}
-	}
-	void load(const char *filename) {
-		MDXChannelParser p;
-		load(filename, p);
-	}
-	void readHeader() {
-		title = s.readLine(0x1a);
-		if(title && *title) {
-			char *nl = strrchr((char *)title, '\r');
-			if(nl) *nl = 0;
-		}
-		pcm_file = s.readLine(0);
-		file_base = s.tell();
-		Voice_offset = s.readBigUint16();
-		memset(mml_offset, 0, sizeof(mml_offset));
-		mml_offset[0] = s.readBigUint16();
-		num_channels = mml_offset[0] / 2 - 1;
-		if(num_channels > 16) num_channels = 16;
-		for(int i = 1; i < num_channels; i++) {
-			mml_offset[i] = s.readBigUint16();
-		}
-		handleHeader();
-	}
-	void readVoices() {
-		s.seek(file_base + Voice_offset);
-		while(!s.eof()) {
-			MDXVoice inst;
-			if(!inst.load(s)) break;
-			handleVoice(inst);
-		}
-	}
-	void readChannel(int i, MDXChannelParser &p) {
-		s.seek(file_base + mml_offset[i]);
-		size_t chan_endoff = i < num_channels - 1 ? mml_offset[i+1] : Voice_offset;
-		size_t chan_end = file_base + chan_endoff;
-		bool done = false;
-		p.reset();
-		p.channel = i;
-		p.channelLength = chan_endoff - mml_offset[i];
-		p.handleChannelStart(i);
-		while(!s.eof() && !done) {
-			uint8_t b = s.readUint8();
-			if(s.eof()) break;
-			done = p.eat(b);
-			if(chan_end && s.tell() >= chan_end) break;
-		}
-		p.handleChannelEnd(i);
-	}
-	const char *commandName(uint8_t c) {
-		const char *cmdNames[] = {
-			"Informal command", // 0xe6
-			"Extended MML", // 0xe7
-			"PCM4/8 enable", // 0xe8
-			"LFO delay setting", // 0xe9
-			"OPM LFO control", // 0xea
-			"LFO volume control", // 0xeb
-			"LFO pitch control", // 0xec
-			"ADPCM/noise freq", // 0xed
-			"Sync signal wait", // 0xee
-			"Sync signal send", // 0xef
-			"Key on delay", // 0xf0
-			"Data end", // 0xf1
-			"Portamento time", // 0xf2
-			"Detune", // 0xf3
-			"Repeat escape", // 0xf4
-			"Repeat end", // 0xf5
-			"Repeat start", // 0xf6
-			"Disable key-off", // 0xf7
-			"Sound length", // 0xf8
-			"Volume decrement", // 0xf9
-			"Volume increment", // 0xfa
-			"Set volume", // 0xfb
-			"Output phase", // 0xfc
-			"Set voice #", // 0xfd
-			"Set OPM register", // 0xfe
-			"Set tempo", // 0xff
-		};
-		if(c >= 0xe6 && c <= 0xff) return cmdNames[c - 0xe6];
-		return "Unknown";
-	}
-	static const char *noteName(int note) {
-		const char *noteNames[] = { "c", "c+", "d", "d+" , "e", "f", "f+", "g", "g+", "a", "a+", "b",  };
-		return noteNames[(note + 3) % 12];
-	}
-	static int noteOctave(int note) {
-		return (note + 3) / 12;
-	}
-	static char channelName(uint8_t chan) {
-		if(chan < 8) return 'A' + chan;
-		if(chan < 16) return 'P' + chan - 8;
-		return '!';
-	}
-	static int volumeVal(uint8_t v) {
-		int vol_conv[] = {
-			85,  87,  90,  93,  95,  98, 101, 103,
-			106, 109, 111, 114, 117, 119, 122, 125
-		};
-
-		if(v < 16) return vol_conv[v];
-		return 255 - v;
-	}
-
-	virtual void handleHeader() {} // Called right after header is loaded
-	virtual void handleVoice(MDXVoice &v) {}
 };
 
 #endif /* MDX_H_ */
