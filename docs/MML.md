@@ -66,6 +66,66 @@ Notes are followed by a numerical value to specify length. Otherwise the value o
 `W` Sync wait. Wait for a Sync send command on another channel.
 
 `MP#1,#2,#3` Set Pitch LFO values.
-`#1`: LFO waveform (0 = sawtooth, 1 = square, 2 = triangle)
-`#2`: 1/4 LFO cycle in ticks
-`#3`: LFO max amplitude
+* `#1`: LFO waveform (0 = sawtooth, 1 = square, 2 = triangle)
+* `#2`: 1/4 LFO cycle in ticks
+* `#3`: LFO max amplitude
+
+`MPON` Modulate Pitch ON. Enable pitch LFO.
+
+`MPOF` Modulate Pitch OFf. Disable pitch LFO.
+
+`MA#1,#2,#3` Set Amplitude LFO values.
+* `#1` LFO waveform (0 = sawtooth, 1 = square, 2 = triangle)
+* `#2` 1/4 LFO cycle in ticks
+* `#3` LFO max amplitude
+
+`MAON` Modulate Amplitude ON. Enable amplitude LFO.
+
+`MAOF` Modulate Amplitude OFf. Disable amplitude LFO.
+
+`MD#` Delay from key-on to the start of LFO modulation. Range is `MD0` - `MD255`. `MD0` means no delay. Does not apply to OPM LFO.
+
+`MH#1,#2,#3,#4,#5,#6,#7` Set OPM LFO values.
+* `#1` LFO waveform (0 = sawtooth, 1 = square, 2 = triangle, 3 = noise)
+* `#2` LFRQ
+* `#3` PMD
+* `#4` AMD
+* `#5` PMS
+* `#6` AMS
+* `#7` Key sync. `0` = asynchronous, `1` = synchronous.
+
+`MHON` Enable OPM LFO.
+
+`MHOF` Disable OPM LFO.
+
+`!` Ignore all following commands on the current channel.
+
+`F#` Change PCM frequency. Default is `F4`
+* `F0`: 3.9kHz
+* `F1`: 5.2kHz
+* `F2`: 7.8kHz
+* `F3`: 10.4kHz
+* `F4`: 15.6kHz
+
+Voice definition
+----------------
+
+If a line starts with @, it is the beginning of a voice definition. A voice can be defined at any point in the text.
+
+`@1 = {
+	/* AR  DR  SR  RR  SL  OL  KS  ML DT1 DT2 AME */
+       28,  4,  0,  5,  1, 37,  2,  1,  7,  0,  0,
+       22,  9,  1,  2,  1, 47,  2, 12,  0,  0,  0,
+       29,  4,  3,  6,  1, 37,  1,  3,  3,  0,  0,
+       15,  7,  0,  5, 10,  0,  2,  1,  0,  0,  1,
+	/* CON FL OP */
+       2,  7, 15
+}`
+
+Auxiliary commands
+------------------
+
+If a line starts with `#`, it is considered an auxiliary command.
+
+* `#title "..."` Define title of the song.
+* `#pcmfile "..."` Define a PDX file associated with this song. Extension is optional. File is searched in the same directory as resulting MDX file, or in a pre-defined PDX path.
