@@ -101,7 +101,7 @@ Voice format. This corresponds to the registers in the YM2151 sound chip. Each f
 MML Commands. Each command consists of one byte, followed by specific parameters.
 
 * `0x00-0x7f` • Rest +1 clock cycles
-* `0x80-0xdf` `n` • Note data, followed by duration `n` + 1. Corresponds to MML command **n#,#**. 0x80 corresponds to MML **o0d+**, which means octave 0, note D♯. 0xdf corresponds to **o8d**, octave 8, D. To calculate the MIDI equivalent note, subtract 0x80 and add 3. For the PCM channels, P through W, this represents data number (???).
+* `0x80-0xdf` `n` • Note data, followed by duration `n` + 1. Corresponds to MML command **n#,#**. `0x80` corresponds to MML **o0d+**, which means octave 0, note D♯. `0xdf` corresponds to **o8d**, octave 8, D. To calculate the MIDI equivalent note, subtract 0x80 and add 3. For the PCM channels, P through W, this represents data number (???).
 * `0xff` `n` • Set tempo to `n`. Equivalent to mml command **@t#**. Tempo applies to all tracks at the same time, not just current track.
 * `0xfe` `n` `m` • Set OPM register `n` to value `m`.
 * `0xfd` `n` • Set current voice.
@@ -110,18 +110,18 @@ MML Commands. Each command consists of one byte, followed by specific parameters
 * `0xfa` • Decrease volume. Corresponds to MML command **(**.
 * `0xf9` • Increase volume. Corresponds to MML command **)**.
 * `0xf8` `n` • Sound length
-* `0xf7` • Disable key off.
+* `0xf7` • Disable key off for next note. Corresponds to MML command **&**, except it precedes the note instead of following it.
 * `0xf6` `n` `0x00` • Repeat `n` times until a Repeat end command.
 * `0xf5` `nn` • Repeat end. Loop back `nn` (signed word) bytes.
 * `0xf4` `nn` • Repeat escape. In the last repetition, skip `nn` bytes, thus shortening it.
-* `0xf3` `nn` • Detune `nn`/64 semitones.
+* `0xf3` `nn` • Detune `nn`/64 semitones. Corresponds to MML command **D#**.
 * `0xf2` `nn` • Portamento semitones/16384. (???)
 * `0xf1` `0x00` • Performance end.
-* `0xf1` `nn` • Loop from nn. (???)
-* `0xf0` `n` • Key-on delay. (???)
+* `0xf1` `nn` • Performance end, but loop from `nn` bytes (`nn` is a negative int16).
+* `0xf0` `n` • Delay key-on `n` ticks. Corresponds to MML command **k#**.
 * `0xef` `n` • Sync send on channel `n`. If channel `n` is in Sync Wait, resume playback on that channel. MML command **S#**
 * `0xee` • Sync Wait on current channel. Pause playback on this channel until resumed by a Sync Send signal (see above). MML Command **W**.
-* `0xed` `n` • ADPCM / noise frequency set to `n`. (???)
+* `0xed` `n` • ADPCM / noise frequency set to `n`. For FM channels (A-H), 0 means disable noise, 128+ means set noise frequency (without bit 7). For ADPCM channels (P-W), sets sampling frequency, corresponding to MML command **F#**.
 * `0xec` `0x80` • Pitch LFO disable (**MPOF**).
 * `0xec` `0x81` • Pitch LFO enable (**MPON**).
 * `0xec` `m` `nn` `aa` • LFO Pitch control. `m` controls the waveform (0=sawtooth, 1=square, 2=triangle), `nn` is the frequency, expressed in clock cycles / 4, and `aa` is the amplitude.
@@ -131,7 +131,7 @@ MML Commands. Each command consists of one byte, followed by specific parameters
 * `0xea` `0x80` • LFO OPM MHOF.
 * `0xea` `0x81` • LFO OPM MHON.
 * `0xea` `m` `n` `o` `p` `q` • OPM LFO `m`=sync/wave, `n`=lfrq, `o`=pmd, `p`=amd, `q`=pms/ams  (???)
-* `0xe9` `n` • Set LFO delay.
+* `0xe9` `n` • Set LFO key-on delay. Corresponds to MML command **MD#**.
 * `0xe8` • PCM8 expansion/ mode shift. (???)
 * `0xe7` `0x01` `n` • Fade-out at speed `n`.
 
