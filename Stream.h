@@ -131,8 +131,4 @@ public:
 	}
 };
 
-size_t WriteStream::write(Buffer &b) {
-	return write(b.data, b.len);
-}
-
 #endif /* STREAM_H_ */
