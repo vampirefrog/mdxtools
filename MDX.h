@@ -1,10 +1,11 @@
 #ifndef MDX_H_
 #define MDX_H_
 
+#include <stdint.h>
+
 #include "exceptionf.h"
 #include "Stream.h"
 #include "FS.h"
-#include <iconv.h>
 
 struct MDXVoiceOsc {
 	uint8_t dt1_mul;
@@ -134,11 +135,11 @@ struct MDXHeader {
 		if(pcmFile && *pcmFile) printf("PCM File: \"%s\"\n", pcmFile);
 		printf("fileBase=%x\n", fileBase);
 		printf("numChannels=%d\n", numChannels);
-		for(uint i = 0; i < numChannels; i++) {
+		for(uint16_t i = 0; i < numChannels; i++) {
 			printf("%u: offset=%d length=%d\n", i, channels[i].offset, channels[i].length);
 		}
 		printf("voiceOffset=%d\n", voiceOffset);
-		for(uint i = 0; i <= 255; i++) {
+		for(uint16_t i = 0; i <= 255; i++) {
 			if(voices[i]) voices[i]->dump();
 		}
 	}
