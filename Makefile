@@ -10,13 +10,20 @@ LIBS=-lz
 endif
 
 .SECONDEXPANSION:
-mdxdump_SRCS=tools.cpp
+mdxdump_SRCS=tools.cpp MDX.cpp
 pdx2wav_SRCS=tools.cpp
 pdx2sf2_SRCS=tools.cpp Soundfont.c
 mididump_SRCS=tools.cpp
-mdx2vgm_SRCS=tools.cpp
+mdx2vgm_SRCS=tools.cpp MDX.cpp Stream.cpp
+mdx2mml_SRCS=MDX.cpp
+mdx2opm_SRCS=MDX.cpp
+mdx2midi_SRCS=MDX.cpp Stream.cpp
+mdxstat_SRCS=MDX.cpp
+vgmtest_SRCS=Stream.cpp
 
 OBJS=$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(foreach prog,$(PROGS),$(prog).cpp $($(prog)_SRCS))))
+
+$(OBJS): Makefile
 
 $(PROGS): $$(sort $$@.o $$(patsubst %.c,%.o,$$(patsubst %.cpp,%.o,$$($$@_SRCS))))
 	$(CXX) $^ -o $@ $(CFLAGS) $(LIBS)
@@ -27,7 +34,6 @@ $(PROGS): $$(sort $$@.o $$(patsubst %.c,%.o,$$(patsubst %.cpp,%.o,$$($$@_SRCS)))
 	$(CC) -MMD -c $< -o $@ $(CFLAGS)
 
 -include $(OBJS:.o=.d)
-
 
 clean:
 	rm -f $(PROGS) $(addsuffix .exe,$(PROGS)) *.o
