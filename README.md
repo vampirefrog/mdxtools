@@ -80,5 +80,10 @@ It is a desktop computer released by Sharp in 1987 ([see wikipedia page](http://
 Emulators
 ---------
 
-* XM6: http://mijet.eludevisibility.org/XM6%20Pro-68k/XM6%20Pro-68k.html
-* More emulators at Zophar's: http://www.zophar.net/x68000.html
+* [XM6 2.06](http://yohkai.no-ip.info/x680x0/XM6.htm) (source available for 2.05)
+* [XM6 Pro-68k](http://mijet.eludevisibility.org/XM6%20Pro-68k/XM6%20Pro-68k.html)
+* [XM6 TypeG](http://www.geocities.jp/kugimoto0715/xm6g_win32.html)
+* [XM6i](http://xm6i.org/)
+* [WinX68k](http://www.geocities.jp/winx68khighspeed/) (source available on the [XM6 Pro-68k page](http://mijet.eludevisibility.org/XM6%20Pro-68k/XM6%20Pro-68k.html))
+* [Virtual X68000](http://www.vx68k.org/vx68k/) (linux)
+* [More emulators at Zophar's](http://www.zophar.net/x68000.html)
