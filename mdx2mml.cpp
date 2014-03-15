@@ -136,20 +136,26 @@ public:
 			if(r > 2) mmlf("]%d", r); else mmlf("]");
 		}
 	}
-	virtual void handleSoundLength(uint8_t l) { mmlf("q%d", l); }
+	virtual void handleRepeatEscape(int16_t r) { mmlf("/"); }
 	virtual void handlePan(uint8_t p) { mmlf("p%d", p); }
 	virtual void handleDisableKeyOff() { nextKeyOff = true; }
+	virtual void handleKeyOnDelay(uint8_t d) { mmlf("k%d", d); }
+	virtual void handleSoundLength(uint8_t l) {
+		if(l <= 8) mmlf("q%d", l);
+		else mmlf("@q%d", 255 - l);
+	}
 	virtual void handleDetune(int16_t d) { mmlf("D%d", d); }
 	virtual void handleOPMLFO(uint8_t sync_wave, uint8_t lfrq, uint8_t pmd, uint8_t amd, uint8_t pms_ams) {
 		mmlf("MH%d,%d,%d,%d,%d,%d,%d", sync_wave & 0x1f, lfrq, pmd-128, amd, (pms_ams & 0xf0) >> 4, pms_ams & 0x0f, (sync_wave & 0x40) >> 6);
 	}
+	virtual void handleADPCMNoiseFreq(uint8_t f) {
+		if(channel >= 8) mmlf("F%d", f);
+	}
 	virtual void handleOPMLFOMHON() { mmlf("MHON"); }
 	virtual void handleOPMLFOMHOF() { mmlf("MHOF"); }
-	virtual void handleChannelStart(int chan) {
-		printf("\n/* Channel %c (%s) */\n", channelName(chan), chan < 8 ? "FM" : "PCM");
-	}
-	virtual void handleChannelEnd(int chan) {
-		printf("\n");
+	virtual void handleSyncWait() { mmlf("W"); }
+	virtual void handleSyncSend(uint8_t chan) {
+		if(chan < 16) mmlf("S%d", chan);
 	}
 };
 
