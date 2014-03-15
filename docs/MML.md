@@ -115,7 +115,8 @@ Voice definition
 
 If a line starts with @, it is the beginning of a voice definition. A voice can be defined at any point in the text.
 
-```@1 = {
+```
+@1 = {
 	/* AR  DR  SR  RR  SL  OL  KS  ML DT1 DT2 AME */
        28,  4,  0,  5,  1, 37,  2,  1,  7,  0,  0,
        22,  9,  1,  2,  1, 47,  2, 12,  0,  0,  0,
@@ -123,7 +124,8 @@ If a line starts with @, it is the beginning of a voice definition. A voice can 
        15,  7,  0,  5, 10,  0,  2,  1,  0,  0,  1,
 	/* CON FL OP */
        2,  7, 15
-}```
+}
+```
 
 Auxiliary commands
 ------------------
