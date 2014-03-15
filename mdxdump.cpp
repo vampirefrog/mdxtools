@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
 			MDXHeader h;
 			h.read(s);
 			h.dump();
-			for(uint i = 0; i < h.numChannels; i++) {
+			for(uint16_t i = 0; i < h.numChannels; i++) {
 				printf("Channel %d (offset=%d length=%d)\n", i, h.channels[i].offset, h.channels[i].length);
 				s.seek(h.fileBase + h.channels[i].offset);
 				MDXDumperParser p;
