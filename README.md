@@ -98,14 +98,14 @@ Voice format. This corresponds to the registers in the YM2151 sound chip. Each f
 * DT2 & D2R x 4
 * D1R & RR x 4
 
-MML Commands. Each command consists of one byte, followed by specific parameters.
+MDX Commands. Each command consists of one byte, followed by specific parameters.
 
 * `0x00-0x7f` • Rest +1 clock cycles
 * `0x80-0xdf` `n` • Note data, followed by duration `n` + 1. Corresponds to MML command **n#,#**. `0x80` corresponds to MML **o0d+**, which means octave 0, note D♯. `0xdf` corresponds to **o8d**, octave 8, D. To calculate the MIDI equivalent note, subtract 0x80 and add 3. For the PCM channels, P through W, this represents data number (???).
 * `0xff` `n` • Set tempo to `n`. Equivalent to mml command **@t#**. Tempo applies to all tracks at the same time, not just current track.
 * `0xfe` `n` `m` • Set OPM register `n` to value `m`.
 * `0xfd` `n` • Set current voice.
-* `0xfc` `n` • Set output phase.
+* `0xfc` `n` • Pan.
 * `0xfb` `n` • Set volume.
 * `0xfa` • Decrease volume. Corresponds to MML command **(**.
 * `0xf9` • Increase volume. Corresponds to MML command **)**.
