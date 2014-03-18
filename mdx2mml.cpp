@@ -149,7 +149,8 @@ public:
 		mmlf("MH%d,%d,%d,%d,%d,%d,%d", sync_wave & 0x1f, lfrq, pmd-128, amd, (pms_ams & 0xf0) >> 4, pms_ams & 0x0f, (sync_wave & 0x40) >> 6);
 	}
 	virtual void handleADPCMNoiseFreq(uint8_t f) {
-		if(channel >= 8) mmlf("F%d", f);
+		if(channel < 8) mmlf("w%d", f & 0x7f);
+		else mmlf("F%d", f & 0x7f);
 	}
 	virtual void handleOPMLFOMHON() { mmlf("MHON"); }
 	virtual void handleOPMLFOMHOF() { mmlf("MHOF"); }
