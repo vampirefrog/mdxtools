@@ -54,8 +54,11 @@ int main(int argc, char **argv) {
 				printf("Channel %d (offset=%d length=%d)\n", i, h.channels[i].offset, h.channels[i].length);
 				s.seek(h.fileBase + h.channels[i].offset);
 				MDXDumperParser p;
-				for(size_t j = 0; !s.eof() && j < h.channels[i].length; j++)
-					p.eat(s.readUint8());
+				for(size_t j = 0; !s.eof() && j < h.channels[i].length; j++) {
+					uint8_t c = s.readUint8();
+					printf("%02x ", c);
+					p.eat(c);
+				}
 			}
 		} catch(exceptionf e) {
 			fprintf(stderr, "Exception caught: %s\n", e.what());
