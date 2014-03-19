@@ -3,11 +3,20 @@
 void MDXHeader::read(FileReadStream &s) {
 	// Read in the title and PDX file
 	title = s.readLine(0x1a);
-	if(title && *title) {
-		char *nl = strrchr((char *)title, '\r');
-		if(nl) *nl = 0;
+	if(title) {
+		if(*title) {
+			char *nl = strrchr((char *)title, '\r');
+			if(nl) *nl = 0;
+		} else {
+			delete[] title;
+			title = 0;
+		}
 	}
 	pcmFile = s.readLine(0);
+	if(pcmFile && !*pcmFile) {
+		delete[] pcmFile;
+		pcmFile = 0;
+	}
 	fileBase = s.tell();
 	voiceOffset = s.readBigUint16();
 
