@@ -49,7 +49,7 @@ MDX Commands. Each command consists of one byte, followed by specific parameters
 * `0xf5` `nn` • Repeat end. Loop back `nn` (signed word) bytes.
 * `0xf4` `nn` • Repeat escape. In the last repetition, skip `nn` bytes, thus shortening it.
 * `0xf3` `nn` • Detune `nn`/64 semitones. Corresponds to MML command **D#**.
-* `0xf2` `nn` • Portamento semitones/16384. (???)
+* `0xf2` `nn` • Portamento. Change pitch `nn`/16384 semitones per clock. This is issued before the starting note.
 * `0xf1` `0x00` • Performance end.
 * `0xf1` `nn` • Performance end, but loop from `nn` bytes (`nn` is a negative int16).
 * `0xf0` `n` • Delay key-on `n` ticks. Corresponds to MML command **k#**.
