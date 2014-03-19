@@ -49,6 +49,7 @@ int main(int argc, char **argv) {
 	MDXStatParser total;
 	for(int i = 1; i < argc; i++) {
 		try {
+			printf("%s\n", argv[i]);
 			FileReadStream s(argv[i]);
 			MDXHeader h;
 			h.read(s);
@@ -60,6 +61,7 @@ int main(int argc, char **argv) {
 					p.eat(s.readUint8());
 				fileTotal.add(p);
 			}
+			fileTotal.output();
 			total.add(fileTotal);
 		} catch(exceptionf e) {
 			fprintf(stderr, "Error: %s\n", e.what());
