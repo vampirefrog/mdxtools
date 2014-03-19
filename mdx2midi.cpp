@@ -3,6 +3,8 @@
 #include "FS.h"
 #include "Midi.h"
 
+#include <exception>
+
 class MDXMidiChannelParser: public MDXMemParser {
 public:
 	MidiWriteTrack mid;
@@ -99,17 +101,26 @@ public:
 		firstTrack.writeTrackEnd(totalTicks);
 		o.writeTrack(firstTrack);
 		for(int i = 0; i < h.numChannels; i++) {
-			if(parsers[i].mid.len == 0) break;
+			if(parsers[i].mid.len == 0) continue;
 			MidiWriteTrack track;
 			char buf[256];
 			snprintf(buf, sizeof(buf), "Channel %c (%s)", MDXParser::channelName(i), i > 8 ? "ADPCM" : "FM");
 			track.writeTrackName(0, buf);
 			track.writeBankSelect(0, i, 0);
+
+			// VOPM specific sends
 			track.writeRPN(0, i, 0, 32); // Pitch Bend Sensitivity
-			track.writeControlChange(0, i, 13, 0);
-			track.writeControlChange(0, i, 12, 0);
+			track.writeControlChange(0, i, 6, 112); // set 4MHz clock
+			track.writeControlChange(0, i, 12, 0); // Amplitude LFO level
+			track.writeControlChange(0, i, 13, 0); // Pitch LFO level
+			track.writeControlChange(0, i, 126, 127); // Monophonic mode
+			track.writeControlChange(0, i, 5, 63);
+
 			track.writePitchBend(0, i, 0x2000);
+
+
 			track.write(parsers[i].mid);
+
 			track.writeTrackEnd(0);
 			o.writeTrack(track);
 		}
@@ -118,10 +129,14 @@ public:
 
 int main(int argc, char **argv) {
 	for(int i = 1; i < argc; i++) {
-		char buf[256];
-		snprintf(buf, sizeof(buf), "%s.mid", argv[i]);
-		MDXMidi m;
-		m.open(argv[i], buf);
+		try {
+			char buf[256];
+			snprintf(buf, sizeof(buf), "%s.mid", argv[i]);
+			MDXMidi m;
+			m.open(argv[i], buf);
+		} catch(exceptionf e) {
+			fprintf(stderr, "Error: %s\n", e.what());
+		}
 	}
 	return 0;
 }
