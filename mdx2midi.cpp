@@ -17,7 +17,7 @@ public:
 	MDXMidiChannelParser(): volume(127), pan(3), firstTempo(0), totalTicks(0) {}
 
 	virtual void handleNote(uint8_t n, uint8_t duration) {
-		int add = channel >= 8 ? 0 : 3;
+		int add = channel >= 8 ? 36 : 3;
 		mid.writeNoteOn(restTime, channel, n + add, 100);
 		mid.writeNoteOn(duration, channel, n + add, 0);
 		restTime = 0;
