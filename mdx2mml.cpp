@@ -158,6 +158,9 @@ public:
 	virtual void handleSyncSend(uint8_t chan) {
 		if(chan < 16) mmlf("S%d", chan);
 	}
+	virtual void handleSetOPMRegister(uint8_t r, uint8_t v) {
+		mmlf("y%d,%d", r, v);
+	}
 };
 
 static void printVoice(MDXVoice *v) {
