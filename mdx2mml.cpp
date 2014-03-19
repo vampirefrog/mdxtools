@@ -74,7 +74,7 @@ public:
 			if(percent) sprintf(buf + strlen(buf), "%%%d", duration);
 			else sprintf(buf + strlen(buf), "%d", mmlDuration);
 			if(dot) strcat(buf, ".");
-			if(nextKeyOff) strcat(buf, "%");
+			if(nextKeyOff) strcat(buf, "&");
 			if(nextPortamento) {
 				int nextNote = note + (nextPortamento * duration + (nextPortamento < 0 ? -16383 : 16383)) / 16384;
 				int nextOctave = noteOctave(nextNote);
@@ -83,7 +83,7 @@ public:
 				curOctave = nextOctave;
 				sprintf(buf + strlen(buf), "%s", noteName(nextNote));
 			}
-			mmlf(buf);
+			mmlf("%s", buf);
 		}
 		nextKeyOff = false;
 		nextPortamento = 0;
