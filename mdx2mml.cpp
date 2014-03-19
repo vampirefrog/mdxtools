@@ -19,7 +19,8 @@ public:
 	int repeatStackPointer;
 	int lastRest;
 	bool nextKeyOff;
-	MDXParserMML(): MDXParser(), channelLength(0), loopPosition(0), col(0), lastOctave(-1), repeatStackPointer(0), lastRest(0), nextKeyOff(false) {}
+	int nextPortamento;
+	MDXParserMML(): MDXParser(), channelLength(0), loopPosition(0), col(0), lastOctave(-1), repeatStackPointer(0), lastRest(0), nextKeyOff(false), nextPortamento(0) {}
 
 	void mmlf(const char *fmt, ...) {
 		if(col == 0) printf("%c ", channelName(channel));
@@ -40,18 +41,18 @@ public:
 		}
 	}
 	virtual void handleNote(uint8_t note, uint8_t duration) {
+		int octave = noteOctave(note);
 		if(channel < 8) {
-			int oc = noteOctave(note);
-			if(lastOctave != oc) {
-				if(lastOctave == -1 || lastOctave - oc > 1 || oc - lastOctave > 1) {
-					mmlf("o%d", oc);
-				} else if(lastOctave == oc + 1) {
+			if(lastOctave != octave) {
+				if(lastOctave == -1 || lastOctave - octave > 1 || octave - lastOctave > 1) {
+					mmlf("o%d", octave);
+				} else if(lastOctave == octave + 1) {
 					mmlf("<");
-				} else if(lastOctave == oc - 1) {
+				} else if(lastOctave == octave - 1) {
 					mmlf(">");
 				}
 			}
-			lastOctave = oc;
+			lastOctave = octave;
 		}
 		if(duration > 0) {
 			int mmlDuration;
@@ -64,13 +65,28 @@ public:
 			} else {
 				percent = true;
 			}
+			char buf[100];
 			if(channel < 8) {
-				mmlf("%s%s%d%s%s", noteName(note), percent ? "%" : "", percent ? duration : mmlDuration, dot ? "." : "", nextKeyOff ? "&" : "");
+				sprintf(buf, "%s", noteName(note));
 			} else {
-				mmlf("n%d,%s%d%s%s", note, percent ? "%" : "", percent ? duration : mmlDuration, dot ? "." : "", nextKeyOff ? "&" : "");
+				sprintf(buf, "n%d,", note);
 			}
+			if(percent) sprintf(buf + strlen(buf), "%%%d", duration);
+			else sprintf(buf + strlen(buf), "%d", mmlDuration);
+			if(dot) strcat(buf, ".");
+			if(nextKeyOff) strcat(buf, "%");
+			if(nextPortamento) {
+				int nextNote = note + (nextPortamento * duration + (nextPortamento < 0 ? -16383 : 16383)) / 16384;
+				int nextOctave = noteOctave(nextNote);
+				strcat(buf, "_");
+				if(nextOctave != octave) sprintf(buf + strlen(buf), "o%d", nextOctave);
+				lastOctave = nextOctave;
+				sprintf(buf + strlen(buf), "%s", noteName(nextNote));
+			}
+			mmlf(buf);
 		}
 		nextKeyOff = false;
+		nextPortamento = 0;
 	}
 	virtual void handleRest(uint8_t duration) {
 		if(duration == 128) {
@@ -160,6 +176,9 @@ public:
 	}
 	virtual void handleSetOPMRegister(uint8_t r, uint8_t v) {
 		mmlf("y%d,%d", r, v);
+	}
+	virtual void handlePortamento(int16_t p) {
+		nextPortamento = p;
 	}
 };
 
