@@ -14,13 +14,13 @@ class MDXParserMML: public MDXParser {
 public:
 	int channelLength;
 	int loopPosition;
-	int col, lastOctave;
+	int col, curOctave;
 	int repeatStack[5];
 	int repeatStackPointer;
 	int lastRest;
 	bool nextKeyOff;
 	int nextPortamento;
-	MDXParserMML(): MDXParser(), channelLength(0), loopPosition(0), col(0), lastOctave(-1), repeatStackPointer(0), lastRest(0), nextKeyOff(false), nextPortamento(0) {}
+	MDXParserMML(): MDXParser(), channelLength(0), loopPosition(0), col(0), curOctave(-1), repeatStackPointer(0), lastRest(0), nextKeyOff(false), nextPortamento(0) {}
 
 	void mmlf(const char *fmt, ...) {
 		if(col == 0) printf("%c ", channelName(channel));
@@ -43,16 +43,16 @@ public:
 	virtual void handleNote(uint8_t note, uint8_t duration) {
 		int octave = noteOctave(note);
 		if(channel < 8) {
-			if(lastOctave != octave) {
-				if(lastOctave == -1 || lastOctave - octave > 1 || octave - lastOctave > 1) {
+			if(curOctave != octave) {
+				if(curOctave == -1 || curOctave - octave > 1 || octave - curOctave > 1) {
 					mmlf("o%d", octave);
-				} else if(lastOctave == octave + 1) {
+				} else if(curOctave == octave + 1) {
 					mmlf("<");
-				} else if(lastOctave == octave - 1) {
+				} else if(curOctave == octave - 1) {
 					mmlf(">");
 				}
 			}
-			lastOctave = octave;
+			curOctave = octave;
 		}
 		if(duration > 0) {
 			int mmlDuration;
@@ -80,7 +80,7 @@ public:
 				int nextOctave = noteOctave(nextNote);
 				strcat(buf, "_");
 				if(nextOctave != octave) sprintf(buf + strlen(buf), "o%d", nextOctave);
-				lastOctave = nextOctave;
+				curOctave = nextOctave;
 				sprintf(buf + strlen(buf), "%s", noteName(nextNote));
 			}
 			mmlf(buf);
@@ -139,14 +139,14 @@ public:
 	virtual void handleVolumeDec() { mmlf("("); }
 
 	virtual void handleRepeatStart(uint8_t times) {
-		lastOctave = -1;
+		curOctave = -1;
 		if(repeatStackPointer < 5) {
 			repeatStack[repeatStackPointer++] = times;
 		}
 		mmlf("[");
 	}
 	virtual void handleRepeatEnd(int16_t offset) {
-		lastOctave = -1;
+		curOctave = -1;
 		if(repeatStackPointer >= 0) {
 			int r = repeatStack[--repeatStackPointer];
 			if(r > 2) mmlf("]%d", r); else mmlf("]");
