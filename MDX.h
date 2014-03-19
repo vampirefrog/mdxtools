@@ -132,31 +132,31 @@ public:
 
 	static const char *commandName(uint8_t c) {
 		const char *cmdNames[] = {
-			"Informal command",   // 0xe6
+			"Informal",           // 0xe6
 			"Extended MML",       // 0xe7
 			"PCM4/8 enable",      // 0xe8
-			"LFO delay setting",  // 0xe9
-			"OPM LFO control",    // 0xea
-			"LFO volume control", // 0xeb
-			"LFO pitch control",  // 0xec
+			"LFO delay",          // 0xe9
+			"OPM LFO",            // 0xea
+			"Amplitude LFO",      // 0xeb
+			"Pitch LFO",          // 0xec
 			"ADPCM/noise freq",   // 0xed
-			"Sync signal wait",   // 0xee
-			"Sync signal send",   // 0xef
+			"Sync wait",          // 0xee
+			"Sync send",          // 0xef
 			"Key on delay",       // 0xf0
 			"Data end",           // 0xf1
-			"Portamento time",    // 0xf2
+			"Portamento",         // 0xf2
 			"Detune",             // 0xf3
 			"Repeat escape",      // 0xf4
 			"Repeat end",         // 0xf5
 			"Repeat start",       // 0xf6
 			"Disable key-off",    // 0xf7
 			"Sound length",       // 0xf8
-			"Volume decrement",   // 0xf9
-			"Volume increment",   // 0xfa
+			"Volume dec",         // 0xf9
+			"Volume inc",         // 0xfa
 			"Set volume",         // 0xfb
 			"Output phase",       // 0xfc
 			"Set voice #",        // 0xfd
-			"Set OPM register",   // 0xfe
+			"Set OPM reg",        // 0xfe
 			"Set tempo",          // 0xff
 		};
 		if(c >= 0xe6 && c <= 0xff) return cmdNames[c - 0xe6];

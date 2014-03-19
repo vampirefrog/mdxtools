@@ -375,17 +375,11 @@ bool MDXParser::eat(uint8_t b) {
 				case 0x01:
 					state = FadeOutValue;
 					break;
-				case 0x02:
-					break;
 				case 0x03:
 					state = FlagValue;
 					break;
-				case 0x04:
-					break;
-				case 0x05:
-					break;
-				case 0x06:
-					break;
+				default:
+					handleCommand(0xe7, b); // bogus, for statistics. Need to handle other commands properly
 			}
 			break;
 		case FadeOutValue:
