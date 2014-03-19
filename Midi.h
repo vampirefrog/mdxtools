@@ -182,6 +182,11 @@ public:
 								case 0x06: // Marker text
 									handleMarkerTextEvent(duration, (const char *)metaBuf);
 									break;
+								case 0x08:
+									handleProgramNameEvent(duration, (const char *)metaBuf);
+									break;
+								case 0x09:
+									handleDeviceNameEvent(duration, (const char *)metaBuf);
 								case 0x51: // Set tempo
 									if(metaLen >= 3)
 										handleTempo(duration, (metaBuf[0] << 16) | (metaBuf[1] << 8) | metaBuf[2]);
@@ -441,6 +446,8 @@ public:
 	virtual void handleInstrumentNameEvent(int duration, const char *txt) {}
 	virtual void handleLyricEvent(int duration, const char *txt) {}
 	virtual void handleMarkerTextEvent(int duration, const char *txt) {}
+	virtual void handleProgramNameEvent(int duration, const char  *txt) {}
+	virtual void handleDeviceNameEvent(int duration, const char  *txt) {}
 	virtual void handleTempo(int duration, uint32_t tempo) {}
 	virtual void handleTimeSignature(int duration, uint8_t numerator, uint8_t denominator, uint8_t ticksPerClick, uint8_t quarterNote32ndNotes) {}
 	virtual void handleTrackEnd(int duration) {}
@@ -529,6 +536,14 @@ private:
 		printf("%08x MarkerText \"%s\"\n", duration, txt);
 	}
 
+	virtual void handleProgramNameEvent(int duration, const char *txt) {
+		printf("%08x ProgramName \"%s\"\n", duration, txt);
+	}
+
+	virtual void handleDeviceNameEvent(int duration, const char *txt) {
+		printf("%08x DeviceName \"%s\"\n", duration, txt);
+	}
+
 	virtual void handleTempo(int duration, uint32_t tempo) {
 		printf("%08x Tempo %d BPM (%d)\n", duration, tempo == 0 ? 0 : 60000000 / tempo, tempo);
 	}
@@ -555,18 +570,18 @@ private:
 	}
 };
 
-class MidiWriteChannel: public Buffer {
+class MidiWriteTrack: public Buffer {
 	uint8_t lastCmd;
 public:
-	MidiWriteChannel(): lastCmd(0) {}
+	MidiWriteTrack(): lastCmd(0) {}
 	void writeDeltaTime(uint32_t t) {
 		if(t > 0x1fffff) writeUint8(0x80 | ((t >> 21) & 0x7f));
 		if(t > 0x3fff) writeUint8(0x80 | ((t >> 14) & 0x7f));
 		if(t > 0x7f) writeUint8(0x80 | ((t >> 7) & 0x7f));
 		writeUint8(t & 0x7f);
 	}
-	void writeCmd(uint8_t cmd) {
-		if(lastCmd != cmd) {
+	void writeCmd(uint8_t cmd, bool noReuse = false) {
+		if(lastCmd != cmd || noReuse == true) {
 			lastCmd = cmd;
 			writeUint8(cmd);
 		}
@@ -586,11 +601,33 @@ public:
 		writeUint8((tempo >> 8) & 0xff);
 		writeUint8((tempo >> 0) & 0xff);
 	}
-	void writeTrackEnd(uint32_t deltaTime) {
+	void writeMetaEvent(uint32_t deltaTime, uint8_t ev, uint8_t len, uint8_t *buf) {
 		writeDeltaTime(deltaTime);
-		writeCmd(0xff);
-		writeUint8(0x2f);
-		writeUint8(0x00);
+		writeCmd(0xff, true);
+		writeUint8(ev);
+		writeUint8(len);
+		write(buf, len);
+	}
+	void writeMetaEvent(uint32_t deltaTime, uint8_t ev, uint8_t len, ...) {
+		writeDeltaTime(deltaTime);
+		writeCmd(0xff, true);
+		writeUint8(ev);
+		writeUint8(len);
+		if(len > 0) {
+			va_list ap;
+			va_start(ap, len);
+			for(int i = 0; i < len; i++) writeUint8(va_arg(ap, unsigned int));
+			va_end(ap);
+		}
+	}
+	void writeTimeSignature(uint32_t deltaTime, uint8_t numerator, uint8_t denominator, uint8_t ticksPerClick = 0, uint8_t quarterNote32ndNotes = 0) {
+		if(quarterNote32ndNotes > 0 || ticksPerClick > 0)
+			writeMetaEvent(deltaTime, 0x58, 4, numerator, denominator, ticksPerClick, quarterNote32ndNotes);
+		else
+			writeMetaEvent(deltaTime, 0x58, 2, numerator, denominator);
+	}
+	void writeTrackEnd(uint32_t deltaTime) {
+		writeMetaEvent(deltaTime, 0x2f, 0);
 	}
 	void writeProgramChange(uint32_t deltaTime, uint8_t channel, uint8_t program) {
 		writeDeltaTime(deltaTime);
@@ -601,11 +638,7 @@ public:
 	void writeTextEvent(uint8_t event, uint32_t deltaTime, const char *text, int len = -1) {
 		if(len < 0) len = strlen(text);
 		if(len > 127) len = 127;
-		writeDeltaTime(deltaTime);
-		writeCmd(0xff);
-		writeUint8(event);
-		writeUint8(len);
-		write(text, len);
+		writeMetaEvent(deltaTime, event, len, (uint8_t *)text);
 	}
 	void writeText(uint32_t deltaTime, const char *text, int len = -1) {
 		writeTextEvent(0x01, deltaTime, text, len);
@@ -621,7 +654,7 @@ public:
 	}
 	void writeControlChange(uint32_t deltaTime, uint8_t channel, uint8_t controller, uint8_t value) {
 		writeDeltaTime(deltaTime);
-		writeCmd(0xb0 | (channel & 0x0f));
+		writeCmd(0xb0 | (channel & 0x0f), true);
 		writeUint8(controller & 0x7f);
 		writeUint8(value & 0x7f);
 	}
@@ -646,6 +679,27 @@ public:
 		writeControlChange(0, channel, 100, number & 0x7f);
 		writeControlChange(0, channel, 6, value_msb & 0x7f);
 		writeControlChange(0, channel, 38, value_msb & 0x7f);
+	}
+	void writeBankSelect(uint32_t deltaTime, uint8_t channel, uint16_t bank) {
+		writeControlChange(deltaTime, channel, 0, (bank >> 7) & 0x7f);
+		writeControlChange(0, channel, 32, bank & 0x7f);
+	}
+};
+
+class MidiWriteStream: public FileWriteStream {
+public:
+	MidiWriteStream(const char *filename): FileWriteStream(filename) {}
+	void writeHeader(int numTracks, int ticksPerQuarterNote = 960, int fileType = 1) {
+		write("MThd", 4);
+		writeBigUint32(0x06);
+		writeBigUint16(fileType);
+		writeBigUint16(numTracks);
+		writeBigUint16(ticksPerQuarterNote);
+	}
+	void writeTrack(MidiWriteTrack &t) {
+		write("MTrk", 4);
+		writeBigUint32(t.len);
+		write(t);
 	}
 };
 
