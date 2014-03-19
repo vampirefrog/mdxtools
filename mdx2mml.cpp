@@ -193,6 +193,7 @@ static void printVoice(MDXVoice *v) {
 			v->osc[i].getMUL(), v->osc[i].getDT1(), v->osc[i].getDT2(), v->osc[i].getAME()
 		);
 	}
+	printf("\t/* CON FL OP */\n");
 	printf("\t%d, %d, %d\n}\n\n", v->getCON(), v->getFL(), v->slot_mask);
 }
 
