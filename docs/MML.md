@@ -1,7 +1,7 @@
 MXDRV MML (DOCUMENT IS WORK IN PROGRESS)
 =========
 
-This page is based on http://www16.atwiki.jp/mxdrv/pages/19.html, which is based on documentation from MXC, the MML compiler for the X68000.
+This page is based on http://www16.atwiki.jp/mxdrv/pages/19.html, which is based on documentation from MXC, a MML compiler for the X68000. There are other compilers available as well, with more features, such as note.x (available [here](http://nfggames.com/x68000/Mirrors/x68pub/x68tools/SOUND/MXDRV/)).
 
 Lines starting with A-H or P are considered to be MML data.
 If a note length is preceded by a '%', the length is in clock ticks. Example: `c+%36`.
