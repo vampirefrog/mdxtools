@@ -1,7 +1,9 @@
 mdxtools
 ========
 
-A bunch of tools for handling the MDX music format (music for the Sharp X68000). The tools are as follows:
+A bunch of tools for handling the MDX music format (music for the Sharp X68000 using the MXDRV sound driver).
+
+These tools are aimed at the large collections of MDX files available online (see below for download links). They are meant to convert to other formats, such as vgm, midi and for the curious, MML and dumping the raw MDX data.
 
 * mdx2vgm (WIP) - convert to VGM format
 * mdxdump - dump all the information in a MDX file.
