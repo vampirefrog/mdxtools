@@ -254,6 +254,7 @@ bool MDXParser::eat(uint8_t b) {
 		case KeyOnDelayVal:
 			handleKeyOnDelay(b);
 			handleCommand(0xf0, b);
+			state = None;
 			break;
 		case SyncSendChannel:
 			handleSyncSend(b);
