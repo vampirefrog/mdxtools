@@ -121,7 +121,8 @@ protected:
 		LFOVolumeWave,      LFOVolumePeriodMSB, LFOVolumePeriodLSB,
 		LFOVolumeChangeMSB, LFOVolumeChangeLSB, OPMLFOSyncWave,
 		OPMLFOLFRQ,         OPMLFOPMD,          OPMLFOAMD,
-		OPMLFOPMSAMS,       FadeOutB1,          FadeOutValue,
+		OPMLFOPMSAMS,       ExtendedCmd,        FadeOutValue,
+		FlagValue,
 	} state;
 public:
 	MDXParser(): pos(0), nn(0), n2(0), n3(0), n4(0), n5(0), w(0), v(0), state(None) {}
@@ -228,6 +229,8 @@ public:
 	virtual void handleUndefinedCommand(uint8_t b) {}
 	virtual void handleChannelStart(int chan) {}
 	virtual void handleChannelEnd(int chan) {}
+	virtual void handleKill() {}
+	virtual void handleFlag(uint8_t f) {}
 };
 
 class MDXMemParser: public MDXParser {

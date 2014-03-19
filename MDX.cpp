@@ -143,7 +143,7 @@ bool MDXParser::eat(uint8_t b) {
 						state = None;
 						break;
 					case 0xe7:
-						state = FadeOutB1;
+						state = ExtendedCmd;
 						break;
 					default:
 						handleUndefinedCommand(b);
@@ -366,14 +366,37 @@ bool MDXParser::eat(uint8_t b) {
 			handleCommand(0xe9, b);
 			state = None;
 			break;
-		case FadeOutB1:
-			state = FadeOutValue;
+		case ExtendedCmd:
+			switch(b) {
+				case 0x00:
+					handleKill();
+					handleCommand(0xe7, 0x00);
+					break;
+				case 0x01:
+					state = FadeOutValue;
+					break;
+				case 0x02:
+					break;
+				case 0x03:
+					state = FlagValue;
+					break;
+				case 0x04:
+					break;
+				case 0x05:
+					break;
+				case 0x06:
+					break;
+			}
 			break;
 		case FadeOutValue:
 			handleFadeOut(b);
-			handleCommand(0xe7, b);
+			handleCommand(0xe7, 0x01, b);
 			state = None;
 			break;
+		case FlagValue:
+			handleFlag(b);
+			handleCommand(0xe7, 0x03, b);
+			state = None;
 		default:
 			printf("Unknown state %d\n", state);
 			break;
