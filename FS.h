@@ -65,11 +65,17 @@ public:
 class ZFileReadStream: public FSReadStream {
 	gzFile f;
 public:
-	ZFileReadStream(const char *filename) { throw FileOpenException(); open(filename); }
+	ZFileReadStream(const char *filename) { open(filename); }
 	ZFileReadStream() {}
 	~ZFileReadStream() { close(); }
 
-	void open(const char *filename) { f = gzopen(filename, "rb"); }
+	void open(const char *filename) {
+		f = gzopen(filename, "rb");
+		if(f == Z_NULL) {
+			int er;
+			throw new exceptionf("Could not gzopen %s for reading: %s\n", filename, gzerror(f, &er));
+		}
+	}
 	void close() { gzclose(f); }
 };
 
@@ -84,7 +90,7 @@ public:
 
 	void open(const char *filename) {
 		f = fopen(filename, "wb");
-		if(!f) throw FileOpenException();
+		if(!f) throw exceptionf("Could not open %s for writing: %s (%d)\n", filename, strerror(errno), errno);
 	}
 	void close() {
 		fclose(f);
