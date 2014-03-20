@@ -14,8 +14,11 @@ public:
 	uint8_t firstTempo;
 	uint32_t totalTicks;
 	uint8_t kTicks, qTicks;
+	bool nextKeyOff;
+	int nextPortamento;
+	int lastNote;
 
-	MDXMidiChannelParser(): volume(127), pan(3), firstTempo(0), totalTicks(0), kTicks(0), qTicks(8) {}
+	MDXMidiChannelParser(): volume(127), pan(3), firstTempo(0), totalTicks(0), kTicks(0), qTicks(8), nextKeyOff(false), nextPortamento(0), lastNote(-1) {}
 
 	virtual void handleNote(uint8_t n, uint8_t duration) {
 		int add = channel >= 8 ? 36 : 3;
@@ -23,17 +26,52 @@ public:
 		if(qTicks <= 8) d = duration * qTicks / 8;
 		else d = MIN(duration, 255 - qTicks);
 		if(kTicks < d) {
-			mid.writeNoteOn(restTime + kTicks, channel, n + add, 100);
-			mid.writeNoteOn(d - kTicks, channel, n + add, 0);
-			restTime = duration - d;
+			if(nextKeyOff) {
+				if(lastNote >= 0) {
+					if(lastNote != n) {
+						mid.writeNoteOn(restTime + kTicks, channel, n + add, 100);
+						mid.writeNoteOn(d - kTicks, channel, lastNote + add, 0);
+						restTime = 0;
+					} else restTime += duration;
+				} else {
+					mid.writeNoteOn(restTime + kTicks, channel, n + add, 100);
+					restTime = duration;
+				}
+				lastNote = n;
+			} else {
+				if(lastNote >= 0) {
+					if(lastNote != n) {
+						mid.writeNoteOn(restTime + kTicks, channel, n + add, 100);
+						mid.writeNoteOn(d - kTicks, channel, n + add, 0);
+						mid.writeNoteOn(0, channel, lastNote + add, 0);
+					} else {
+						mid.writeNoteOn(restTime + d, channel, n + add, 0);
+					}
+				} else {
+					mid.writeNoteOn(restTime + kTicks, channel, n + add, 100);
+					mid.writeNoteOn(d - kTicks, channel, n + add, 0);
+				}
+				restTime = duration - d;
+				lastNote = -1;
+			}
 		} else {
 			restTime += duration;
 		}
 		totalTicks += duration;
+		nextPortamento = 0;
+		nextKeyOff = false;
 	}
 	virtual void handleRest(uint8_t duration) {
 		restTime += duration;
 		totalTicks += duration;
+	}
+	virtual void handlePortamento(int16_t p) {
+		nextPortamento = p;
+	}
+	virtual void handleDisableKeyOff() {
+		nextKeyOff = true;
+	}
+	virtual void handleDataEnd() {
 	}
 	virtual void handleSetVoiceNum(uint8_t voice) {
 		mid.writeProgramChange(0, channel, voice);
@@ -46,11 +84,9 @@ public:
 		mid.writeTempo(0, calcTempo(tempo));
 		if(firstTempo == 0) firstTempo = tempo;
 	}
-	virtual void handleChannelEnd(int chan) {
-		mid.writeTrackEnd(0);
-	}
 	virtual void handleDetune(int16_t det) {
-		mid.writePitchBend(0, channel, 0x2000 + det * 64);
+		mid.writePitchBend(restTime, channel, 0x2000 + det * 64);
+		restTime = 0;
 	}
 	virtual void handleSetVolume(uint8_t vol) {
 		volume = vol;
@@ -127,11 +163,10 @@ public:
 			track.writeNRPN(0, i, 0, 112); // OPM Clock = 4MHz
 			track.writeControlChange(0, i, 12, 0); // Amplitude LFO level
 			track.writeControlChange(0, i, 13, 0); // Pitch LFO level
+			track.writeControlChange(0, i, 5, 63); // Portamento time
 			track.writeControlChange(0, i, 126, 127); // Monophonic mode
-			track.writeControlChange(0, i, 5, 63);
 
 			track.writePitchBend(0, i, 0x2000);
-
 
 			track.write(parsers[i].mid);
 
