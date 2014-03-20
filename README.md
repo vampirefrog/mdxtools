@@ -8,9 +8,9 @@ These tools are aimed at the large collections of MDX files available online (se
 * mdx2vgm (WIP) - convert to VGM format
 * mdxdump - dump all the information in a MDX file.
 * mdxstat - analyze and print out some statistics and totals about given MDX files.
-* mml2mdx (TBD) - a MML compiler
 * mdx2mml - a MML decompiler
 * mdx2midi (WIP) - a MML to MIDI file converter. Use in conjunction with pdx2sf2 to hear the samples too.
+* mididump - Dump all the info and events in a .mid file. Useful for development. You can also use MidiPiano for a GUI version.
 * mdx2opm (WIP) - Extract OPM voices from MDX file (usable in [VOPM](http://www.geocities.jp/sam_kb/VOPM/)).
 * pdx2wav - extract the samples from a PDX file, into 16-bit WAV files.
 * pdx2sf2 - generate a SoundFont file with the samples from the PDX file. Useful for importing a song into a DAW.
