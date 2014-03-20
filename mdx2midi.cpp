@@ -13,14 +13,22 @@ public:
 	uint8_t volume, pan;
 	uint8_t firstTempo;
 	uint32_t totalTicks;
+	uint8_t kTicks, qTicks;
 
-	MDXMidiChannelParser(): volume(127), pan(3), firstTempo(0), totalTicks(0) {}
+	MDXMidiChannelParser(): volume(127), pan(3), firstTempo(0), totalTicks(0), kTicks(0), qTicks(8) {}
 
 	virtual void handleNote(uint8_t n, uint8_t duration) {
 		int add = channel >= 8 ? 36 : 3;
-		mid.writeNoteOn(restTime, channel, n + add, 100);
-		mid.writeNoteOn(duration, channel, n + add, 0);
-		restTime = 0;
+		uint8_t d;
+		if(qTicks <= 8) d = duration * qTicks / 8;
+		else d = MIN(duration, 255 - qTicks);
+		if(kTicks < d) {
+			mid.writeNoteOn(restTime + kTicks, channel, n + add, 100);
+			mid.writeNoteOn(d - kTicks, channel, n + add, 0);
+			restTime = duration - d;
+		} else {
+			restTime += duration;
+		}
 		totalTicks += duration;
 	}
 	virtual void handleRest(uint8_t duration) {
@@ -55,6 +63,12 @@ public:
 		}
 		uint8_t pans[] = { 64, 127, 0, 64 };
 		mid.writeControlChange(0, channel, 10, pans[pan & 0x03]);
+	}
+	virtual void handleSoundLength(uint8_t q) {
+		qTicks = q;
+	}
+	virtual void handleKeyOnDelay(uint8_t k) {
+		kTicks = k;
 	}
 };
 
@@ -110,7 +124,7 @@ public:
 
 			// VOPM specific sends
 			track.writeRPN(0, i, 0, 32); // Pitch Bend Sensitivity
-			track.writeControlChange(0, i, 6, 112); // set 4MHz clock
+			track.writeNRPN(0, i, 0, 112); // OPM Clock = 4MHz
 			track.writeControlChange(0, i, 12, 0); // Amplitude LFO level
 			track.writeControlChange(0, i, 13, 0); // Pitch LFO level
 			track.writeControlChange(0, i, 126, 127); // Monophonic mode
