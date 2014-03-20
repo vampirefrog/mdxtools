@@ -17,8 +17,9 @@ public:
 	bool nextKeyOff;
 	int nextPortamento;
 	int lastNote;
+	bool isFirstNote;
 
-	MDXMidiChannelParser(): volume(127), pan(3), firstTempo(0), totalTicks(0), kTicks(0), qTicks(8), nextKeyOff(false), nextPortamento(0), lastNote(-1) {}
+	MDXMidiChannelParser(): volume(127), pan(3), firstTempo(0), totalTicks(0), kTicks(0), qTicks(8), nextKeyOff(false), nextPortamento(0), lastNote(-1), isFirstNote(true) {}
 
 	virtual void handleNote(uint8_t n, uint8_t duration) {
 		int add = channel >= 8 ? 36 : 3;
@@ -49,7 +50,14 @@ public:
 					}
 				} else {
 					mid.writeNoteOn(restTime + kTicks, channel, n + add, 100);
-					mid.writeNoteOn(d - kTicks, channel, n + add, 0);
+					int fTicks = 0;
+					if(isFirstNote) {
+						fTicks = 1;
+						mid.writeControlChange(fTicks, channel, 126, 127); // Monophonic mode
+						mid.writeControlChange(0, channel, 5, 63); // Portamento time
+						isFirstNote = false;
+					}
+					mid.writeNoteOn(d - kTicks - fTicks, channel, n + add, 0);
 				}
 				restTime = duration - d;
 				lastNote = -1;
@@ -163,8 +171,6 @@ public:
 			track.writeNRPN(0, i, 0, 112); // OPM Clock = 4MHz
 			track.writeControlChange(0, i, 12, 0); // Amplitude LFO level
 			track.writeControlChange(0, i, 13, 0); // Pitch LFO level
-			track.writeControlChange(0, i, 5, 63); // Portamento time
-			track.writeControlChange(0, i, 126, 127); // Monophonic mode
 
 			track.writePitchBend(0, i, 0x2000);
 
