@@ -667,7 +667,7 @@ public:
 		writeControlChange(deltaTime, channel, 99, (number >> 7) & 0x7f);
 		writeControlChange(0, channel, 98, number & 0x7f);
 		writeControlChange(0, channel, 6, value_msb & 0x7f);
-		writeControlChange(0, channel, 38, value_msb & 0x7f);
+		writeControlChange(0, channel, 38, value_lsb & 0x7f);
 	}
 	void writeRPN(uint32_t deltaTime, uint8_t channel, uint16_t number, uint8_t value_msb) {
 		writeControlChange(deltaTime, channel, 101, (number >> 7) & 0x7f);
@@ -678,7 +678,7 @@ public:
 		writeControlChange(deltaTime, channel, 101, (number >> 7) & 0x7f);
 		writeControlChange(0, channel, 100, number & 0x7f);
 		writeControlChange(0, channel, 6, value_msb & 0x7f);
-		writeControlChange(0, channel, 38, value_msb & 0x7f);
+		writeControlChange(0, channel, 38, value_lsb & 0x7f);
 	}
 	void writeBankSelect(uint32_t deltaTime, uint8_t channel, uint16_t bank) {
 		writeControlChange(deltaTime, channel, 0, (bank >> 7) & 0x7f);
