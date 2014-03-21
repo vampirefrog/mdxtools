@@ -23,7 +23,7 @@ class MDXDumperParser: public MDXParser {
 	virtual void handleRepeatEscape(int16_t r) { printf("RepeatEscape %d\n", r); }
 	virtual void handleDetune(int16_t d) { printf("Detune %d\n", d); }
 	virtual void handlePortamento(int16_t t) { printf("Portamento %d\n", t); }
-	virtual void handleSetOPMRegister(uint8_t reg, uint8_t val) { printf("SetOPMRegister %d %d;\n", reg, val); }
+	virtual void handleSetOPMRegister(uint8_t reg, uint8_t val) { printf("SetOPMRegister 0x%02x 0x%02x;\n", reg, val); }
 	virtual void handleDataEnd() { printf("DataEnd\n"); }
 	virtual void handleDataEnd(int16_t end) { printf("DataEnd %d\n", end); }
 	virtual void handleLFOPitch(uint8_t b, uint16_t period, uint16_t change) { printf("LFOPitch %d %d %d\n", b, period, change); }
