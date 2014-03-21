@@ -13,7 +13,7 @@ private:
 
 class MDXParserMML: public MDXParser {
 public:
-	FileWriteStream s;
+	FileWriteStream *s;
 	int channelLength;
 	int loopPosition;
 	int col, curOctave;
@@ -25,15 +25,15 @@ public:
 	MDXParserMML(): MDXParser(), channelLength(0), loopPosition(0), col(0), curOctave(-1), repeatStackPointer(0), lastRest(0), nextKeyOff(false), nextPortamento(0) {}
 
 	void mmlf(const char *fmt, ...) {
-		if(col == 0) s.printf("%c ", channelName(channel));
+		if(col == 0) s->printf("%c ", channelName(channel));
 		va_list ap;
 		va_start(ap, fmt);
-		int printed = s.vprintf(fmt, ap);
+		int printed = s->vprintf(fmt, ap);
 		va_end(ap);
 		col += printed;
 		if(col > 79) {
 			col = 0;
-			s.printf("\n");
+			s->printf("\n");
 		}
 	}
 
@@ -221,7 +221,7 @@ int main(int argc, char **argv) {
 			for(int i = 0; i < h.numChannels; i++) {
 				o.printf("/* Channel %c (%s) */\n", MDXParser::channelName(i), i >= 8 ? "ADPCM" : "FM");
 				MDXParserMML p;
-				p.s = o;
+				p.s = &o;
 				p.channel = i;
 				p.loopPosition = pre[i].loopPosition;
 				p.channelLength = h.channels[i].length;
