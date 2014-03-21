@@ -1,4 +1,5 @@
 #include "MDX.h"
+#include "tools.h"
 
 class MDXPreParserMML: public MDXParser {
 public:
@@ -12,6 +13,7 @@ private:
 
 class MDXParserMML: public MDXParser {
 public:
+	FileWriteStream s;
 	int channelLength;
 	int loopPosition;
 	int col, curOctave;
@@ -23,15 +25,15 @@ public:
 	MDXParserMML(): MDXParser(), channelLength(0), loopPosition(0), col(0), curOctave(-1), repeatStackPointer(0), lastRest(0), nextKeyOff(false), nextPortamento(0) {}
 
 	void mmlf(const char *fmt, ...) {
-		if(col == 0) printf("%c ", channelName(channel));
+		if(col == 0) s.printf("%c ", channelName(channel));
 		va_list ap;
 		va_start(ap, fmt);
-		int printed = vprintf(fmt, ap);
+		int printed = s.vprintf(fmt, ap);
 		va_end(ap);
 		col += printed;
 		if(col > 79) {
 			col = 0;
-			printf("\n");
+			s.printf("\n");
 		}
 	}
 
@@ -182,19 +184,19 @@ public:
 	}
 };
 
-static void printVoice(MDXVoice *v) {
-	printf("@%d={\n\t/* AR DR SR RR SL OL KS ML DT1 DT2 AME */\n", v->number);
+static void printVoice(MDXVoice *v, FileWriteStream &s) {
+	s.printf("@%d={\n\t/* AR DR SR RR SL OL KS ML DT1 DT2 AME */\n", v->number);
 	int indices[4] = { 0, 2, 1, 3 };
 	for(int n = 0; n < 4; n++) {
 		int i = indices[n];
-		printf("\t%d, %d, %d, %d,  %d, %d, %d, %d,  %d, %d, %d,\n",
+		s.printf("\t%d, %d, %d, %d,  %d, %d, %d, %d,  %d, %d, %d,\n",
 			v->osc[i].getAR(), v->osc[i].getD1R(), v->osc[i].getD2R(),
 			v->osc[i].getRR(), v->osc[i].getD1L(), v->osc[i].getTL(), v->osc[i].getKS(),
 			v->osc[i].getMUL(), v->osc[i].getDT1(), v->osc[i].getDT2(), v->osc[i].getAME()
 		);
 	}
-	printf("\t/* CON FL OP */\n");
-	printf("\t%d, %d, %d\n}\n\n", v->getCON(), v->getFL(), v->slot_mask);
+	s.printf("\t/* CON FL OP */\n");
+	s.printf("\t%d, %d, %d\n}\n\n", v->getCON(), v->getFL(), v->slot_mask);
 }
 
 int main(int argc, char **argv) {
@@ -203,11 +205,12 @@ int main(int argc, char **argv) {
 			FileReadStream s(argv[i]);
 			MDXHeader h;
 			h.read(s);
-			printf("/* %s */\n", argv[i]);
-			if(h.title) printf("#title \"%s\"\n", h.title);
-			if(h.pcmFile) printf("#pcmfile \"%s\"\n", h.pcmFile);
+			FileWriteStream o(replaceExtension(argv[i], "mml"));
+			o.printf("/* %s */\n", argv[i]);
+			if(h.title) o.printf("#title \"%s\"\n", h.title);
+			if(h.pcmFile) o.printf("#pcmfile \"%s\"\n", h.pcmFile);
 			for(int i = 0; i < 256; i++) {
-				if(h.voices[i]) printVoice(h.voices[i]);
+				if(h.voices[i]) printVoice(h.voices[i], o);
 			}
 			MDXPreParserMML pre[16]; // run a pre-pass to determine the loop positions (they're at the end of each channel)
 			for(int i = 0; i < h.numChannels; i++) {
@@ -216,18 +219,19 @@ int main(int argc, char **argv) {
 					pre[i].eat(s.readUint8());
 			}
 			for(int i = 0; i < h.numChannels; i++) {
-				printf("/* Channel %c (%s) */\n", MDXParser::channelName(i), i >= 8 ? "ADPCM" : "FM");
+				o.printf("/* Channel %c (%s) */\n", MDXParser::channelName(i), i >= 8 ? "ADPCM" : "FM");
 				MDXParserMML p;
+				p.s = o;
 				p.channel = i;
 				p.loopPosition = pre[i].loopPosition;
 				p.channelLength = h.channels[i].length;
 				s.seek(h.fileBase + h.channels[i].offset);
 				for(size_t j = 0; !s.eof() && j < h.channels[i].length; j++)
 					p.eat(s.readUint8());
-				printf("\n\n");
+				o.printf("\n\n");
 			}
 		} catch(exceptionf *e) {
-			printf("Exception caught: %s\n", e->what());
+			fprintf(stderr, "Exception caught: %s\n", e->what());
 		}
 	}
 
