@@ -1,6 +1,7 @@
 #include "PDX.h"
 #include "Soundfont.h"
 #include "ADPCMDecoder.h"
+#include "tools.h"
 
 int main(int argc, char **argv) {
 	ADPCMDecoder d; // initialize once
@@ -140,10 +141,7 @@ int main(int argc, char **argv) {
 		ItmChk = Item_MakeChunk(FCC_pmod, sizeof(presetModList), &presetModList, 0);
 		List_AddItem(LstChk, ItmChk);
 
-		char buf[256];
-		snprintf(buf, sizeof(buf), "%s.sf2", argv[i]);
-		WriteSF2toFile(s, buf);
-		printf("wrote %s\n", buf);
+		WriteSF2toFile(s, replaceExtension(argv[i], "sf2"));
 		free(samples);
 		free(sampleHeaders);
 		free(bags);
