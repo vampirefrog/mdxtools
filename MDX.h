@@ -270,6 +270,9 @@ public:
 		} else repeatStackPos--;
 		if(repeatStackPos < 0) repeatStackPos = 0;
 	}
+	virtual void handleRepeatEscape(int16_t ofs) {
+		if(repeatStack[repeatStackPos - 1] == 0) dataPos += ofs;
+	}
 };
 
 #endif /* MDX_H_ */
