@@ -13,12 +13,10 @@ class MDXVGM: public MDXSerializer {
 public:
 	MDXVGM() {}
 	MDXVGM(const char *filename, const char *outfile) {
-		memset(&voices, 0, sizeof(voices));
 		w.version = 0x150;
 		w.ym2151_clock = 4000000;
 		w.okim6258_clock = 8000000;
 		w.okim6258_flags = 0x06;
-		w.rate = 60; // japanese
 
 		memset(sampleIndex, 0xff, sizeof(sampleIndex));
 
@@ -39,7 +37,7 @@ private:
 					pdx.open(buf);
 				} catch(exceptionf e) {
 					opened = false;
-					printf("PDX Error: %s\n", e.what());
+					fprintf(stderr, "PDX Error: %s\n", e.what());
 				}
 			}
 			if(opened) {
@@ -90,7 +88,7 @@ private:
 			if(p->nextKeyOn) {
 				p->nextKeyOn = false;
 			} else {
-				w.writeYM2151(0x08, (voices[p->curVoice].slot_mask << 3) + (p->channel & 0x07)); // Key ON/OFF
+				w.writeYM2151(0x08, (header.voices[p->curVoice]->slot_mask << 3) + (p->channel & 0x07)); // Key ON/OFF
 			}
 		}
 	}

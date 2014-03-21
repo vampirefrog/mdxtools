@@ -100,6 +100,16 @@ public:
 		return fwrite(data, 1, s, f);
 	}
 	void writeUint8(uint8_t i) { fputc(i, f); }
+	int vprintf(const char *fmt, va_list ap) {
+		return ::vfprintf(f, fmt, ap);
+	}
+	int printf(const char *fmt, ...) {
+		va_list ap;
+		va_start(ap, fmt);
+		int r = this->vprintf(fmt, ap);
+		va_end(ap);
+		return r;
+	}
 };
 
 class FS {

@@ -15,9 +15,9 @@ pdx2wav_SRCS=tools.cpp
 pdx2sf2_SRCS=tools.cpp Soundfont.c
 mididump_SRCS=tools.cpp
 mdx2vgm_SRCS=tools.cpp MDX.cpp Stream.cpp
-mdx2mml_SRCS=MDX.cpp
+mdx2mml_SRCS=tools.cpp MDX.cpp
 mdx2opm_SRCS=MDX.cpp
-mdx2midi_SRCS=MDX.cpp Stream.cpp
+mdx2midi_SRCS=tools.cpp MDX.cpp Stream.cpp
 mdxstat_SRCS=MDX.cpp
 vgmtest_SRCS=Stream.cpp
 

@@ -44,6 +44,17 @@ void hexDump(const uint8_t *data, size_t len) {
 }
 
 char *replaceExtension(const char *str, const char *newExt, char *dst, size_t maxLen) {
-	snprintf(dst, maxLen, "%s.%s", str, newExt);
+	static char buf[512];
+	if(!dst) {
+		dst = buf;
+		maxLen = sizeof(buf);
+	}
+
+	size_t len = strlen(str);
+	strncpy(dst, str, MIN(maxLen - 1, len + 1));
+	size_t eLen = strlen(newExt);
+	char *c = strrchr(dst, '.');
+	sprintf(dst + MIN(c ? c - dst : len, maxLen - eLen - 2), ".%s", newExt);
+
 	return dst;
 }

@@ -84,6 +84,19 @@ public:
 			size -= writeSize;
 		}
 	}
+	virtual int vprintf(const char *fmt, va_list ap) {
+		char buf[512];
+		int r = vsnprintf(buf, sizeof(buf), fmt, ap);
+		write(buf);
+		return r;
+	}
+	virtual int printf(const char *fmt, ...) {
+		va_list ap;
+		va_start(ap, fmt);
+		int r = this->vprintf(fmt, ap);
+		va_end(ap);
+		return r;
+	}
 	size_t write(const char *p) { return write((void *)p, strlen(p)); }
 	size_t write(Buffer &b);
 	void writeBigUint16(uint16_t i)    { uint16_t w = Endian::toBigUint16(i);    write(&w, sizeof(w)); }

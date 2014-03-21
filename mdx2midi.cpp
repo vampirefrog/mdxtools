@@ -193,10 +193,8 @@ public:
 int main(int argc, char **argv) {
 	for(int i = 1; i < argc; i++) {
 		try {
-			char buf[256];
-			snprintf(buf, sizeof(buf), "%s.mid", argv[i]);
 			MDXMidi m;
-			m.open(argv[i], buf);
+			m.open(argv[i], replaceExtension(argv[i], "mid"));
 		} catch(exceptionf e) {
 			fprintf(stderr, "Error: %s\n", e.what());
 		}
