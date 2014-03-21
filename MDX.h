@@ -264,14 +264,18 @@ public:
 		if(repeatStackPos >= 5) repeatStackPos = 4;
 	}
 	virtual void handleRepeatEnd(int16_t ofs) {
-		if(repeatStack[repeatStackPos-1]-- > 0) {
+		if(repeatStack[repeatStackPos - 1]-- > 0) {
 			dataPos += ofs;
 			if(dataPos < 0) dataPos = 0;
 		} else repeatStackPos--;
 		if(repeatStackPos < 0) repeatStackPos = 0;
 	}
 	virtual void handleRepeatEscape(int16_t ofs) {
-		if(repeatStack[repeatStackPos - 1] == 0) dataPos += ofs;
+		if(repeatStack[repeatStackPos - 1] == 0) {
+			dataPos += ofs;
+			repeatStackPos--;
+			if(repeatStackPos < 0) repeatStackPos = 0;
+		}
 	}
 };
 
