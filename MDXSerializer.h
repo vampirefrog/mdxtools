@@ -46,7 +46,6 @@ friend class MDXSerialParser;
 public:
 	MDXHeader header;
 	int tempo;
-	MDXVoice voices[256]; // FIXME
 	MDXSerializer() {}
 	MDXSerializer(const char *filename): loopCount(1), tempo(200) {
 		load(filename);
@@ -65,6 +64,7 @@ public:
 				s.read(parsers[i].data, parsers[i].dataLen);
 			}
 		}
+		handleHeader();
 		bool done = false;
 		while(!done) {
 			done = true;
@@ -98,9 +98,7 @@ public:
 		}
 	}
 private:
-	virtual void handleVoice(MDXVoice &v) {
-		voices[v.number] = v;
-	}
+	virtual void handleHeader() {}
 	virtual void handleRest(int r) {}
 	virtual void handleNote(MDXSerialParser *p, int n) {}
 	virtual void handleNoteEnd(MDXSerialParser *p) {}
@@ -127,7 +125,7 @@ void MDXSerialParser::handleRest(uint8_t duration) {
 
 void MDXSerialParser::handleSetVoiceNum(uint8_t t) {
 	curVoice = t;
-	curVoiceData = mdx->voices[t];
+	curVoiceData = *mdx->header.voices[t];
 	mdx->handleSetVoiceNum(this, t);
 }
 
