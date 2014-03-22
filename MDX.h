@@ -82,8 +82,9 @@ struct MDXHeader {
 	uint8_t numChannels;
 	uint16_t voiceOffset;
 	MDXVoice *voices[256];
+	bool reorderVoices;
 
-	MDXHeader(): title(0), pcmFile(0), fileBase(0), numChannels(0), voiceOffset(0) {
+	MDXHeader(): title(0), pcmFile(0), fileBase(0), numChannels(0), voiceOffset(0), reorderVoices(false) {
 		memset(channels, 0, sizeof(channels));
 		memset(voices, 0, sizeof(voices));
 	}
@@ -272,7 +273,7 @@ public:
 	}
 	virtual void handleRepeatEscape(int16_t ofs) {
 		if(repeatStack[repeatStackPos - 1] == 0) {
-			dataPos += ofs;
+			dataPos += ofs + 2;
 			repeatStackPos--;
 			if(repeatStackPos < 0) repeatStackPos = 0;
 		}
