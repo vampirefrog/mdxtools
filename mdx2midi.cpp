@@ -8,6 +8,7 @@
 class MDXMidiChannelParser: public MDXMemParser {
 public:
 	MidiWriteTrack mid;
+	MDXHeader *header;
 	uint32_t deltaTime, restTime;
 	uint8_t lastCmd;
 	uint8_t volume, pan;
@@ -88,7 +89,7 @@ public:
 	virtual void handleDataEnd() {
 	}
 	virtual void handleSetVoiceNum(uint8_t voice) {
-		mid.writeProgramChange(restTime, channel, voice);
+		mid.writeProgramChange(restTime, channel, header->voices[voice] ? header->voices[voice]->number : voice);
 		restTime = 0;
 	}
 	static uint32_t calcTempo(uint32_t tempo) {
@@ -127,6 +128,14 @@ public:
 	virtual void handleKeyOnDelay(uint8_t k) {
 		kTicks = k;
 	}
+
+	virtual void handleLFOPitch(uint8_t b, uint16_t period, uint16_t change) {}
+	virtual void handleLFOPitchMPON() {}
+	virtual void handleLFOPitchMPOF() {}
+	virtual void handleLFOVolume(uint8_t b, uint16_t period, uint16_t change) {}
+	virtual void handleLFOVolumeMAON() {}
+	virtual void handleLFOVolumeMAOF() {}
+	virtual void handleLFODelaySetting(uint8_t d) {}
 };
 
 class MDXMidi {
@@ -135,6 +144,7 @@ public:
 	void open(const char *filename, const char *outfilename) {
 		FileReadStream s(filename);
 		MDXHeader h;
+		h.reorderVoices = true;
 		h.read(s);
 		int loopCount = 1;
 		int midiTracks = 1;
@@ -142,6 +152,7 @@ public:
 		uint32_t totalTicks = 0;
 		for(int i = 0; i < h.numChannels; i++) {
 			parsers[i].channel = i;
+			parsers[i].header = &h;
 			parsers[i].loopIterations = loopCount;
 			parsers[i].dataLen = h.channels[i].length;
 			parsers[i].deltaTime = 0;
