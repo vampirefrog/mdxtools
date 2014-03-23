@@ -592,15 +592,6 @@ public:
 		writeUint8(note & 0x7f);
 		writeUint8(velocity & 0x7f);
 	}
-	void writeTempo(uint32_t deltaTime, uint32_t tempo) {
-		writeDeltaTime(deltaTime);
-		writeCmd(0xff);
-		writeUint8(0x51);
-		writeUint8(0x03);
-		writeUint8((tempo >> 16) & 0xff);
-		writeUint8((tempo >> 8) & 0xff);
-		writeUint8((tempo >> 0) & 0xff);
-	}
 	void writeMetaEvent(uint32_t deltaTime, uint8_t ev, uint8_t len, uint8_t *buf) {
 		writeDeltaTime(deltaTime);
 		writeCmd(0xff, true);
@@ -619,6 +610,9 @@ public:
 			for(int i = 0; i < len; i++) writeUint8(va_arg(ap, unsigned int));
 			va_end(ap);
 		}
+	}
+	void writeTempo(uint32_t deltaTime, uint32_t tempo) {
+		writeMetaEvent(deltaTime, 0x51, 3, (tempo >> 16) & 0xff, (tempo >> 8) & 0xff, (tempo >> 0) & 0xff);
 	}
 	void writeTimeSignature(uint32_t deltaTime, uint8_t numerator, uint8_t denominator, uint8_t ticksPerClick = 0, uint8_t quarterNote32ndNotes = 0) {
 		if(quarterNote32ndNotes > 0 || ticksPerClick > 0)
