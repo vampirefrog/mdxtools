@@ -29,7 +29,19 @@ public:
 		if(qTicks <= 8) d = duration * qTicks / 8;
 		else d = MIN(duration, 255 - qTicks);
 		if(kTicks < d) {
-			if(nextKeyOff) {
+			if(nextPortamento) {
+				int nextNote = n + (nextPortamento * duration + (nextPortamento < 0 ? -16383 : 16383)) / 16384;
+				if(lastNote >= 0) {
+					mid.writeNoteOn(restTime, channel, lastNote + add, 0);
+				}
+				printf("nextPortamento %d note=%d nextNote=%d duration=%d\n", nextPortamento, n, nextNote, duration);
+				mid.writeControlChange(0, channel, 5, MIN(duration - kTicks, 127)); // Portamento time
+				mid.writeNoteOn(kTicks, channel, n + add, volume);
+				mid.writeNoteOn(1, channel, nextNote + add, volume);
+				mid.writeNoteOn(d - kTicks - 1, channel, n + add, 0);
+				mid.writeNoteOn(0, channel, nextNote + add, 0);
+				nextPortamento = 0;
+			} else if(nextKeyOff) {
 				if(lastNote >= 0) {
 					if(lastNote != n) {
 						mid.writeNoteOn(restTime + kTicks, channel, n + add, volume);
