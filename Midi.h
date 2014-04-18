@@ -187,6 +187,7 @@ public:
 									break;
 								case 0x09:
 									handleDeviceNameEvent(duration, (const char *)metaBuf);
+									break;
 								case 0x51: // Set tempo
 									if(metaLen >= 3)
 										handleTempo(duration, (metaBuf[0] << 16) | (metaBuf[1] << 8) | metaBuf[2]);
