@@ -40,7 +40,6 @@ char *iconvAlloc(const char *str, const char *to, const char *from, int len) {
 
 void hexDump(const uint8_t *data, size_t len) {
 	for(size_t i = 0; i < len; i++) printf("%02x", data[i]);
-	printf("\n");
 }
 
 char *replaceExtension(const char *str, const char *newExt, char *dst, size_t maxLen) {
