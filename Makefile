@@ -1,6 +1,6 @@
 CFLAGS=-ggdb -Wall
 
-PROGS=mdxstat vgmtest mdxdump mdx2mml pdx2wav pdx2sf2 mdx2vgm mdx2opm mdx2midi mididump
+PROGS=mdxstat vgmtest mdxdump mdx2mml pdx2wav pdx2sf2 mdx2vgm mdx2opm mdx2midi mididump midi2json
 all: $(PROGS)
 
 ifneq (,$(findstring MINGW,$(shell uname -s)))
@@ -14,6 +14,7 @@ mdxdump_SRCS=tools.cpp MDX.cpp
 pdx2wav_SRCS=tools.cpp
 pdx2sf2_SRCS=tools.cpp Soundfont.c
 mididump_SRCS=tools.cpp
+midi2json_SRCS=tools.cpp
 mdx2vgm_SRCS=tools.cpp MDX.cpp Stream.cpp
 mdx2mml_SRCS=tools.cpp MDX.cpp
 mdx2opm_SRCS=tools.cpp MDX.cpp

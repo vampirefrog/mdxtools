@@ -16,6 +16,7 @@ private:
 	bool nrpn;
 public:
 	bool dumpBytes;
+	int fileFormat, numTracks, ticksPerQuarterNote;
 	MidiReadStream(const char *filename): rpn_msb(127), rpn_lsb(127), nrpn(false), dumpBytes(false) {
 		load(filename);
 	}
@@ -29,11 +30,11 @@ public:
 		}
 		int header_len = s.readBigUint32();
 		printf("header_len=%d\n", header_len);
-		int file_format = s.readBigUint16();
-		int num_tracks = s.readBigUint16();
-		int ticks = s.readBigUint16();
-		printf("file_format=%s (%d) num_tracks=%d ticks=%d\n", fileFormatName(file_format), file_format, num_tracks, ticks);
-		for(int i = 0; i < num_tracks; i++) {
+		fileFormat = s.readBigUint16();
+		numTracks = s.readBigUint16();
+		ticksPerQuarterNote = s.readBigUint16();
+		printf("fileFormat=%s (%d) numTracks=%d ticksPerQuarterNote=%d\n", fileFormatName(fileFormat), fileFormat, numTracks, ticksPerQuarterNote);
+		for(int i = 0; i < numTracks; i++) {
 			if(!s.readCompare("MTrk")) {
 				throw exceptionf("%s: invalid track header at %p", filename, s.tell());
 			}
