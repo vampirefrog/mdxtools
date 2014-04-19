@@ -89,3 +89,13 @@ Emulators
 * [WinX68k](http://www.geocities.jp/winx68khighspeed/) (source available on the [XM6 Pro-68k page](http://mijet.eludevisibility.org/XM6%20Pro-68k/XM6%20Pro-68k.html))
 * [Virtual X68000](http://www.vx68k.org/vx68k/) (linux)
 * [More emulators at Zophar's](http://www.zophar.net/x68000.html)
+
+Licensing
+---------
+
+Please see the LICENSE file for more information.
+
+Contributing
+------------
+
+If you would like to improve or contribute to this project, I highly encourage you to submit pull requests instead of maintaining your own fork. This way, it is less confusing for users. I will do my best to include your patches.
