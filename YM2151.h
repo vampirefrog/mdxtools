@@ -722,8 +722,8 @@ private:
 				(op)->phase = 0;            /* clear phase */       \
 				(op)->state = EG_ATT;       /* KEY ON = attack */   \
 				(op)->volume += (~(op)->volume *                    \
-							   (eg_inc[(op)->eg_sel_ar + ((eg_cnt>>(op)->eg_sh_ar)&7)])    \
-							  ) >>4;                                \
+					(eg_inc[(op)->eg_sel_ar + ((eg_cnt>>(op)->eg_sh_ar)&7)]) \
+				) >>4;                                              \
 				if ((op)->volume <= MIN_ATT_INDEX)                  \
 				{                                                   \
 					(op)->volume = MIN_ATT_INDEX;                   \
@@ -768,8 +768,7 @@ private:
 	}
 
 
-	void set_connect( YM2151Operator *om1, int cha, int v)
-	{
+	void set_connect( YM2151Operator *om1, int cha, int v) {
 		YM2151Operator *om2 = om1+1;
 		YM2151Operator *oc1 = om1+2;
 
@@ -859,8 +858,7 @@ private:
 		}
 	}
 
-	void refresh_EG(YM2151Operator * op)
-	{
+	void refresh_EG(YM2151Operator * op) {
 		uint32_t kc;
 		uint32_t v;
 
@@ -972,10 +970,7 @@ private:
 		return tl_tab[p];
 	}
 
-
-
-	#define volume_calc(OP) ((OP)->tl + ((uint32_t)(OP)->volume) + (AM & (OP)->AMmask))
-
+#define volume_calc(OP) ((OP)->tl + ((uint32_t)(OP)->volume) + (AM & (OP)->AMmask))
 	void chan_calc(unsigned int chan) {
 		YM2151Operator *op;
 		unsigned int env;
@@ -1003,8 +998,7 @@ private:
 			*op->connect = op->fb_out_prev;
 
 		op->fb_out_curr = 0;
-		if (env < ENV_QUIET)
-		{
+		if (env < ENV_QUIET) {
 			if (!op->fb_shift)
 				out=0;
 			op->fb_out_curr = op_calc1(op, env, (out<<op->fb_shift) );
@@ -1512,7 +1506,7 @@ private:
 
 			op+=4;
 			i--;
-		}while (i);
+		} while (i);
 
 
 		/* CSM is calculated *after* the phase generator calculations (verified on real chip)
