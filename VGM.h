@@ -1,9 +1,18 @@
 #ifndef VGM_H__
 #define VGM_H__
 
+#include <exception>
+
 #include "exceptionf.h"
 #include "FS.h"
 #include "wchar.h"
+#include "tools.h"
+
+class VGMEndException: public std::exception {
+};
+
+class VGMReadException: public std::exception {
+};
 
 struct VGM {
 	VGM() { reset(); }
@@ -38,6 +47,9 @@ struct VGM {
 		pokey_clock, qsound_clock;
 	uint32_t extra_header_offset;
 
+	uint8_t *data;
+	uint32_t data_size, data_pos;
+
 	void reset() {
 		eof_offset = version = sn76489_clock =
 		ym2413_clock = gd3_offset = total_samples = loop_offset =
@@ -60,6 +72,7 @@ struct VGM {
 		k054539_clock = huc6280_clock = c140_clock = k053260_clock =
 		pokey_clock = qsound_clock =
 		extra_header_offset = 0;
+		data_pos = 0;
 
 		track_name_en = track_name_jp = 0;
 		game_name_en = game_name_jp = 0;
@@ -186,6 +199,10 @@ struct VGM {
 		if(gd3_offset) loadGD3(f);
 
 		f.seek(vgm_data_offset);
+		data_size = MAX(eof_offset, gd3_offset) - vgm_data_offset;
+		data = new uint8_t[data_size];
+		f.read(data, data_size);
+		data_pos = 0;
 	}
 
 	uint16_t *track_name_en, *track_name_jp;
@@ -301,6 +318,136 @@ struct VGM {
 		wprintf(L"notes: %s\n", notes);
 	}
 
+	virtual void handleWait(uint32_t wait) {};
+	virtual void handleDataEnd() {};
+	virtual void handlePrematureEnd() {};
+	virtual void handleAY8910(uint8_t aa, uint8_t dd) {};
+	virtual void handleYM2151(uint8_t aa, uint8_t dd) {};
+	virtual void handleOKIM6258(uint8_t aa, uint8_t dd) {};
+	virtual void handleUnknownCommand(uint8_t cc) {};
+	virtual void handleDataChunk(uint8_t tt, uint32_t ss, uint8_t *data) {};
+	virtual void handleSetupStreamControl(uint8_t ss, uint8_t tt, uint8_t pp, uint8_t cc) {};
+	virtual void handleSetStreamData(uint8_t ss, uint8_t dd, uint8_t ll, uint8_t bb) {};
+	virtual void handleSetStreamFrequency(uint8_t ss, uint32_t ff) {};
+	virtual void handleStopStream(uint8_t ss) {};
+	virtual void handleStartStream(uint8_t ss, uint16_t bb, uint8_t ff) {};
+	void parse() {
+		bool done = false;
+		while(!done) {
+			try {
+				uint8_t b = readUint8();
+				if(b >= 0x70 && b <= 0x7f) handleWait(b - 0x70 + 1);
+				else switch(b) {
+					case 0x66:
+						handleDataEnd();
+						done = true;
+						break;
+					case 0x61:
+						handleWait(readUint16());
+						break;
+					case 0x62:
+						handleWait(735);
+						break;
+					case 0x63:
+						handleWait(882);
+						break;
+					case 0xa0:
+						{
+							uint8_t aa = readUint8();
+							uint8_t dd = readUint8();
+							handleAY8910(aa, dd);
+						}
+						break;
+					case 0x54:
+						{
+							uint8_t aa = readUint8();
+							uint8_t dd = readUint8();
+							handleYM2151(aa, dd);
+						}
+						break;
+					case 0xb7:
+						{
+							uint8_t aa = readUint8();
+							uint8_t dd = readUint8();
+							handleOKIM6258(aa, dd);
+						}
+						break;
+					case 0x67:
+						{
+							readUint8(); // ignore 0x66
+							uint8_t tt = readUint8();
+							uint32_t ss = readUint32();
+							uint8_t *data = new uint8_t[ss];
+							readData(data, ss);
+							handleDataChunk(tt, ss, data);
+							delete[] data;
+						}
+						break;
+					case 0x90:
+						{
+							uint8_t ss = readUint8();
+							uint8_t tt = readUint8();
+							uint8_t pp = readUint8();
+							uint8_t cc = readUint8();
+							handleSetupStreamControl(ss, tt, pp, cc);
+						}
+						break;
+					case 0x91:
+						{
+							uint8_t ss = readUint8();
+							uint8_t dd = readUint8();
+							uint8_t ll = readUint8();
+							uint8_t bb = readUint8();
+							handleSetStreamData(ss, dd, ll, bb);
+						}
+						break;
+					case 0x92:
+						{
+							uint8_t ss = readUint8();
+							uint32_t ff = readUint32();
+							handleSetStreamFrequency(ss, ff);
+						}
+						break;
+					case 0x94:
+						handleStopStream(readUint8());
+						break;
+					case 0x95:
+						{
+							uint8_t ss = readUint8();
+							uint16_t bb = readUint16();
+							uint8_t ff = readUint8();
+							handleStartStream(ss, bb, ff);
+						}
+						break;
+					default:
+						handleUnknownCommand(b);
+						break;
+				}
+			} catch(VGMReadException &e) {
+				handlePrematureEnd();
+				done = true;
+			}
+		}
+	}
+
+	uint8_t readUint8() {
+		if(data_pos >= data_size-1) throw VGMReadException();
+		return data[data_pos++];
+	}
+
+	uint32_t readUint16() {
+		return readUint8() | (readUint8() << 8);
+	}
+
+	uint32_t readUint32() {
+		return readUint8() | (readUint8() << 8) | (readUint8() << 16) | (readUint8() << 24);
+	}
+
+	void readData(uint8_t *buffer, uint32_t size) {
+		if(data_pos + size >= data_size) throw VGMReadException();
+		memcpy(buffer, data + data_pos, size);
+		data_pos += size;
+	}
 };
 
 #endif /* VGM_H__ */
