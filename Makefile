@@ -37,4 +37,4 @@ $(PROGS): $$(sort $$@.o $$(patsubst %.c,%.o,$$(patsubst %.cpp,%.o,$$($$@_SRCS)))
 -include $(OBJS:.o=.d)
 
 clean:
-	rm -f $(PROGS) $(addsuffix .exe,$(PROGS)) *.o
+	rm -f $(PROGS) $(addsuffix .exe,$(PROGS)) *.o *.d
