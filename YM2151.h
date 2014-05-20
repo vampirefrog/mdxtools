@@ -217,7 +217,6 @@ private:
 	signed int op_calc1(YM2151Operator * OP, unsigned int env, signed int pm);
 
 	void chan_calc(uint8_t chan);
-	void chan7_calc();
 	void advance_eg();
 	void advance();
 };

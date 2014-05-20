@@ -316,27 +316,15 @@ void YM2151::update_one(int32_t **buffers, uint32_t length) {
 		chanout[6] = 0;
 		chanout[7] = 0;
 
-		for(uint8_t n = 0; n < 7; n++) {
+		for(uint8_t n = 0; n < 8; n++) {
 			chan_calc(n);
 		}
-		chan7_calc();
 
-		outl = chanout[0] & pan[0];
-		outr = chanout[0] & pan[1];
-		outl += (chanout[1] & pan[2]);
-		outr += (chanout[1] & pan[3]);
-		outl += (chanout[2] & pan[4]);
-		outr += (chanout[2] & pan[5]);
-		outl += (chanout[3] & pan[6]);
-		outr += (chanout[3] & pan[7]);
-		outl += (chanout[4] & pan[8]);
-		outr += (chanout[4] & pan[9]);
-		outl += (chanout[5] & pan[10]);
-		outr += (chanout[5] & pan[11]);
-		outl += (chanout[6] & pan[12]);
-		outr += (chanout[6] & pan[13]);
-		outl += (chanout[7] & pan[14]);
-		outr += (chanout[7] & pan[15]);
+		outl = outr = 0;
+		for(uint8_t n = 0; n < 8; n++) {
+			outl += (chanout[n] & pan[n << 1]);
+			outr += (chanout[n] & pan[(n << 1) | 1]);
+		}
 
 		outl >>= FINAL_SH;
 		outr >>= FINAL_SH;
@@ -806,75 +794,21 @@ void YM2151::chan_calc(uint8_t chan) {
 		*(op+2)->connect += op_calc(op+2, env, c1);
 
 	env = volume_calc(op+3);    /* C2 */
-	if (env < ENV_QUIET)
-		chanout[chan]    += op_calc(op+3, env, c2);
-
-	/* M1 */
-	op->mem_value = mem;
-}
-
-void YM2151::chan7_calc() {
-	YM2151Operator *op;
-	unsigned int env;
-	uint32_t AM = 0;
-
-	if (Muted[7])
-		return;
-
-	m2 = c1 = c2 = mem = 0;
-	op = &oper[7*4];       /* M1 */
-
-	*op->mem_connect = op->mem_value;   /* restore delayed sample (MEM) value to m2 or c2 */
-
-	if (op->ams)
-		AM = lfa << (op->ams-1);
-	env = volume_calc(op);
-	{
-		int32_t out = op->fb_out_prev + op->fb_out_curr;
-		op->fb_out_prev = op->fb_out_curr;
-
-		if (!op->connect)
-			/* algorithm 5 */
-			mem = c1 = c2 = op->fb_out_prev;
-		else
-			/* other algorithms */
-			*op->connect = op->fb_out_prev;
-
-		op->fb_out_curr = 0;
-		if (env < ENV_QUIET)
-		{
-			if (!op->fb_shift)
-				out=0;
-			op->fb_out_curr = op_calc1(op, env, (out<<op->fb_shift) );
-		}
-	}
-
-	env = volume_calc(op+1);    /* M2 */
-	if (env < ENV_QUIET)
-		*(op+1)->connect += op_calc(op+1, env, m2);
-
-	env = volume_calc(op+2);    /* C1 */
-	if (env < ENV_QUIET)
-		*(op+2)->connect += op_calc(op+2, env, c1);
-
-	env = volume_calc(op+3);    /* C2 */
-	if (noise & 0x80)
-	{
+	if (chan == 7 && noise & 0x80) {
 		int32_t noiseout;
 
 		noiseout = 0;
 		if (env < 0x3ff)
 			noiseout = (env ^ 0x3ff) * 2;   /* range of the YM2151 noise output is -2044 to 2040 */
 		chanout[7] += ((noise_rng&0x10000) ? noiseout: -noiseout); /* bit 16 -> output */
+	} else if(env < ENV_QUIET) {
+			chanout[chan] += op_calc(op+3, env, c2);
 	}
-	else
-	{
-		if (env < ENV_QUIET)
-			chanout[7] += op_calc(op+3, env, c2);
-	}
+
 	/* M1 */
 	op->mem_value = mem;
 }
+
 
 void YM2151::advance_eg() {
 	YM2151Operator *op;
