@@ -515,11 +515,9 @@ void YM2151::init_chip_tables() {
 }
 
 #define KEY_OFF(op, key_clr){                                   \
-		if ((op)->key)                                          \
-		{                                                       \
+		if ((op)->key) {                                        \
 			(op)->key &= key_clr;                               \
-			if (!(op)->key)                                     \
-			{                                                   \
+			if (!(op)->key) {                                   \
 				if ((op)->state>EG_REL)                         \
 					(op)->state = EG_REL;/* KEY OFF = release */\
 			}                                                   \
@@ -640,89 +638,26 @@ void YM2151::set_connect( YM2151Operator *om1, int cha, int v) {
 }
 
 void YM2151::refresh_EG(YM2151Operator * op) {
-	uint32_t kc;
-	uint32_t v;
+	uint32_t kc, v;
 
 	kc = op->kc;
 
-	v = kc >> op->ks;
-	if ((op->ar+v) < 32+62)
-	{
-		op->eg_sh_ar  = egRateShift [op->ar  + v ];
-		op->eg_sel_ar = egRateSelect[op->ar  + v ];
+	for(int i = 0; i < 4; i++, op++) {
+		v = kc >> op->ks;
+		if ((op->ar+v) < 32+62) {
+			op->eg_sh_ar  = egRateShift [op->ar  + v ];
+			op->eg_sel_ar = egRateSelect[op->ar  + v ];
+		} else {
+			op->eg_sh_ar  = 0;
+			op->eg_sel_ar = 17*RATE_STEPS;
+		}
+		op->eg_sh_d1r = egRateShift [op->d1r + v];
+		op->eg_sel_d1r= egRateSelect[op->d1r + v];
+		op->eg_sh_d2r = egRateShift [op->d2r + v];
+		op->eg_sel_d2r= egRateSelect[op->d2r + v];
+		op->eg_sh_rr  = egRateShift [op->rr  + v];
+		op->eg_sel_rr = egRateSelect[op->rr  + v];
 	}
-	else
-	{
-		op->eg_sh_ar  = 0;
-		op->eg_sel_ar = 17*RATE_STEPS;
-	}
-	op->eg_sh_d1r = egRateShift [op->d1r + v];
-	op->eg_sel_d1r= egRateSelect[op->d1r + v];
-	op->eg_sh_d2r = egRateShift [op->d2r + v];
-	op->eg_sel_d2r= egRateSelect[op->d2r + v];
-	op->eg_sh_rr  = egRateShift [op->rr  + v];
-	op->eg_sel_rr = egRateSelect[op->rr  + v];
-
-
-	op+=1;
-
-	v = kc >> op->ks;
-	if ((op->ar+v) < 32+62)
-	{
-		op->eg_sh_ar  = egRateShift [op->ar  + v ];
-		op->eg_sel_ar = egRateSelect[op->ar  + v ];
-	}
-	else
-	{
-		op->eg_sh_ar  = 0;
-		op->eg_sel_ar = 17*RATE_STEPS;
-	}
-	op->eg_sh_d1r = egRateShift [op->d1r + v];
-	op->eg_sel_d1r= egRateSelect[op->d1r + v];
-	op->eg_sh_d2r = egRateShift [op->d2r + v];
-	op->eg_sel_d2r= egRateSelect[op->d2r + v];
-	op->eg_sh_rr  = egRateShift [op->rr  + v];
-	op->eg_sel_rr = egRateSelect[op->rr  + v];
-
-	op+=1;
-
-	v = kc >> op->ks;
-	if ((op->ar+v) < 32+62)
-	{
-		op->eg_sh_ar  = egRateShift [op->ar  + v ];
-		op->eg_sel_ar = egRateSelect[op->ar  + v ];
-	}
-	else
-	{
-		op->eg_sh_ar  = 0;
-		op->eg_sel_ar = 17*RATE_STEPS;
-	}
-	op->eg_sh_d1r = egRateShift [op->d1r + v];
-	op->eg_sel_d1r= egRateSelect[op->d1r + v];
-	op->eg_sh_d2r = egRateShift [op->d2r + v];
-	op->eg_sel_d2r= egRateSelect[op->d2r + v];
-	op->eg_sh_rr  = egRateShift [op->rr  + v];
-	op->eg_sel_rr = egRateSelect[op->rr  + v];
-
-	op+=1;
-
-	v = kc >> op->ks;
-	if ((op->ar+v) < 32+62)
-	{
-		op->eg_sh_ar  = egRateShift [op->ar  + v ];
-		op->eg_sel_ar = egRateSelect[op->ar  + v ];
-	}
-	else
-	{
-		op->eg_sh_ar  = 0;
-		op->eg_sel_ar = 17*RATE_STEPS;
-	}
-	op->eg_sh_d1r = egRateShift [op->d1r + v];
-	op->eg_sel_d1r= egRateSelect[op->d1r + v];
-	op->eg_sh_d2r = egRateShift [op->d2r + v];
-	op->eg_sel_d2r= egRateSelect[op->d2r + v];
-	op->eg_sh_rr  = egRateShift [op->rr  + v];
-	op->eg_sel_rr = egRateSelect[op->rr  + v];
 }
 
 
