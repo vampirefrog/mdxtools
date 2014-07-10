@@ -20,7 +20,7 @@ The rest of this document is work in progress.
 Download music library
 ----------------------
 
-* See zip file near end of page - http://www.gamesx.com/wiki/doku.php?id=x68000:sxsi_disk_image_with_games_and_lots_of_mdx_files
+* Neko's collection with >28k songs http://nfggames.com/X68000/Music/MXDRV_Neko68k.rar
 * Another collection (to open, use [DiskExplorer](http://hp.vector.co.jp/authors/VA013937/editdisk/index_e.html)) http://nfggames.com/forum2/index.php?topic=4813.0
 
 Ways to listen to MDX files
