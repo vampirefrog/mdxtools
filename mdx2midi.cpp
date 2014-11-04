@@ -34,7 +34,6 @@ public:
 				if(lastNote >= 0) {
 					mid.writeNoteOn(restTime, channel, lastNote + add, 0);
 				}
-				printf("nextPortamento %d note=%d nextNote=%d duration=%d\n", nextPortamento, n, nextNote, duration);
 				mid.writeControlChange(0, channel, 5, MIN(duration - kTicks, 127)); // Portamento time
 				mid.writeNoteOn(kTicks, channel, n + add, volume);
 				mid.writeNoteOn(1, channel, nextNote + add, volume);
@@ -42,6 +41,7 @@ public:
 				mid.writeNoteOn(0, channel, nextNote + add, 0);
 				nextPortamento = 0;
 			} else if(nextKeyOff) {
+				mid.writeControlChange(0, channel, 5, 0); // Portamento time
 				if(lastNote >= 0) {
 					if(lastNote != n) {
 						mid.writeNoteOn(restTime + kTicks, channel, n + add, volume);
@@ -66,14 +66,13 @@ public:
 					mid.writeNoteOn(restTime + kTicks, channel, n + add, volume);
 					int fTicks = 0;
 					if(isFirstNote) {
-						fTicks = d - kTicks - 1;
+						//fTicks = d - kTicks - 1;
 						// VOPM specific sends
-						mid.writeControlChange(fTicks, channel, 126, 127); // Monophonic mode
-						mid.writeControlChange(0, channel, 5, 0); // Portamento time
-						mid.writeRPN(0, channel, 0, 32); // Pitch Bend Sensitivity
-						mid.writeNRPN(0, channel, 0, 112); // OPM Clock = 4MHz
-						mid.writeControlChange(0, channel, 12, 0); // Amplitude LFO level
-						mid.writeControlChange(0, channel, 13, 0); // Pitch LFO level
+						// mid.writeControlChange(fTicks, channel, 126, 127); // Monophonic mode
+						// mid.writeRPN(0, channel, 0, 32); // Pitch Bend Sensitivity
+						// mid.writeNRPN(0, channel, 0, 112); // OPM Clock = 4MHz
+						// mid.writeControlChange(0, channel, 12, 0); // Amplitude LFO level
+						// mid.writeControlChange(0, channel, 13, 0); // Pitch LFO level
 						isFirstNote = false;
 					}
 					mid.writeNoteOn(d - kTicks - fTicks, channel, n + add, 0);
@@ -140,6 +139,14 @@ public:
 	virtual void handleKeyOnDelay(uint8_t k) {
 		kTicks = k;
 	}
+	virtual void handleVolumeInc() {
+		int v = (volume * 16 + 15) / 127;
+		volume = (v + 1) * 127 / 15;
+	}
+	virtual void handleVolumeDec() {
+		int v = (volume * 16 + 15) / 127;
+		volume = (v - 1) * 127 / 15;
+	}
 
 	virtual void handleLFOPitch(uint8_t b, uint16_t period, uint16_t change) {}
 	virtual void handleLFOPitchMPON() {}
@@ -201,6 +208,12 @@ public:
 			snprintf(buf, sizeof(buf), "Channel %c (%s)", MDXParser::channelName(i), i < 8 ? "FM" : "ADPCM");
 			track.writeTrackName(0, buf);
 			track.writeBankSelect(0, i, 0);
+
+			track.writeControlChange(0, i, 126, 127); // Monophonic mode
+			track.writeRPN(0, i, 0, 32); // Pitch Bend Sensitivity
+			track.writeNRPN(0, i, 0, 112); // OPM Clock = 4MHz
+			track.writeControlChange(0, i, 12, 0); // Amplitude LFO level
+			track.writeControlChange(0, i, 13, 0); // Pitch LFO level
 
 			track.writeRPN(0, i, 0, 32); // Pitch Bend Sensitivity
 			track.writePitchBend(0, i, 0x2000);
