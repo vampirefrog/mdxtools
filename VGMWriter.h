@@ -33,6 +33,11 @@ struct VGMWriter: VGM {
 		buf.writeUint8(reg);
 		buf.writeUint8(val);
 	}
+	void writeYM2413(uint8_t reg, uint8_t val) {
+		buf.writeUint8(0x51);
+		buf.writeUint8(reg);
+		buf.writeUint8(val);
+	}
 	void writeOKIM6258(uint8_t reg, uint8_t data) {
 		buf.writeUint8(0xb7);
 		buf.writeUint8(reg);
