@@ -40,6 +40,8 @@ Notes are followed by a numerical value to specify length. Otherwise the value o
 
 `_` Portamento. If specified right after a note, the sound glides from one note to the next.
 
+`&` Legato. Valid only right after a note, it disables key-off, therefore creating a legato effect with the next note.
+
 `v#` Set volume. Range is `v0` - `v15`. Initial value `v8`.
 
 `@v#` Fine volume. Range is `@v0` - `@v127`.
