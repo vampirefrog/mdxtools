@@ -4,9 +4,15 @@ MXDRV MML (DOCUMENT IS WORK IN PROGRESS)
 This page is based on http://www16.atwiki.jp/mxdrv/pages/19.html, which is based on documentation from MXC, a MML compiler for the X68000. There are other compilers available as well, with more features, such as note.x (available [here](http://nfggames.com/x68000/Mirrors/x68pub/x68tools/SOUND/MXDRV/)).
 
 Lines starting with A-H or P are considered to be MML data.
+
+Tempo and note lengths
+----------------------
 If a note length is preceded by a '%', the length is in clock ticks. Example: `c+%36`.
 Note lengths can be connected using `^`. Example: f2 ^ 8 ^ 192.
 Note length is up to 256 ticks. A quarter note is 48 ticks.
+
+Conversion between OPM tempo and normal tempo (quarter notes per minute) works like this: `opm_tempo = 256 - 60 * opm_clock / (bpm_tempo * 48 * 1024)` and `bpm_tempo = 60 * opm_clock / (48 * 1024 * (256 - opm_tempo))`, where `opm_clock` is 4MHz, or `4000000`. Simplified versions of these are: `opm_tempo = 256 - (78125 / (16 * bpm_tempo))` and `bpm_tempo = 78125 / (16 * (256 - opm_tempo))`.
+
 
 Commands
 --------
@@ -117,7 +123,7 @@ If a line starts with @, it is the beginning of a voice definition. A voice can 
 
 ```
 @1 = {
-	/* AR  DR  SR  RR  SL  OL  KS  ML DT1 DT2 AME */
+	/* AR D1R D2R  RR D1L  TL  KS MUL DT1 DT2 AME */
        28,  4,  0,  5,  1, 37,  2,  1,  7,  0,  0,
        22,  9,  1,  2,  1, 47,  2, 12,  0,  0,  0,
        29,  4,  3,  6,  1, 37,  1,  3,  3,  0,  0,
