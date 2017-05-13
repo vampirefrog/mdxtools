@@ -36,7 +36,7 @@ Windows:
 
 Unix:
 
-* MDXPlay (command line player): http://homepage3.nifty.com/StudioBreeze/software/mdxplay-e.html
+* [MDXPlay](http://homepage3.nifty.com/StudioBreeze/software/mdxplay-e.html), command line player ([mirror](http://vgmrips.net/mirror/mdxplay-20070206.tar.gz))
 
 X68000:
 
