@@ -185,7 +185,7 @@ public:
 };
 
 static void printVoice(MDXVoice *v, FileWriteStream &s) {
-	s.printf("@%d={\n\t/* AR DR SR RR SL OL KS ML DT1 DT2 AME */\n", v->number);
+	s.printf("@%d={\n\t/* AR D1R D2R RR D1L TL KS MUL DT1 DT2 AME */\n", v->number);
 	int indices[4] = { 0, 2, 1, 3 };
 	for(int n = 0; n < 4; n++) {
 		int i = indices[n];
