@@ -56,10 +56,12 @@ public:
 	}
 	void close() { if(f) fclose(f); }
 	size_t read(void *ptr, size_t len) { return fread(ptr, 1, len, f); }
-	uint8_t readUint8() { return fgetc(f); }
+	uint8_t readUint8() {
+		return fgetc(f);
+	}
 	size_t tell() { return ftell(f); }
 	int seek(size_t offset, int whence = SEEK_SET) { return fseek(f, offset, whence); }
-	bool eof() { return feof(f); }
+	bool eof() { return feof(f) != 0; }
 };
 
 class ZFileReadStream: public FSReadStream {

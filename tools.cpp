@@ -57,3 +57,5 @@ char *replaceExtension(const char *str, const char *newExt, char *dst, size_t ma
 
 	return dst;
 }
+
+char cleanChar(char c) { return c < 32 || c >= 127 ? '.' : c; }

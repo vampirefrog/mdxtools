@@ -39,7 +39,7 @@ void MDXHeader::read(FileReadStream &s) {
 	while(!s.eof()) {
 		MDXVoice inst;
 		if(!inst.load(s)) break;
-		if(!voices[inst.number]) // Do not allocate twice the same voice
+		if(!voices[inst.number]) // Do not allocate the same voice twice
 			voices[inst.number] = new MDXVoice(inst);
 		if(reorderVoices) voices[inst.number]->number = v;
 		v++;

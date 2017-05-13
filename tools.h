@@ -15,4 +15,7 @@ char *replaceExtension(const char *str, const char *newExt, char *dst = NULL, si
 #define MIN(a, b) ( (a) < (b) ? (a) : (b) )
 #define MAX(a, b) ( (a) > (b) ? (a) : (b) )
 
+char cleanChar(char c);
+
+
 #endif /* TOOLS_H_ */
