@@ -12,7 +12,6 @@ int main(int argc, char **argv) {
 					uint8_t *data = p.loadSample(j);
 					int16_t *wavData = new int16_t[p.samples[j].length * 2];
 					ADPCMDecoder d;
-					printf("samples %d length=%d\n", j, p.samples[j].length);
 					d.decode(data, p.samples[j].length * 2, wavData);
 					char buf[256];
 					snprintf(buf, sizeof(buf), "%s-%d.wav", argv[i], j);
