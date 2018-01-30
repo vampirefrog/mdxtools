@@ -12,7 +12,7 @@ struct ADPCMDecoder {
 	int32_t step;
 	uint8_t signal_gain;
 
-	ADPCMDecoder(uint8_t outputBits = 16, uint8_t signalGain = 6) {
+	ADPCMDecoder(uint8_t outputBits = 16, uint8_t signalGain = 4) {
 		output_bits = outputBits;
 		signal_gain = signalGain;
  		compute_tables();
