@@ -55,7 +55,7 @@ This corresponds to the OPM registers. Each field is 1 byte. The x4 fields are 4
 <td>×4</td>
 </tr>
 <tr>
-<td></td><td colspan="7" align="center"TL</td>
+<td></td><td colspan="7" align="center">TL</td>
 <td>×4</td>
 </tr>
 <tr>
@@ -89,12 +89,12 @@ Each command consists of one byte, followed by specific parameters. Integers are
 <tr><td><code>0x80-0xdf</code> <code>n</code></td><td><code>n#,#</code></td><td>Note data, followed by duration <code>n</code> + 1. <code>0x80</code> corresponds to MML <b>o0d+</b>, which means octave 0, note D♯. <code>0xdf</code> corresponds to <b>o8d</b>, octave 8, D. To calculate the MIDI equivalent note, subtract <code>0x80</code> and add <code>3</code>. For the PCM channels, P through W, this represents the sample index, the first sample is <code>0x80</code>, second sample is <code>0x81</code> and so on.</td></tr>
 <tr><td><code>0xff</code> <code>n</code></td><td><code>@t#</code></td><td>Set tempo to <code>n</code>. Tempo applies to all tracks at the same time, not just current track.</td></tr>
 <tr><td><code>0xfe</code> <code>n</code> <code>m</code></td><td><code>y#1,#2</code></td><td>Set OPM register <code>n</code> to value <code>m</code>.</td></tr>
-<tr><td><code>0xfd</code> <code>n</code></td><td><code>@v#</code></td><td>Set current voice.</td></tr>
+<tr><td><code>0xfd</code> <code>n</code></td><td><code>@#</code></td><td>Set current voice.</td></tr>
 <tr><td><code>0xfc</code> <code>n</code></td><td><code>p#</code></td><td>Pan.</td></tr>
 <tr><td><code>0xfb</code> <code>n</code></td><td><code>@v#</code></td><td>Set volume.</td></tr>
 <tr><td><code>0xfa</code></td><td><code>(</code></td><td>Decrease volume.</td></tr>
 <tr><td><code>0xf9</code></td><td><code>)</code></td><td>Increase volume.</td></tr>
-<tr><td><code>0xf8</code> <code>n</code></td><td><code>l#</code></td><td>Set default note length.</td></tr>
+<tr><td><code>0xf8</code> <code>n</code></td><td><code>q#</code></td><td>Set note length (staccato).</td></tr>
 <tr><td><code>0xf7</code></td><td><code>&amp;</code>*</td><td>Disable key off for next note. Corresponds to MML command <b>&amp;</b>, except it precedes the note instead of following it.</td></tr>
 <tr><td><code>0xf6</code> <code>n</code> <code>0x00</code></td><td><code>[</code></td><td>Repeat <code>n</code> times until a Repeat end command. Corresponds to MML command <code>[</code>, but loop multiplier is specified here instead of the closing <code>]</code>.</td></tr>
 <tr><td><code>0xf5</code> <code>nn</code></td><td><code>]</code></td><td>Repeat end. Loop back <code>nn</code> (signed word) bytes.</td></tr>
