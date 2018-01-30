@@ -16,9 +16,12 @@ struct MDXVoiceOsc {
 	uint8_t d1l_rr;
 
 	void dump() {
-		printf("dt1_mul=0x%02x dt1=%d mul=%d ", dt1_mul, getDT1(), getMUL());
-		printf("tl=0x%02x tl=%d ", tl, getTL());
-		printf("ks_ar=0x%02x ks=%d ar=%d\n", ks_ar, getKS(), getAR());
+		printf("dt1_mul=0x%02x DT1=%d MUL=%d ", dt1_mul, getDT1(), getMUL());
+		printf("tl=0x%02x TL=%d\n", tl, getTL());
+		printf("ks_ar=0x%02x KS=%d AR=%d ", ks_ar, getKS(), getAR());
+		printf("ame_d1r=0x%02x AME=%d D1R=%d\n", ame_d1r, getAME(), getD1R());
+		printf("dt2_d2r=0x%02x DT2=%d D2R=%d ", dt2_d2r, getDT2(), getD2R());
+		printf("d1l_rr=0x%02x D1L=%d RR=%d\n", d1l_rr, getD1L(), getRR());
 	}
 
 	inline uint8_t getDT1() { return (dt1_mul >> 4) & 0x07; } // DeTune 1
