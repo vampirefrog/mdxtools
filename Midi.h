@@ -297,7 +297,7 @@ public:
 		const char *noteNames[] = {
 			"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
 		};
-		if(octave) *octave = n / 12;
+		if(octave) *octave = n / 12 - 1;
 		return noteNames[n % 12];
 	}
 

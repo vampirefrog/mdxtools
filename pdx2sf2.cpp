@@ -20,7 +20,6 @@ int main(int argc, char **argv) {
 		int16_t *samples = (int16_t *)malloc(totalSamplesSize * 2);
 		memset(samples, 0, totalSamplesSize * 2);
 		int curPos = 0;
-		printf("%s: %d samples\n", argv[i], totalSamples);
 		sfSample *sampleHeaders = (sfSample *)malloc((totalSamples + 1) * sizeof(sfSample));
 		int x = 0;
 		for(int j = 0; j < PDX_NUM_SAMPLES; j++) {
