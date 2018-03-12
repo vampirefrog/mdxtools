@@ -14,6 +14,7 @@
 *.sf2
 *.acd
 *.acd-bak
+*.sublime-workspace
 sounds/*.txt
 
 data/
