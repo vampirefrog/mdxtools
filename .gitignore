@@ -15,6 +15,10 @@
 *.acd
 *.acd-bak
 *.sublime-workspace
+*.yy.c
+*.yy.h
+*.tab.c
+*.tab.h
 sounds/*.txt
 
 data/
