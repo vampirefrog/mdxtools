@@ -12,7 +12,7 @@ static void mdx_renderer_write_wait(struct mdx_player *p, int wait, void *data) 
 	stream_sample_t *renderbuf[2] = { r->bufL + r->cur_sample, r->bufR + r->cur_sample };
 	r->cur_sample += wait;
 
-	ym2151_update_one(r->opm, renderbuf, wait);
+	ym2151_update_one(&r->opm, renderbuf, wait);
 
 	adpcm_driver_run(r->adpcm_driver, r->chipBufL, r->chipBufR, wait);
 	for(int i = 0; i < wait; i++) {
@@ -43,7 +43,7 @@ static void mdx_renderer_write_wait(struct mdx_player *p, int wait, void *data) 
 
 static void mdx_renderer_write_opm(struct mdx_driver *d, uint8_t reg, uint8_t val, void *data_ptr) {
 	struct mdx_renderer *r = (struct mdx_renderer *)data_ptr;
-	ym2151_write_reg(r->opm, reg, val);
+	ym2151_write_reg(&r->opm, reg, val);
 }
 
 // static void mdx_renderer_write_oki(struct adpcm_driver *d, uint8_t port, uint8_t data, void *data_ptr) {
@@ -71,8 +71,8 @@ void mdx_renderer_init(
 	r->chipBufR = chipBufR;
 	r->num_buf_samples = num_buf_samples;
 
-	r->opm = ym2151_init(4000000, sample_rate);
-	ym2151_reset_chip(r->opm);
+	ym2151_init(&r->opm, 4000000, sample_rate);
+	ym2151_reset_chip(&r->opm);
 
 	// r->m6258_rate = device_start_okim6258(0, 8000000, FOSC_DIV_BY_512, TYPE_4BITS, OUTPUT_12BITS);
 	// device_reset_okim6258(0);

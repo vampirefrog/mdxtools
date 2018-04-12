@@ -12,7 +12,7 @@ struct mdx_renderer {
 	stream_sample_t *bufL, *bufR, *chipBufL, *chipBufR;
 	int num_buf_samples, cur_sample;
 
-	void *opm;
+	struct ym2151 opm;
 	int m6258_rate;
 
 	struct adpcm_driver *adpcm_driver;
