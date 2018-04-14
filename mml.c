@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "mml.h"
+#include "sjis.h"
 
 static char channel_name(int c) {
 	return c < 8 ? 'A' + c : (c < 16 ? 'P' + c - 8 : '?');
@@ -54,6 +55,27 @@ void mdx_decompiler_init(struct mdx_decompiler *d, char *buf, int columns) {
 }
 
 void mdx_decompiler_decompile(struct mdx_decompiler *d, struct mdx_file *f) {
+	uint8_t utfbuf[256];
+	char titlebuf[256];
+	int l;
+	if(f->title_len > 0) {
+		memset(utfbuf, 0, sizeof(utfbuf));
+		l = sjis_to_utf8(f->title, f->title_len, utfbuf, sizeof(utfbuf));
+		if(l > 0) {
+			snprintf(titlebuf, sizeof(titlebuf), "#title \"%s\"", utfbuf);
+			d->line(titlebuf);
+		}
+	}
+
+	if(f->pdx_filename_len > 0) {
+		memset(utfbuf, 0, sizeof(utfbuf));
+		l = sjis_to_utf8(f->pdx_filename, f->pdx_filename_len, utfbuf, sizeof(utfbuf));
+		if(l > 0) {
+			snprintf(titlebuf, sizeof(titlebuf), "#pcmfile \"%s\"", utfbuf);
+			d->line(titlebuf);
+		}
+	}
+
 	int ops[4] = { 0, 2, 1, 3 };
 	for(int i = 0; i < 256; i++) {
 		if(f->voices[i]) {
