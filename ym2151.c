@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h> // for memset
 #include <stddef.h> // for NULL
+#include <stdint.h>
 
 #include "ym2151.h"
 
@@ -64,10 +65,10 @@ static signed int tl_tab[TL_TAB_LEN];
 static unsigned int sin_tab[SIN_LEN];
 
 /* translate from D1L to volume index (16 D1L levels) */
-static UINT32 d1l_tab[16];
+static uint32_t d1l_tab[16];
 
 #define RATE_STEPS (8)
-static const UINT8 eg_inc[19*RATE_STEPS]={
+static const uint8_t eg_inc[19*RATE_STEPS]={
 
 /*cycle:0 1  2 3  4 5  6 7*/
 
@@ -100,7 +101,7 @@ static const UINT8 eg_inc[19*RATE_STEPS]={
 #define O(a) (a*RATE_STEPS)
 
 /*note that there is no O(17) in this table - it's directly in the code */
-static const UINT8 eg_rate_select[32+64+32]={   /* Envelope Generator rates (32 + 64 rates + 32 RKS) */
+static const uint8_t eg_rate_select[32+64+32]={   /* Envelope Generator rates (32 + 64 rates + 32 RKS) */
 /* 32 dummy (infinite time) rates */
 O(18),O(18),O(18),O(18),O(18),O(18),O(18),O(18),
 O(18),O(18),O(18),O(18),O(18),O(18),O(18),O(18),
@@ -147,7 +148,7 @@ O(16),O(16),O(16),O(16),O(16),O(16),O(16),O(16)
 /*mask  2047, 1023, 511, 255, 127, 63, 31, 15, 7,  3, 1,  0,  0,  0,  0,  0 */
 
 #define O(a) (a*1)
-static const UINT8 eg_rate_shift[32+64+32] = {  /* Envelope Generator counter shifts (32 + 64 rates + 32 RKS) */
+static const uint8_t eg_rate_shift[32+64+32] = {  /* Envelope Generator counter shifts (32 + 64 rates + 32 RKS) */
 /* 32 infinite time rates */
 O(0),O(0),O(0),O(0),O(0),O(0),O(0),O(0),
 O(0),O(0),O(0),O(0),O(0),O(0),O(0),O(0),
@@ -200,14 +201,14 @@ O( 0),O( 0),O( 0),O( 0),O( 0),O( 0),O( 0),O( 0)
 *   DT2=0 DT2=1 DT2=2 DT2=3
 *   0     600   781   950
 */
-static const UINT32 dt2_tab[4] = { 0, 384, 500, 608 };
+static const uint32_t dt2_tab[4] = { 0, 384, 500, 608 };
 
 /*  DT1 defines offset in Hertz from base note
 *   This table is converted while initialization...
 *   Detune table shown in struct ym2151 User's Manual is wrong (verified on the real chip)
 */
 
-static const UINT8 dt1_tab[4*32] = { /* 4*32 DT1 values */
+static const uint8_t dt1_tab[4*32] = { /* 4*32 DT1 values */
 /* DT1=0 */
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -225,7 +226,7 @@ static const UINT8 dt1_tab[4*32] = { /* 4*32 DT1 values */
   8, 8, 9,10,11,12,13,14,16,17,19,20,22,22,22,22
 };
 
-static const UINT16 phaseinc_rom[768]={
+static const uint16_t phaseinc_rom[768]={
 1299,1300,1301,1302,1303,1304,1305,1306,1308,1309,1310,1311,1313,1314,1315,1316,
 1318,1319,1320,1321,1322,1323,1324,1325,1327,1328,1329,1330,1332,1333,1334,1335,
 1337,1338,1339,1340,1341,1342,1343,1344,1346,1347,1348,1349,1351,1352,1353,1354,
@@ -295,7 +296,7 @@ static const UINT16 phaseinc_rom[768]={
 		some 0x80 could be 0x81 as well as some 0x00 could be 0x01.
 */
 
-static const UINT8 lfo_noise_waveform[256] = {
+static const uint8_t lfo_noise_waveform[256] = {
 0xFF,0xEE,0xD3,0x80,0x58,0xDA,0x7F,0x94,0x9E,0xE3,0xFA,0x00,0x4D,0xFA,0xFF,0x6A,
 0x7A,0xDE,0x49,0xF6,0x00,0x33,0xBB,0x63,0x91,0x60,0x51,0xFF,0x00,0xD8,0x7F,0xDE,
 0xDC,0x73,0x21,0x85,0xB2,0x9C,0x5D,0x24,0xCD,0x91,0x9E,0x76,0x7F,0x20,0xFB,0xF3,
@@ -617,8 +618,8 @@ INLINE void set_connect(struct ym2151 *chip, struct ym2151_operator *om1, int ch
 }
 
 static void refresh_EG(struct ym2151_operator * op) {
-	UINT32 kc;
-	UINT32 v;
+	uint32_t kc;
+	uint32_t v;
 
 	kc = op->kc;
 
@@ -709,7 +710,6 @@ void ym2151_write_reg(struct ym2151 *chip, int r, int v) {
 			break;
 
 		case 0x08:
-			chip = chip; /* chip is used in KEY_ON macro */
 			envelope_KONKOFF(chip, &chip->oper[ (v&7)*4 ], v );
 			break;
 
@@ -849,7 +849,7 @@ void ym2151_write_reg(struct ym2151 *chip, int r, int v) {
 			v &= 0x7f;
 			if (v != op->kc)
 			{
-				UINT32 kc, kc_channel;
+				uint32_t kc, kc_channel;
 
 				kc_channel = (v - (v>>2))*64;
 				kc_channel += 768;
@@ -886,7 +886,7 @@ void ym2151_write_reg(struct ym2151 *chip, int r, int v) {
 			v >>= 2;
 			if (v !=  (op->kc_i & 63))
 			{
-				UINT32 kc_channel;
+				uint32_t kc_channel;
 
 				kc_channel = v;
 				kc_channel |= (op->kc_i & ~63);
@@ -912,8 +912,8 @@ void ym2151_write_reg(struct ym2151 *chip, int r, int v) {
 
 	case 0x40:      /* DT1, MUL */
 		{
-			UINT32 olddt1_i = op->dt1_i;
-			UINT32 oldmul = op->mul;
+			uint32_t olddt1_i = op->dt1_i;
+			uint32_t oldmul = op->mul;
 
 			op->dt1_i = (v&0x70)<<1;
 			op->mul   = (v&0x0f) ? (v&0x0f)<<1: 1;
@@ -932,8 +932,8 @@ void ym2151_write_reg(struct ym2151 *chip, int r, int v) {
 
 	case 0x80:      /* KS, AR */
 		{
-			UINT32 oldks = op->ks;
-			UINT32 oldar = op->ar;
+			uint32_t oldks = op->ks;
+			uint32_t oldar = op->ar;
 
 			op->ks = 5-(v>>6);
 			op->ar = (v&0x1f) ? 32 + ((v&0x1f)<<1) : 0;
@@ -973,7 +973,7 @@ void ym2151_write_reg(struct ym2151 *chip, int r, int v) {
 
 	case 0xc0:      /* DT2, D2R */
 		{
-			UINT32 olddt2 = op->dt2;
+			uint32_t olddt2 = op->dt2;
 			op->dt2 = dt2_tab[ v>>6 ];
 			if (op->dt2 != olddt2)
 				op->freq = ( (chip->freq[ op->kc_i + op->dt2 ] + op->dt1) * op->mul ) >> 1;
@@ -1107,7 +1107,7 @@ void ym2151_reset_chip(struct ym2151 *chip) {
 
 
 INLINE signed int op_calc(struct ym2151_operator * OP, unsigned int env, signed int pm) {
-	UINT32 p;
+	uint32_t p;
 
 	p = (env<<3) + sin_tab[ ( ((signed int)((OP->phase & ~FREQ_MASK) + (pm<<15))) >> FREQ_SH ) & SIN_MASK ];
 
@@ -1118,8 +1118,8 @@ INLINE signed int op_calc(struct ym2151_operator * OP, unsigned int env, signed 
 }
 
 INLINE signed int op_calc1(struct ym2151_operator * OP, unsigned int env, signed int pm) {
-	UINT32 p;
-	INT32  i;
+	uint32_t p;
+	int32_t  i;
 
 	i = (OP->phase & ~FREQ_MASK) + pm;
 
@@ -1131,12 +1131,12 @@ INLINE signed int op_calc1(struct ym2151_operator * OP, unsigned int env, signed
 	return tl_tab[p];
 }
 
-#define volume_calc(OP) ((OP)->tl + ((UINT32)(OP)->volume) + (AM & (OP)->AMmask))
+#define volume_calc(OP) ((OP)->tl + ((uint32_t)(OP)->volume) + (AM & (OP)->AMmask))
 
 static void chan_calc(struct ym2151 *chip, unsigned int chan) {
 	struct ym2151_operator *op;
 	unsigned int env;
-	UINT32 AM = 0;
+	uint32_t AM = 0;
 
 	if (chip->Muted[chan])
 		return;
@@ -1150,7 +1150,7 @@ static void chan_calc(struct ym2151 *chip, unsigned int chan) {
 		AM = chip->lfa << (op->ams-1);
 	env = volume_calc(op);
 	{
-		INT32 out = op->fb_out_prev + op->fb_out_curr;
+		int32_t out = op->fb_out_prev + op->fb_out_curr;
 		op->fb_out_prev = op->fb_out_curr;
 
 		if (!op->connect)
@@ -1187,7 +1187,7 @@ static void chan_calc(struct ym2151 *chip, unsigned int chan) {
 static void chan7_calc(struct ym2151 *chip) {
 	struct ym2151_operator *op;
 	unsigned int env;
-	UINT32 AM = 0;
+	uint32_t AM = 0;
 
 	if (chip->Muted[7])
 		return;
@@ -1201,7 +1201,7 @@ static void chan7_calc(struct ym2151 *chip) {
 		AM = chip->lfa << (op->ams-1);
 	env = volume_calc(op);
 	{
-		INT32 out = op->fb_out_prev + op->fb_out_curr;
+		int32_t out = op->fb_out_prev + op->fb_out_curr;
 		op->fb_out_prev = op->fb_out_curr;
 
 		if (!op->connect)
@@ -1230,7 +1230,7 @@ static void chan7_calc(struct ym2151 *chip) {
 
 	env = volume_calc(op+3);    /* C2 */
 	if (chip->noise & 0x80) {
-		INT32 noiseout;
+		int32_t noiseout;
 
 		noiseout = 0;
 		if (env < 0x3ff)
@@ -1607,7 +1607,7 @@ static void advance(struct ym2151 *chip) {
 	i = (chip->noise_p>>16);        /* number of events (shifts of the shift register) */
 	chip->noise_p &= 0xffff;
 	while (i) {
-		UINT32 j;
+		uint32_t j;
 		j = ( (chip->noise_rng ^ (chip->noise_rng>>3) ) & 1) ^ 1;
 		chip->noise_rng = (j<<16) | (chip->noise_rng>>1);
 		i--;
@@ -1619,14 +1619,14 @@ static void advance(struct ym2151 *chip) {
 	i = 8;
 	do {
 		if(op->pms) { /* only when phase modulation from LFO is enabled for this channel */
-			INT32 mod_ind = chip->lfp;      /* -128..+127 (8bits signed) */
+			int32_t mod_ind = chip->lfp;      /* -128..+127 (8bits signed) */
 			if (op->pms < 6)
 				mod_ind >>= (6 - op->pms);
 			else
 				mod_ind <<= (op->pms - 5);
 
 			if (mod_ind) {
-				UINT32 kc_channel = op->kc_i + mod_ind;
+				uint32_t kc_channel = op->kc_i + mod_ind;
 				(op+0)->phase += ( (chip->freq[ kc_channel + (op+0)->dt2 ] + (op+0)->dt1) * (op+0)->mul ) >> 1;
 				(op+1)->phase += ( (chip->freq[ kc_channel + (op+1)->dt2 ] + (op+1)->dt1) * (op+1)->mul ) >> 1;
 				(op+2)->phase += ( (chip->freq[ kc_channel + (op+2)->dt2 ] + (op+2)->dt1) * (op+2)->mul ) >> 1;
@@ -1784,8 +1784,8 @@ void ym2151_update_one(struct ym2151 *chip, SAMP **buffers, int length) {
 	}
 }
 
-void ym2151_set_mutemask(struct ym2151 *chip, UINT32 MuteMask) {
-	UINT8 CurChn;
+void ym2151_set_mutemask(struct ym2151 *chip, uint32_t MuteMask) {
+	uint8_t CurChn;
 
 	for (CurChn = 0; CurChn < 8; CurChn ++)
 		chip->Muted[CurChn] = (MuteMask >> CurChn) & 0x01;
