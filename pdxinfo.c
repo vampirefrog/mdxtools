@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
 			TYPE_NONE, &opt_recursive
 		},
 		{
-			'e', "header",
+			'H', "header",
 			"Print header",
 			0,
 			TYPE_SWITCH,
