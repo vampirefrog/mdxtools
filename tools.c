@@ -7,8 +7,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <glob.h>
+#include <dirent.h>
+#ifndef __EMSCRIPTEN__
 #include <zlib.h>
+#endif /* __EMSCRIPTEN */
 #include "tools.h"
 
 uint8_t *load_file(const char *filename, size_t *size_out) {
@@ -43,6 +45,7 @@ uint8_t *load_file(const char *filename, size_t *size_out) {
 	return data;
 }
 
+#ifndef __EMSCRIPTEN__
 uint8_t *load_gzfile(const char *filename, size_t *size_out) {
 	gzFile f = gzopen(filename, "rb");
 	if(!f) {
@@ -89,6 +92,8 @@ uint8_t *load_gzfile(const char *filename, size_t *size_out) {
 	if(size_out) *size_out = size;
 	return data;
 }
+#endif /* __EMSCRIPTEN */
+
 
 int gcd(int a, int b) {
 	int c = a % b;
@@ -101,7 +106,6 @@ int gcd(int a, int b) {
 
 	return b;
 }
-
 int find_pdx_file(const char *mdx_file_path, const char *pdx_filename, char *out, int out_len) {
 	char *s = strdup(mdx_file_path);
 	char *d = dirname(s);
@@ -113,32 +117,34 @@ int find_pdx_file(const char *mdx_file_path, const char *pdx_filename, char *out
 
 	for(int i = 0; i < 2; i++) {
 		if(i == 0) {
-			snprintf(buf, sizeof(buf), "%s/%s", d, pdx_filename);
+			snprintf(buf, sizeof(buf), "%s", pdx_filename);
 		} else {
-			snprintf(buf, sizeof(buf), "%s/%s.PDX", d, pdx_filename);
+			snprintf(buf, sizeof(buf), "%s.PDX", pdx_filename);
 		}
 		int r = stat(buf, &st);
 		if(r == 0) {
 			strncpy(out, buf, out_len);
-			return 0;
+			goto good;
 		}
 
-		char buf2[256];
 		int found = 0;
-		snprintf(buf2, sizeof(buf2), "%s/*", d);
-		glob_t pglob;
-		glob(buf2, GLOB_NOSORT, 0, &pglob);
-		for(int i = 0; i < pglob.gl_pathc; i++) {
-			if(!strcasecmp(pglob.gl_pathv[i], buf)) {
-				strncpy(out, pglob.gl_pathv[i], out_len);
+		struct dirent **namelist;
+		int n = scandir(d, &namelist, NULL, alphasort);
+		while(n--) {
+			if(!found && !strcasecmp(namelist[n]->d_name, buf)) {
+				snprintf(out, out_len, "%s/%s", d, namelist[n]->d_name);
 				found = 1;
 			}
+			free(namelist[n]);
 		}
-		globfree(&pglob);
+		free(namelist);
+
 		if(found)
-			return 0;
+			goto good;
 	}
 
+good:
+	free(s);
 	return 0;
 }
 
