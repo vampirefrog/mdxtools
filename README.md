@@ -5,15 +5,22 @@ A bunch of tools for handling the MDX music format (music for the Sharp X68000 u
 
 These tools are aimed at the large collections of MDX files available online (see below for download links). They are meant to convert to other formats, such as vgm, midi and for the curious, MML and dumping the raw MDX data.
 
-* mdx2vgm (WIP) - convert to VGM format
-* mdxdump - dump all the information in a MDX file.
-* mdxstat - analyze and print out some statistics and totals about given MDX files.
-* mdx2mml - a MML decompiler
-* mdx2midi (WIP) - a MML to MIDI file converter. Use in conjunction with pdx2sf2 to hear the samples too.
-* mididump - Dump all the info and events in a .mid file. Useful for development. You can also use MidiPiano for a GUI version.
-* mdx2opm (WIP) - Extract OPM voices from MDX file (usable in [VOPM](http://www.geocities.jp/sam_kb/VOPM/)).
-* pdx2wav - extract the samples from a PDX file, into 16-bit WAV files.
-* pdx2sf2 - generate a SoundFont file with the samples from the PDX file. Useful for importing a song into a DAW.
+* `mdxplay` (WIP) - play a mdx file, currently linux only (libao)
+* `mdx2pcm` (WIP) - render a mdx file to a wav file
+* `mdx2vgm` (WIP) - convert to VGM format
+* `mdxinfo` - extract information from a MDX file, and output in `.csv` format
+* `mdx2mml` - an MML decompiler
+* `mml2mdx` - an MML compiler
+* `mdxdump` - dump all the information in a MDX file.
+* `mdxstat` - analyze and print out some statistics and totals about given MDX files.
+* `mdx2midi` (WIP) - a MML to MIDI file converter. Use in conjunction with pdx2sf2 to hear the samples too.
+* `mididump` - Dump all the info and events in a .mid file. Useful for development. You can also use MidiPiano for a GUI version.
+* `mdx2opm` (WIP) - Extract OPM voices from MDX file (usable in [VOPM](http://www.geocities.jp/sam_kb/VOPM/)).
+* `pdx2wav` - extract the samples from a PDX file, into 16-bit WAV files.
+* `pdx2sf2` - generate a SoundFont file with the samples from the PDX file. Useful for importing a song into a DAW.
+* `pdxinfo` - extract information from a PDX file, and output in `.csv` format
+* `adpcm-decode` - decodes ADPCM data from stdin and outputs 16-bit PCM to stdout (sample rate does not change)
+* `adpcm-encode` - encodes PCM data from stdrin and outputs APDCM data to stdout (sample rate does not change)
 
 The rest of this document is work in progress.
 
