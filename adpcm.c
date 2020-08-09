@@ -21,7 +21,7 @@ static short step_size[49] = { 16, 17, 19, 21, 23, 25, 28, 31, 34, 37, 41,
 /*
 * one function local to this file only.
 */
-short step_adjust ( char );
+static short step_adjust ( char );
 
 /*
 * Initialze the data used by the coder.
