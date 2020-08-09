@@ -32,3 +32,11 @@ mdx2vgm
 pdx2sf2
 pdx2wav
 mdx2opm
+
+mdxinfo
+mdxplay
+mml2mdx
+mdx2pcm
+adpcm-encode
+adpcm-decode
+pdxinfo
