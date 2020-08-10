@@ -27,6 +27,22 @@ struct mdx_channel {
 	int pos;
 };
 
+struct mdx_voice_osc {
+	uint8_t dt1_mul;
+	uint8_t tl;
+	uint8_t ks_ar;
+	uint8_t ame_d1r;
+	uint8_t dt2_d2r;
+	uint8_t d1l_rr;
+} __attribute__((__packed__));
+
+struct mdx_voice {
+	uint8_t voice_id;
+	uint8_t fl_con;
+	uint8_t slot_mask;
+	struct mdx_voice_osc osc[4];
+} __attribute__((__packed__));
+
 struct mdx_file {
 	uint32_t data_start_ofs;
 	uint8_t *title, title_len;
@@ -49,5 +65,21 @@ int mdx_file_load(struct mdx_file *f, uint8_t *data, int len);
 int mdx_cmd_len(uint8_t *data, int pos, int len);
 const char *mdx_lfo_waveform_name(uint8_t waveform);
 const char *mdx_error_name(int err);
+
+uint8_t mdx_voice_get_id(uint8_t *v);
+uint8_t mdx_voice_get_fl(uint8_t *v);
+uint8_t mdx_voice_get_con(uint8_t *v);
+uint8_t mdx_voice_get_slot_mask(uint8_t *v);
+uint8_t mdx_voice_osc_get_dt1(uint8_t *v, int osc);
+uint8_t mdx_voice_osc_get_mul(uint8_t *v, int osc);
+uint8_t mdx_voice_osc_get_tl(uint8_t *v, int osc);
+uint8_t mdx_voice_osc_get_ks(uint8_t *v, int osc);
+uint8_t mdx_voice_osc_get_ar(uint8_t *v, int osc);
+uint8_t mdx_voice_osc_get_ame(uint8_t *v, int osc);
+uint8_t mdx_voice_osc_get_d1r(uint8_t *v, int osc);
+uint8_t mdx_voice_osc_get_dt2(uint8_t *v, int osc);
+uint8_t mdx_voice_osc_get_d2r(uint8_t *v, int osc);
+uint8_t mdx_voice_osc_get_d1l(uint8_t *v, int osc);
+uint8_t mdx_voice_osc_get_rr(uint8_t *v, int osc);
 
 #endif /* MDX_H_ */

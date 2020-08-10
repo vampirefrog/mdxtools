@@ -175,3 +175,63 @@ const char *mdx_error_name(int err) {
 	}
 	return "Unknown";
 }
+
+uint8_t mdx_voice_get_id(uint8_t *v) {
+	return v[0];
+}
+
+uint8_t mdx_voice_get_fl(uint8_t *v) {
+	return v[1] >> 3 & 0x07;
+}
+
+uint8_t mdx_voice_get_con(uint8_t *v) {
+	return v[1] & 0x07;
+}
+
+uint8_t mdx_voice_get_slot_mask(uint8_t *v) {
+	return v[2] & 0x0f;
+}
+
+uint8_t mdx_voice_osc_get_dt1(uint8_t *v, int osc) {
+	return v[3 + osc] >> 4 & 0x07;
+}
+
+uint8_t mdx_voice_osc_get_mul(uint8_t *v, int osc) {
+	return v[3 + osc] & 0x0f;
+}
+
+uint8_t mdx_voice_osc_get_tl(uint8_t *v, int osc) {
+	return v[7 + osc] & 0x7f;
+}
+
+uint8_t mdx_voice_osc_get_ks(uint8_t *v, int osc) {
+	return v[11 + osc] >> 6;
+}
+
+uint8_t mdx_voice_osc_get_ar(uint8_t *v, int osc) {
+	return v[11 + osc] & 0x1f;
+}
+
+uint8_t mdx_voice_osc_get_ame(uint8_t *v, int osc) {
+	return v[15 + osc] >> 7;
+}
+
+uint8_t mdx_voice_osc_get_d1r(uint8_t *v, int osc) {
+	return v[15 + osc] & 0x1f;
+}
+
+uint8_t mdx_voice_osc_get_dt2(uint8_t *v, int osc) {
+	return v[19 + osc] >> 6;
+}
+
+uint8_t mdx_voice_osc_get_d2r(uint8_t *v, int osc) {
+	return v[19 + osc] & 0x1f;
+}
+
+uint8_t mdx_voice_osc_get_d1l(uint8_t *v, int osc) {
+	return v[23 + osc] >> 4;
+}
+
+uint8_t mdx_voice_osc_get_rr(uint8_t *v, int osc) {
+	return v[23 + osc] & 0x0f;
+}

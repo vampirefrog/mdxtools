@@ -5,7 +5,7 @@ LEX=flex
 
 PROGS=mdxinfo pdxinfo \
 mdxplay \
-mdx2vgm mdx2pcm pdx2wav mdx2mml mml2mdx \
+mdx2vgm mdx2pcm pdx2wav mdx2mml mml2mdx mdx2opm \
 adpcm-encode adpcm-decode \
 mididump
 all: $(PROGS)
@@ -26,6 +26,7 @@ mdxdump_SRCS=mdx.c mdx_driver.c tools.c sjis_unicode.c sjis.c
 pdx2wav_SRCS=pdx.c wav.c tools.c adpcm.c
 mdx2mml_SRCS=mdx.c mml.c tools.c cmdline.c sjis.c sjis_unicode.c
 mml2mdx_SRCS=mml2mdx.c mml.tab.c mml.yy.c buffer.c
+mdx2opm_SRCS=mdx2opm.c tools.c mdx.c
 adpcm-encode_SRCS=adpcm.c
 adpcm-decode_SRCS=adpcm.c
 mididump_SRCS=mididump.c midi.c stream.c tools.c
