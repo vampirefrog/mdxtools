@@ -1,5 +1,178 @@
+#include <stdio.h>
+#include <string.h>
 #include "mdx.h"
 #include "tools.h"
+
+static const char *commandName(uint8_t c) {
+	const char *cmdNames[] = {
+		"Informal",           // 0xe6
+		"Extended MML",       // 0xe7
+		"PCM4/8 enable",      // 0xe8
+		"LFO delay",          // 0xe9
+		"OPM LFO",            // 0xea
+		"Amplitude LFO",      // 0xeb
+		"Pitch LFO",          // 0xec
+		"ADPCM/noise freq",   // 0xed
+		"Sync wait",          // 0xee
+		"Sync send",          // 0xef
+		"Key on delay",       // 0xf0
+		"Data end",           // 0xf1
+		"Portamento",         // 0xf2
+		"Detune",             // 0xf3
+		"Repeat escape",      // 0xf4
+		"Repeat end",         // 0xf5
+		"Repeat start",       // 0xf6
+		"Disable key-off",    // 0xf7
+		"Sound length",       // 0xf8
+		"Volume dec",         // 0xf9
+		"Volume inc",         // 0xfa
+		"Set volume",         // 0xfb
+		"Output phase",       // 0xfc
+		"Set voice #",        // 0xfd
+		"Set OPM reg",        // 0xfe
+		"Set tempo",          // 0xff
+	};
+	if(c >= 0xe6 && c <= 0xff) return cmdNames[c - 0xe6];
+	return "Unknown";
+}
+
+static const char *noteName(int note) {
+	const char *noteNames[] = { "c", "c+", "d", "d+" , "e", "f", "f+", "g", "g+", "a", "a+", "b",  };
+	return noteNames[(note + 3) % 12];
+}
+
+static int noteOctave(int note) {
+	return (note + 3) / 12;
+}
+
+static char channelName(uint8_t chan) {
+	if(chan < 8) return 'A' + chan;
+	if(chan < 16) return 'P' + chan - 8;
+	return '!';
+}
+
+void handleRest(uint8_t duration) { printf("Rest %d (192 / %d)\n", duration, duration == 0 ? 0 : 192 / duration); }
+void handleNote(uint8_t note, uint8_t duration) { printf("Note %d (%s%d) duration %d (192 / %d)\n", note, noteName(note), noteOctave(note), duration, duration == 0 ? 0 : 192 / duration); }
+void handleCommand(uint8_t c, ...) { /* printf("Command 0x%02x: %s\n", c, commandName(c)); */ }
+void handlePCM8ExpansionShift() { printf("PCM8ExpansionShift\n"); }
+void handleUndefinedCommand(uint8_t b) { printf("UndefinedCommand %d\n", b); }
+void handleChannelStart(int chan) { printf("ChannelStart %c (%d)\n", channelName(chan), chan); }
+void handleChannelEnd(int chan) { printf("ChannelEnd %c (%d)\n", channelName(chan), chan); }
+
+/* ff */ void handleSetTempo(uint8_t t) { printf("SetTempo %d BPM (%d)\n", 78125 / (16 * (256 - t)), t); }
+/* fe */ void handleSetOPMRegister(uint8_t reg, uint8_t val) { printf("SetOPMRegister 0x%02x 0x%02x;\n", reg, val); }
+/* fd */ void handleSetVoiceNum(uint8_t t) { printf("SetVoiceNum %d\n", t); }
+/* fc */ void handlePan(uint8_t p) { printf("Pan %d\n", p); }
+/* fb */ void handleSetVolume(uint8_t v) { printf("SetVolume %d\n", v); }
+/* fa */ void handleVolumeDec() { printf("VolumeDec\n"); }
+/* f9 */ void handleVolumeInc() { printf("VolumeInc\n"); }
+/* f8 */ void handleSetNoteLength(uint8_t l) { printf("SetNoteLength %d\n", l); }
+/* f7 */ void handleDisableKeyOff() { printf("DisableKeyOff\n"); }
+/* f6 */ void handleRepeatStart(uint8_t r) { printf("RepeatStart %d\n", r); }
+/* f5 */ void handleRepeatEnd(int16_t r) { printf("RepeatEnd %d\n", r); }
+/* f4 */ void handleRepeatEscape(int16_t r) { printf("RepeatEscape %d\n", r); }
+/* f3 */ void handleDetune(int16_t d) { printf("Detune %d\n", d); }
+/* f2 */ void handlePortamento(int16_t t) { printf("Portamento %d\n", t); }
+/* f1 */ void handlePerformanceEnd(int16_t loop) { printf("PerformanceEnd %d\n", loop); }
+/* f0 */ void handleKeyOnDelay(uint8_t d) { printf("KeyOnDelay %d\n", d); }
+/* ef */ void handleSyncSend(uint8_t s) { printf("SyncSend %d\n", s); }
+/* ee */ void handleSyncWait() { printf("SyncWait\n"); }
+/* ed */ void handleADPCMNoiseFreq(uint8_t f) { printf("ADPCMNoiseFreq %d\n", f); }
+/* ec */ void handleLFOPitchMPON() { printf("LFOPitchMPON\n"); }
+/* ec */ void handleLFOPitchMPOF() { printf("LFOPitchMPOF\n"); }
+/* ec */ void handleLFOPitch(uint8_t b, uint16_t period, uint16_t change) { printf("LFOPitch %d %d %d\n", b, period, change); }
+/* eb */ void handleLFOVolume(uint8_t b, uint16_t period, uint16_t change) { printf("LFOVolume %d %d %d\n", b, period, change); }
+/* eb */ void handleLFOVolumeMAON() { printf("LFOVolumeMAON\n"); }
+/* eb */ void handleLFOVolumeMAOF() { printf("LFOVolumeMAOF\n"); }
+/* ea */ void handleOPMLFO(uint8_t sync_wave, uint8_t lfrq, uint8_t pmd, uint8_t amd, uint8_t pms_ams) { printf("OPMLFO %d %d %d %d %d\n", sync_wave, lfrq, pmd, amd, pms_ams); }
+/* ea */ void handleOPMLFOMHON() { printf("OPMLFOMHON\n"); }
+/* ea */ void handleOPMLFOMHOF() { printf("OPMLFOMHOF\n"); }
+/* e9 */ void handleLFODelaySetting(uint8_t d) { printf("LFODelaySetting %d\n", d); }
+/* e8 */ void handlePCM8Enable() { printf("PCM8Enable\n"); }
+/* e7 */ void handleFadeOut(uint8_t f) { printf("FadeOut %d\n", f); }
+
+static void run_through_file(struct mdx_file *f, int *num_cmds_out, int *pcm8_out, int *pcm_notes_out) {
+	*pcm8_out = 0;
+	memset(num_cmds_out, 0, 16 * sizeof(int));
+	if(pcm_notes_out) memset(pcm_notes_out, 0, 96 * sizeof(int));
+
+	for(int i = 0; i < f->num_channels; i++) {
+		struct mdx_channel *chan = &f->channels[i];
+
+		for(int j = 0; j < chan->data_len; /* nothing */) {
+			int l = mdx_cmd_len(chan->data, j, chan->data_len - j);
+			if(l < 0) break;
+
+			uint8_t *p = &chan->data[j];
+
+			// stop on performance end command
+			num_cmds_out[i]++;
+			if(*p == 0xf1 && j < chan->data_len - 1 && p[1] == 0) {
+				break;
+			}
+			if(*p == 0xe8) *pcm8_out = 1;
+			if(pcm_notes_out && i >= 8 && *p >= 0x80 && *p <= 0xdf) {
+				pcm_notes_out[*p - 0x80]++;
+			}
+
+			printf("channel=%d file_offset=0x%08x channel_offset=0x%08x length=%d ", i, j + (chan->data - f->data), j, l);
+
+			if(*p <= 0x7f) {
+				handleRest(*p);
+			} else if(*p <= 0xdf) {
+				handleNote(*p - 0x80, p[1]);
+			} else switch(*p) {
+				case 0xff: handleSetTempo(p[1]); break;
+				case 0xfe: handleSetOPMRegister(p[1], p[2]); break;
+				case 0xfd: handleSetVoiceNum(p[1]); break;
+				case 0xfc: handlePan(p[1]); break;
+				case 0xfb: handleSetVolume(p[1]); break;
+				case 0xfa: handleVolumeDec(); break;
+				case 0xf9: handleVolumeInc(); break;
+				case 0xf8: handleSetNoteLength(p[1]); break;
+				case 0xf7: handleDisableKeyOff(); break;
+				case 0xf6: handleRepeatStart(p[1]); break;
+				case 0xf5: handleRepeatEnd(p[1] << 8 | p[2]); break;
+				case 0xf4: handleRepeatEscape(p[1] << 8 | p[2]); break;
+				case 0xf3: handleDetune(p[1] << 8 | p[2]); break;
+				case 0xf2: handlePortamento(p[1] << 8 | p[2]); break;
+				case 0xf1: handlePerformanceEnd(p[1] == 0 ? 0 : (p[1] << 8 | p[2])); break;
+				case 0xf0: handleKeyOnDelay(p[1]); break;
+				case 0xef: handleSyncSend(p[1]); break;
+				case 0xee: handleSyncWait(); break;
+				case 0xed: handleADPCMNoiseFreq(p[1]); break;
+				case 0xec:
+					{
+						if(p[1] == 0x80) handleLFOPitchMPOF();
+						else if(p[1] == 0x81) handleLFOPitchMPON();
+						else handleLFOPitch(p[1], p[2] << 8 | p[3], p[4] << 8 | p[5]);
+					}
+					break;
+				case 0xeb:
+					{
+						if(p[1] == 0x80) handleLFOVolumeMAOF();
+						else if(p[1] == 0x81) handleLFOVolumeMAON();
+						else handleLFOVolume(p[1], p[2] << 8 | p[3], p[4] << 8 | p[5]);
+					}
+					break;
+				case 0xea:
+					{
+						if(p[1] == 0x80) handleOPMLFOMHOF();
+						else if(p[1] == 0x81) handleOPMLFOMHON();
+						else handleOPMLFO(p[1], p[2], p[3], p[4], p[5]);
+					}
+					break;
+				case 0xe9: handleLFODelaySetting(p[1]); break;
+				case 0xe8: handlePCM8Enable(); break;
+				case 0xe7: handleFadeOut(p[2]); break;
+				default:
+					handleUndefinedCommand(*p);
+					break;
+			}
+			j += l;
+		}
+	}
+}
 
 int main(int argc, char **argv) {
 	if(argc < 2) {
@@ -13,15 +186,11 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	mdx_file f;
+	struct mdx_file f;
 	mdx_file_load(&f, data, data_len);
 
-	printf("%d channels\n", f.num_channels);
-	for(int i = 0; i < f.num_channels; i++) {
-		printf("channel %d\n", i);
-		int pos = 0;
-		dump_cmd(f.channels[i].
-	}
+	int num_cmds_out[16], pcm8_out;
+	run_through_file(&f, num_cmds_out, &pcm8_out, 0);
 
 	free(data);
 

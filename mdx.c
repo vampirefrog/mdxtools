@@ -3,7 +3,6 @@
 
 #include "mdx.h"
 #include "tools.h"
-#include "vgm.h"
 
 int mdx_cmd_len(uint8_t *data, int pos, int len) {
 	if(len <= 0) return -1;
