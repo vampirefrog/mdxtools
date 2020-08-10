@@ -6,7 +6,8 @@ LEX=flex
 PROGS=mdxinfo pdxinfo \
 mdxplay \
 mdx2vgm mdx2pcm pdx2wav mdx2mml mml2mdx \
-adpcm-encode adpcm-decode
+adpcm-encode adpcm-decode \
+mididump
 all: $(PROGS)
 
 LIBS=-lz
@@ -27,6 +28,7 @@ mdx2mml_SRCS=mdx.c mml.c tools.c cmdline.c sjis.c sjis_unicode.c
 mml2mdx_SRCS=mml2mdx.c mml.tab.c mml.yy.c buffer.c
 adpcm-encode_SRCS=adpcm.c
 adpcm-decode_SRCS=adpcm.c
+mididump_SRCS=mididump.c midi.c stream.c tools.c
 
 OBJS=$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(foreach prog,$(PROGS),$(prog).cpp $($(prog)_SRCS))))
 

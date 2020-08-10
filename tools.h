@@ -18,4 +18,6 @@ void csv_quote(char *str, size_t len);
 // names and num_names can come from argv and argc
 void each_file(const char **names, int num_names, void (*fn)(char *), int recurse);
 
+void hex_dump(const uint8_t *data, size_t len);
+
 #endif /* TOOLS_H_ */
