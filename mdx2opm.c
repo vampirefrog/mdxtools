@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
 		printf("// CH: PAN   FL CON AMS PMS SLOT NE\r\n");
 		printf("// [OPname]: AR D1R D2R  RR D1L  TL  KS MUL DT1 DT2 AMS-EN\r\n");
 		for(int i = 0; i < 256; i++) {
-			if(i < f.num_voices) printVoice(f.voices[i], i+1);
+			if(i < f.num_voices) printVoice(f.voices[i], i);
 			// else printEmptyVoice(i+1);
 		}
 	}
