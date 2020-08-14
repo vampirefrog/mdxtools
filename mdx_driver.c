@@ -339,7 +339,6 @@ static int mdx_driver_advance_channel(struct mdx_driver *r, int chan_num) {
 			break;
 		case 0xfb: // Set volume
 			chan->volume = chan->data[chan->pos+1];
-			// printf("%d: volume %d\n", chan_num, chan->volume);
 			chan->opm_volume = mdx_volume_to_opm(chan->volume);
 			chan->pos += 2;
 			break;
@@ -364,20 +363,12 @@ static int mdx_driver_advance_channel(struct mdx_driver *r, int chan_num) {
 			chan->pos++;
 			break;
 		case 0xf6: // Repeat start ([)
-			//printf("%d [ %d pos=%d\n",
-			//	chan_num, chan->data[chan->pos + 1], chan->pos);
-			// This is how MXDRV does it as well. No repeat stack needed.
 			chan->data[chan->pos + 2] = chan->data[chan->pos + 1];
 			chan->pos += 3;
 			break;
 		case 0xf5: // Repeat end (])
 			{
 				int16_t ofs = (chan->data[chan->pos + 1] << 8) | chan->data[chan->pos + 2];
-				// printf("%d: ] pos=%d ofs=%d 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n",
-				// 	chan_num, chan->pos, ofs,
-				// 	chan->data[chan->pos + ofs], chan->data[chan->pos + ofs + 1],
-				// 	chan->data[chan->pos + ofs + 2], chan->data[chan->pos + ofs + 3],
-				// 	chan->data[chan->pos + ofs + 4], chan->data[chan->pos + ofs + 5]);
 				chan->pos += 3;
 				if(chan->data[chan->pos + ofs - 1] > 1) {
 					chan->data[chan->pos + ofs - 1]--;
@@ -390,18 +381,6 @@ static int mdx_driver_advance_channel(struct mdx_driver *r, int chan_num) {
 				int16_t ofs = (chan->data[chan->pos + 1] << 8) | chan->data[chan->pos + 2];
 				chan->pos += 3;
 				int16_t start_ofs = (chan->data[chan->pos + ofs] << 8) | chan->data[chan->pos + ofs + 1];
-				// printf("%d: / pos=%d ofs=%d start_ofs=%d 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n",
-				// 	chan_num, chan->pos, ofs, start_ofs,
-				// 	chan->data[chan->pos + ofs], chan->data[chan->pos + ofs + 1],
-				// 	chan->data[chan->pos + ofs + 2], chan->data[chan->pos + ofs + 3],
-				// 	chan->data[chan->pos + ofs + 4], chan->data[chan->pos + ofs + 5]);
-				// printf("0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n",
-				// 	chan->data[chan->pos + ofs + start_ofs],
-				// 	chan->data[chan->pos + ofs + start_ofs + 1],
-				// 	chan->data[chan->pos + ofs + start_ofs + 2],
-				// 	chan->data[chan->pos + ofs + start_ofs + 3],
-				// 	chan->data[chan->pos + ofs + start_ofs + 4],
-				// 	chan->data[chan->pos + ofs + start_ofs + 5]);
 				if(chan->data[chan->pos + ofs + start_ofs + 1] <= 1) {
 					chan->pos += ofs + 2;
 				}
