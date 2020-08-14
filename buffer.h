@@ -10,5 +10,15 @@ struct buffer {
 
 void buffer_init(struct buffer *buf);
 void buffer_put(struct buffer *buf, uint8_t b);
+void buffer_reserve(struct buffer *buf, int len);
 void buffer_write(struct buffer *buf, uint8_t *data, int len);
 void buffer_dump(struct buffer *buf);
+void buffer_write_big_uint32(struct buffer *buf, uint32_t i);
+void buffer_write_big_int32(struct buffer *buf, uint32_t i);
+void buffer_write_big_uint16(struct buffer *buf, uint16_t i);
+void buffer_write_big_int16(struct buffer *buf, uint16_t i);
+void buffer_write_uint8(struct buffer *buf, uint8_t i);
+void buffer_write_little_uint32(struct buffer *buf, uint32_t i);
+void buffer_write_little_int32(struct buffer *buf, uint32_t i);
+void buffer_write_little_uint16(struct buffer *buf, uint16_t i);
+void buffer_write_little_int16(struct buffer *buf, uint16_t i);

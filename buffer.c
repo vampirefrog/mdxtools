@@ -23,3 +23,23 @@ void buffer_dump(struct buffer *buf) {
 	}
 	printf("\n");
 }
+
+int buffer_reserve(struct buffer *buf, int len) {
+	if(buf->data_len + len > buf->allocated_len) {
+		buf->allocated_len = (buf->data_len + len + 1023) & ~0x3ff;
+		buf->data = realloc(buf->data, buf->allocated_len);
+		if(!buf->data)
+			return -1;
+	}
+
+	return 0;
+}
+
+int buffer_write(struct buffer *buf, uint8_t *data, int len) {
+	buffer_reserve(len);
+
+	memcpy(buf->data + buf->data_len, data, len);
+	buf->data_len += len;
+
+	return len;
+}
