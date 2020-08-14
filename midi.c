@@ -203,6 +203,27 @@ void midi_track_init(struct midi_track *track) {
 	track->last_cmd = 0;
 }
 
+struct midi_track *midi_file_append_track(struct midi_file *f) {
+	f->num_tracks++;
+	f->tracks = realloc(f->tracks, f->num_tracks * sizeof(struct midi_track *));
+	if(!f->tracks)
+		return 0;
+	struct midi_track *track = &f->tracks[f->num_tracks - 1];
+	midi_track_init(track);
+	return track;
+}
+
+struct midi_track *midi_file_append_track(struct midi_file *f) {
+	f->num_tracks++;
+	f->tracks = realloc(f->tracks, f->num_tracks * sizeof(struct midi_track *));
+	if(!f->tracks)
+		return 0;
+	memmove(f->tracks + 1, f->tracks, (f->num_tracks - 1) * sizeof(struct midi_track *));
+	struct midi_track *track = &f->tracks[0];
+	midi_track_init(track);
+	return track;
+}
+
 void midi_track_write_delta_time(struct midi_track *track, uint32_t t) {
 	if(t > 0x1fffff) buffer_write_uint8(&track->buffer, 0x80 | ((t >> 21) & 0x7f));
 	if(t > 0x3fff) buffer_write_uint8(&track->buffer, 0x80 | ((t >> 14) & 0x7f));

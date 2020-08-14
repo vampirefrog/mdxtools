@@ -31,7 +31,8 @@ struct midi_file {
 int midi_file_init(struct midi_file *f, int file_format, int num_tracks, int ticks_per_quarter_note);
 int midi_file_clear(struct midi_file *f);
 int midi_file_write(struct midi_file *f, struct stream *stream);
-struct midi_track *midi_file_add_track(struct midi_file *f);
+struct midi_track *midi_file_append_track(struct midi_file *f);
+struct midi_track *midi_file_prepend_track(struct midi_file *f);
 
 const char *midi_file_format_name(uint16_t n);
 const char *midi_note_name(uint8_t n, uint8_t *octave);
