@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include "midi.h"
 
 const char *midi_file_format_name(uint16_t n) {
@@ -165,319 +164,164 @@ const char *midi_rpn_name(uint16_t rpn) {
 	return "Unknown";
 }
 
-struct midi_reader *midi_reader_new();
+int midi_file_init(struct midi_file *f, int file_format, int num_tracks, int ticks_per_quarter_note) {
+	f->file_format = file_format;
+	f->ticks_per_quarter_note = ticks_per_quarter_note;
+	f->num_tracks = num_tracks;
 
-void midi_reader_init(struct midi_reader *r) {
-	r->rpn_msb = 127;
-	r->rpn_lsb = 127;
-	r->nrpn = 0;
-	r->dump_bytes = 0;
+	f->tracks = malloc(sizeof(struct midi_track *) * num_tracks);
+	if(!f->tracks) return MIDI_ERR_OUT_OF_MEMORY;
 
-	r->handle_header = 0;
-	r->handle_byte = 0;
-	r->handle_track = 0;
-	r->handle_unknown_command = 0;
-	r->handle_note_on = 0;
-	r->handle_note_off = 0;
-	r->handle_key_after_touch = 0;
-	r->handle_control_change = 0;
-	r->handle_program_change = 0;
-	r->handle_channel_after_touch = 0;
-	r->handle_pitch_wheel_change = 0;
-	r->handle_meta_event = 0;
-	r->handle_meta_sequence_number = 0;
-	r->handle_text_event = 0;
-	r->handle_copyright_info_event = 0;
-	r->handle_track_name_event = 0;
-	r->handle_instrument_name_event = 0;
-	r->handle_lyric_event = 0;
-	r->handle_marker_text_event = 0;
-	r->handle_program_name_event = 0;
-	r->handle_device_name_event = 0;
-	r->handle_tempo = 0;
-	r->handle_time_signature = 0;
-	r->handle_track_end = 0;
-	r->handle_rpn = 0;
-	r->handle_rpn_lsb = 0;
-	r->handle_nrpn = 0;
-	r->handle_nrpn_lsb = 0;
+	return MIDI_ERR_SUCCESS;
 }
 
-int midi_reader_load(struct midi_reader *r, struct read_stream *s) {
-	r->read_stream = s;
-
-	midi_reader_read_header(r);
-	stream_seek((struct stream *)r->read_stream, r->header_len + 8, SEEK_SET);
-	for(int i = 0; i < r->num_tracks; i++) {
-		midi_reader_read_track(r, i);
-	}
-
-	return MIDI_SUCCESS;
+int midi_file_clear(struct midi_file *f) {
+	if(f->tracks) free(f->tracks);
+	f->tracks = 0;
+	f->num_tracks = 0;
 }
 
-int midi_reader_read_header(struct midi_reader *r) {
-	if(!stream_read_compare((struct stream *)r->read_stream, "MThd", 0)) {
-		return MIDI_ERR_NOT_A_MIDI_FILE;
-	}
-	r->header_len = stream_read_big_uint32((struct stream *)r->read_stream);
-	r->file_format = stream_read_big_uint16((struct stream *)r->read_stream);
-	r->num_tracks = stream_read_big_uint16((struct stream *)r->read_stream);
-	r->ticks_per_quarter_note = stream_read_big_uint16((struct stream *)r->read_stream);
-	if(r->handle_header)
-		r->handle_header(r);
+int midi_file_write(struct midi_file *f, struct stream *stream) {
+	stream_write(stream, "MThd", 4);
+	stream_write_big_uint32(stream, 0x06);
+	stream_write_big_uint16(stream, f->file_type);
+	stream_write_big_uint16(stream, f->num_tracks);
+	stream_write_big_uint16(stream, f->ticks_per_quarter_note);
 
-	return MIDI_SUCCESS;
+	for(int i = 0; i < numTracks; i++) {
+		struct midi_track *t = &tracks[i];
+		stream_write(stream, "MTrk", 4);
+		stream_write_big_uint32(stream, t.len);
+		stream_write_buffer(stream, t->buffer);
+	}
+
+	return 0;
 }
 
-int midi_reader_read_track(struct midi_reader *r, int i) {
-	if(!stream_read_compare((struct stream *)r->read_stream, "MTrk", 0)) {
-		return MIDI_ERR_INVALID_TRACK_HEADER;
-	}
-
-	int track_length = stream_read_big_uint32((struct stream *)r->read_stream);
-	if(r->handle_track)
-		r->handle_track(r, i, track_length);
-
-	r->state = None;
-	r->duration = r->channel = 0;
-	for(int j = track_length; j > 0 && !stream_eof((struct stream *)r->read_stream); j--) {
-		uint8_t b = stream_read_uint8((struct stream *)r->read_stream);
-		if(r->handle_byte)
-			r->handle_byte(r, b);
-		midi_reader_eat(r, b);
-	}
-
-	return MIDI_SUCCESS;
+void midi_track_init(struct midi_track *track) {
+	buffer_init(&track->buffer);
+	track->last_cmd = 0;
 }
 
-void midi_reader_eat(struct midi_reader *r, uint8_t b) {
-	switch(r->state) {
-		case None:
-			r->duration = 0;
-			// fall through to the next case
-		case Duration:
-			r->duration <<= 7;
-			r->duration |= (b & 0x7f);
-			if(b & 0x80) {
-				r->state = Duration;
-			} else {
-				r->state = AfterDuration;
-			}
-			break;
-		case AfterDuration:
-			if(b & 0x80) {
-				r->command = b;
-				r->channel = b & 0x0f;
-			} else {
-				switch(r->command) {
-					case 0xff:
-						r->xx = b;
-						r->state = MetaEventL;
-						break;
-					case 0xf8:
-						// Timing clock
-						break;
-					case 0xfa:
-						break;
-					case 0xfb:
-						break;
-					case 0xfc:
-						break;
-					default:
-						switch(r->command & 0xf0) {
-							case 0x80:
-								r->nn = b;
-								r->state = NoteOffV;
-								break;
-							case 0x90:
-								r->nn = b;
-								r->state = NoteOnV;
-								break;
-							case 0xa0:
-								r->nn = b;
-								r->state = KeyAfterTouchV;
-								break;
-							case 0xb0:
-								r->nn = b;
-								r->state = ControlChangeV;
-								break;
-							case 0xc0:
-								if(r->handle_program_change)
-									r->handle_program_change(r, r->channel, r->duration, b);
-								r->state = None;
-								break;
-							case 0xd0:
-								if(r->handle_channel_after_touch)
-									r->handle_channel_after_touch(r, r->channel, r->duration, b);
-								r->state = None;
-								break;
-							case 0xe0:
-								r->nn = b;
-								r->state = PitchWheelChangeT;
-								break;
-							default:
-								if(r->handle_unknown_command)
-									r->handle_unknown_command(r, b);
-								r->state = None;
-								break;
-						}
-						break;
-				}
-			}
-			break;
-		case MetaEventL:
-			r->meta_len = b;
-			r->meta_count = 0;
-			if(r->meta_len == 0) {
-				if(r->handle_meta_event)
-					r->handle_meta_event(r, r->duration, r->xx, 0, 0);
-				switch(r->xx) {
-					case 0x2f:
-						if(r->handle_track_end)
-							r->handle_track_end(r, r->duration);
-						break;
-				}
-				r->state = None;
-			} else {
-				r->meta_buf = malloc(r->meta_len + 1); // add +1 for trailing zero
-				r->state = MetaEventD;
-			}
-			break;
-		case MetaEventD:
-			r->meta_buf[r->meta_count++] = b;
-			if(r->meta_count == r->meta_len) {
-				r->state = None;
-				r->meta_buf[r->meta_len] = 0;
-				if(r->handle_meta_event)
-					r->handle_meta_event(r, r->duration, r->xx, r->meta_len, r->meta_buf);
-				switch(r->xx) {
-					case 0x00: // Track sequence number
-						if(r->meta_len >= 2) {
-							if(r->handle_meta_sequence_number)
-								r->handle_meta_sequence_number(r, r->duration, (r->meta_buf[0] << 8) | r->meta_buf[1]);
-						}
-						break;
-					case 0x01: // Text event
-						if(r->handle_text_event)
-							r->handle_text_event(r, r->duration, (const char *)r->meta_buf);
-						break;
-					case 0x02: // Copyright info text
-						if(r->handle_copyright_info_event)
-							r->handle_copyright_info_event(r, r->duration, (const char *)r->meta_buf);
-						break;
-					case 0x03: // Track name text
-						if(r->handle_track_name_event)
-							r->handle_track_name_event(r, r->duration, (const char *)r->meta_buf);
-						break;
-					case 0x04: // Instrument name text
-						if(r->handle_instrument_name_event)
-							r->handle_instrument_name_event(r, r->duration, (const char *)r->meta_buf);
-						break;
-					case 0x05: // Lyric text
-						if(r->handle_lyric_event)
-							r->handle_lyric_event(r, r->duration, (const char *)r->meta_buf);
-						break;
-					case 0x06: // Marker text
-						if(r->handle_marker_text_event)
-							r->handle_marker_text_event(r, r->duration, (const char *)r->meta_buf);
-						break;
-					case 0x08:
-						if(r->handle_program_name_event)
-							r->handle_program_name_event(r, r->duration, (const char *)r->meta_buf);
-						break;
-					case 0x09:
-						if(r->handle_device_name_event)
-							r->handle_device_name_event(r, r->duration, (const char *)r->meta_buf);
-						break;
-					case 0x51: // Set tempo
-						if(r->meta_len >= 3)
-							if(r->handle_tempo)
-								r->handle_tempo(r, r->duration, (r->meta_buf[0] << 16) | (r->meta_buf[1] << 8) | r->meta_buf[2]);
-						break;
-					case 0x58: {
-							uint8_t numerator = 0;
-							uint8_t denominator = 0;
-							uint8_t ticksPerClick = 0;
-							uint8_t quarterNote32ndNotes = 0;
-							if(r->meta_len >= 1) numerator = r->meta_buf[0];
-							if(r->meta_len >= 2) denominator = r->meta_buf[1];
-							if(r->meta_len >= 3) ticksPerClick = r->meta_buf[2];
-							if(r->meta_len >= 4) quarterNote32ndNotes = r->meta_buf[3];
-							if(r->handle_time_signature)
-								r->handle_time_signature(r, r->duration, numerator, denominator, ticksPerClick, quarterNote32ndNotes);
-						}
-						break;
-				}
-				free(r->meta_buf);
-				r->meta_buf = 0;
-			}
-			break;
-		case NoteOffV:
-			if(r->handle_note_off)
-				r->handle_note_off(r, r->channel, r->duration, r->nn, b);
-			r->state = None;
-			break;
-		case NoteOnV:
-			if(r->handle_note_on)
-				r->handle_note_on(r, r->channel, r->duration, r->nn, b);
-			r->state = None;
-			break;
-		case KeyAfterTouchV:
-			if(r->handle_key_after_touch)
-				r->handle_key_after_touch(r, r->channel, r->duration, r->nn, b);
-			r->state = None;
-			break;
-		case ControlChangeV:
-			if(r->handle_control_change)
-				r->handle_control_change(r, r->channel, r->duration, r->nn, b);
-			switch(r->nn) {
-				case 98:
-					r->rpn_lsb = b;
-					r->nrpn = 1;
-					break;
-				case 99:
-					r->rpn_msb = b;
-					r->nrpn = 1;
-					break;
-				case 100:
-					r->rpn_lsb = b;
-					r->nrpn = 0;
-					break;
-				case 101:
-					r->rpn_msb = b;
-					r->nrpn = 0;
-					break;
-				case 6:
-					if(r->rpn_lsb < 127 && r->rpn_msb < 127) {
-						if(r->nrpn) {
-							if(r->handle_nrpn)
-								r->handle_nrpn(r, r->duration, r->channel, ((r->rpn_msb & 0x7f) << 7) | (r->rpn_lsb & 0x7f), b);
-						} else {
-							if(r->handle_rpn)
-								r->handle_rpn(r, r->duration, r->channel, ((r->rpn_msb & 0x7f) << 7) | (r->rpn_lsb & 0x7f), b);
-						}
-					}
-					break;
-				case 38:
-					if(r->rpn_lsb < 127 && r->rpn_msb < 127) {
-						if(r->nrpn) {
-							if(r->handle_nrpn_lsb)
-								r->handle_nrpn_lsb(r, r->duration, r->channel, ((r->rpn_msb & 0x7f) << 7) | (r->rpn_lsb & 0x7f), b);
-						} else {
-							if(r->handle_rpn_lsb)
-								r->handle_rpn_lsb(r, r->duration, r->channel, ((r->rpn_msb & 0x7f) << 7) | (r->rpn_lsb & 0x7f), b);
-						}
-					}
-					break;
-			}
-			r->state = None;
-			break;
-		case PitchWheelChangeT:
-			if(r->handle_pitch_wheel_change)
-				r->handle_pitch_wheel_change(r, r->channel, r->duration, r->nn | (b << 7));
-			r->state = None;
-			break;
-		default:
-			r->state = None;
+void midi_track_write_delta_time(struct midi_track *track, uint32_t t) {
+	if(t > 0x1fffff) buffer_write_uint8(&track->buffer, 0x80 | ((t >> 21) & 0x7f));
+	if(t > 0x3fff) buffer_write_uint8(&track->buffer, 0x80 | ((t >> 14) & 0x7f));
+	if(t > 0x7f) buffer_write_uint8(&track->buffer, 0x80 | ((t >> 7) & 0x7f));
+	buffer_write_uint8(&track->buffer, t & 0x7f);
+}
+
+void midi_track_write_cmd(track, struct midi_track *track, uint8_t cmd, bool noReuse = false) {
+	if(last_cmd != cmd || noReuse == true) {
+		last_cmd = cmd;
+		buffer_write_uint8(&track->buffer, cmd);
 	}
+}
+
+void midi_track_write_note_on(struct midi_track *track, uint32_t delta_time, uint8_t channel, uint8_t note, uint8_t velocity) {
+	midi_track_write_delta_time(track, delta_time);
+	midi_track_write_cmd(track, 0x90 | (channel & 0x0f));
+	buffer_write_uint8(&track->buffer, note & 0x7f);
+	buffer_write_uint8(&track->buffer, velocity & 0x7f);
+}
+
+void midi_track_write_meta_event(struct midi_track *track, uint32_t delta_time, uint8_t ev, uint8_t len, uint8_t *buf) {
+	midi_track_write_delta_time(track, delta_time);
+	midi_track_write_cmd(track, 0xff, true);
+	buffer_write_uint8(&track->buffer, ev);
+	buffer_write_uint8(&track->buffer, len);
+	buffer_write(&track->buffer, buf, len);
+}
+
+void midi_track_write_meta_event(struct midi_track *track, uint32_t delta_time, uint8_t ev, uint8_t len, ...) {
+	midi_track_write_delta_time(track, delta_time);
+	midi_track_write_cmd(track, 0xff, true);
+	buffer_write_uint8(&track->buffer, ev);
+	buffer_write_uint8(&track->buffer, len);
+	if(len > 0) {
+		va_list ap;
+		va_start(ap, len);
+		for(int i = 0; i < len; i++) buffer_write_uint8(&track->buffer, va_arg(ap, unsigned int));
+		va_end(ap);
+	}
+}
+
+void midi_track_write_tempo(struct midi_track *track, uint32_t delta_time, uint32_t tempo) {
+	midi_track_write_meta_event(delta_time, 0x51, 3, (tempo >> 16) & 0xff, (tempo >> 8) & 0xff, (tempo >> 0) & 0xff);
+}
+
+void midi_track_write_time_signature(struct midi_track *track, uint32_t delta_time, uint8_t numerator, uint8_t denominator, uint8_t ticksPerClick = 0, uint8_t quarterNote32ndNotes = 0) {
+	if(quarterNote32ndNotes > 0 || ticksPerClick > 0)
+		midi_track_write_meta_event(delta_time, 0x58, 4, numerator, denominator, ticksPerClick, quarterNote32ndNotes);
+	else
+		midi_track_write_meta_event(delta_time, 0x58, 2, numerator, denominator);
+}
+
+void midi_track_write_track_end(struct midi_track *track, uint32_t delta_time) {
+	midi_track_write_meta_event(delta_time, 0x2f, 0);
+}
+
+void midi_track_write_program_change(struct midi_track *track, uint32_t delta_time, uint8_t channel, uint8_t program) {
+	midi_track_write_delta_time(track, delta_time);
+	uint8_t cmd = 0xc0 | (channel & 0x0f);
+	midi_track_write_cmd(track, cmd);
+	buffer_write_uint8(&track->buffer, program & 0x7f);
+}
+
+void midi_track_write_text_event(struct midi_track *track, uint8_t event, uint32_t delta_time, const char *text, int len = -1) {
+	if(len < 0) len = strlen(text);
+	if(len > 127) len = 127;
+	midi_track_write_meta_event(track, delta_time, event, len, (uint8_t *)text);
+}
+
+void midi_track_write_text(struct midi_track *track, uint32_t delta_time, const char *text, int len = -1) {
+	midi_track_write_text_event(track, 0x01, delta_time, text, len);
+}
+
+void midi_track_write_track_name(struct midi_track *track, uint32_t delta_time, const char *text, int len = -1) {
+	midi_track_write_text_event(track, 0x03, delta_time, text, len);
+}
+
+void midi_track_write_pitch_bend(struct midi_track *track, uint32_t delta_time, uint8_t channel, uint16_t bend) {
+	midi_track_write_delta_time(track, delta_time);
+	midi_track_write_cmd(track, 0xe0 | (channel & 0x0f));
+	buffer_write_uint8(&track->buffer, bend & 0x7f);
+	buffer_write_uint8(&track->buffer, (bend >> 7) & 0x7f);
+}
+
+void midi_track_write_control_change(struct midi_track *track, uint32_t delta_time, uint8_t channel, uint8_t controller, uint8_t value) {
+	midi_track_write_delta_time(track, delta_time);
+	midi_track_write_cmd(track, 0xb0 | (channel & 0x0f), true);
+	buffer_write_uint8(&track->buffer, controller & 0x7f);
+	buffer_write_uint8(&track->buffer, value & 0x7f);
+}
+
+void midi_track_write_nrpn(struct midi_track *track, uint32_t delta_time, uint8_t channel, uint16_t number, uint8_t value_msb) {
+	midi_track_write_control_change(track, delta_time, channel, 99, (number >> 7) & 0x7f);
+	midi_track_write_control_change(track, 0, channel, 98, number & 0x7f);
+	midi_track_write_control_change(track, 0, channel, 6, value_msb & 0x7f);
+}
+
+void midi_track_write_nrpn(struct midi_track *track, uint32_t delta_time, uint8_t channel, uint16_t number, uint8_t value_msb, uint8_t value_lsb) {
+	midi_track_write_control_change(track, delta_time, channel, 99, (number >> 7) & 0x7f);
+	midi_track_write_control_change(track, 0, channel, 98, number & 0x7f);
+	midi_track_write_control_change(track, 0, channel, 6, value_msb & 0x7f);
+	midi_track_write_control_change(track, 0, channel, 38, value_lsb & 0x7f);
+}
+
+void midi_track_write_rpn(struct midi_track *track, uint32_t delta_time, uint8_t channel, uint16_t number, uint8_t value_msb) {
+	midi_track_write_control_change(track, delta_time, channel, 101, (number >> 7) & 0x7f);
+	midi_track_write_control_change(track, 0, channel, 100, number & 0x7f);
+	midi_track_write_control_change(track, 0, channel, 6, value_msb & 0x7f);
+}
+
+void midi_track_write_rpn(struct midi_track *track, uint32_t delta_time, uint8_t channel, uint16_t number, uint8_t value_msb, uint8_t value_lsb) {
+	midi_track_write_control_change(track, delta_time, channel, 101, (number >> 7) & 0x7f);
+	midi_track_write_control_change(track, 0, channel, 100, number & 0x7f);
+	midi_track_write_control_change(track, 0, channel, 6, value_msb & 0x7f);
+	midi_track_write_control_change(track, 0, channel, 38, value_lsb & 0x7f);
+}
+
+void midi_track_write_bank_select(struct midi_track *track, uint32_t delta_time, uint8_t channel, uint16_t bank) {
+	midi_track_write_control_change(track, delta_time, channel, 0, (bank >> 7) & 0x7f);
+	midi_track_write_control_change(track, 0, channel, 32, bank & 0x7f);
 }
