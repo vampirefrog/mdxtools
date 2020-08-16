@@ -56,7 +56,7 @@ void mdx_decompiler_init(struct mdx_decompiler *d, char *buf, int columns) {
 
 void mdx_decompiler_decompile(struct mdx_decompiler *d, struct mdx_file *f) {
 	uint8_t utfbuf[256];
-	char titlebuf[256];
+	char titlebuf[280];
 	int l;
 	if(f->title_len > 0) {
 		memset(utfbuf, 0, sizeof(utfbuf));
