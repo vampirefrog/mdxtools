@@ -64,7 +64,11 @@ int mdx_file_load(struct mdx_file *f, uint8_t *data, int len);
 
 int mdx_cmd_len(uint8_t *data, int pos, int len);
 const char *mdx_lfo_waveform_name(uint8_t waveform);
+const char mdx_channel_name(uint8_t channel);
+int mdx_note_octave(int note);
 const char *mdx_error_name(int err);
+const char *mdx_note_name(int note);
+const char *mdx_command_name(uint8_t c);
 
 uint8_t mdx_voice_get_id(uint8_t *v);
 uint8_t mdx_voice_get_fl(uint8_t *v);

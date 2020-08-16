@@ -162,6 +162,12 @@ const char *mdx_lfo_waveform_name(uint8_t waveform) {
 	return waveform <= 2 ? waveform_names[waveform] : "invalid";
 }
 
+const char mdx_channel_name(uint8_t chan) {
+	if(chan < 8) return 'A' + chan;
+	if(chan < 16) return 'P' + chan - 8;
+	return '!';
+}
+
 const char *mdx_error_name(int err) {
 	const char *names[] = {
 		"Success",
@@ -173,6 +179,48 @@ const char *mdx_error_name(int err) {
 		return names[err];
 	}
 	return "Unknown";
+}
+
+const char *mdx_command_name(uint8_t c) {
+	const char *cmdNames[] = {
+		"Informal",           // 0xe6
+		"Extended MML",       // 0xe7
+		"PCM4/8 enable",      // 0xe8
+		"LFO delay",          // 0xe9
+		"OPM LFO",            // 0xea
+		"Amplitude LFO",      // 0xeb
+		"Pitch LFO",          // 0xec
+		"ADPCM/noise freq",   // 0xed
+		"Sync wait",          // 0xee
+		"Sync send",          // 0xef
+		"Key on delay",       // 0xf0
+		"Data end",           // 0xf1
+		"Portamento",         // 0xf2
+		"Detune",             // 0xf3
+		"Repeat escape",      // 0xf4
+		"Repeat end",         // 0xf5
+		"Repeat start",       // 0xf6
+		"Disable key-off",    // 0xf7
+		"Sound length",       // 0xf8
+		"Volume dec",         // 0xf9
+		"Volume inc",         // 0xfa
+		"Set volume",         // 0xfb
+		"Output phase",       // 0xfc
+		"Set voice #",        // 0xfd
+		"Set OPM reg",        // 0xfe
+		"Set tempo",          // 0xff
+	};
+	if(c >= 0xe6 && c <= 0xff) return cmdNames[c - 0xe6];
+	return "Unknown";
+}
+
+const char *mdx_note_name(int note) {
+	const char *noteNames[] = { "c", "c+", "d", "d+" , "e", "f", "f+", "g", "g+", "a", "a+", "b",  };
+	return noteNames[(note + 3) % 12];
+}
+
+int mdx_note_octave(int note) {
+	return (note + 3) / 12;
 }
 
 uint8_t mdx_voice_get_id(uint8_t *v) {
