@@ -3,61 +3,13 @@
 #include "mdx.h"
 #include "tools.h"
 
-static const char *commandName(uint8_t c) {
-	const char *cmdNames[] = {
-		"Informal",           // 0xe6
-		"Extended MML",       // 0xe7
-		"PCM4/8 enable",      // 0xe8
-		"LFO delay",          // 0xe9
-		"OPM LFO",            // 0xea
-		"Amplitude LFO",      // 0xeb
-		"Pitch LFO",          // 0xec
-		"ADPCM/noise freq",   // 0xed
-		"Sync wait",          // 0xee
-		"Sync send",          // 0xef
-		"Key on delay",       // 0xf0
-		"Data end",           // 0xf1
-		"Portamento",         // 0xf2
-		"Detune",             // 0xf3
-		"Repeat escape",      // 0xf4
-		"Repeat end",         // 0xf5
-		"Repeat start",       // 0xf6
-		"Disable key-off",    // 0xf7
-		"Sound length",       // 0xf8
-		"Volume dec",         // 0xf9
-		"Volume inc",         // 0xfa
-		"Set volume",         // 0xfb
-		"Output phase",       // 0xfc
-		"Set voice #",        // 0xfd
-		"Set OPM reg",        // 0xfe
-		"Set tempo",          // 0xff
-	};
-	if(c >= 0xe6 && c <= 0xff) return cmdNames[c - 0xe6];
-	return "Unknown";
-}
-
-static const char *noteName(int note) {
-	const char *noteNames[] = { "c", "c+", "d", "d+" , "e", "f", "f+", "g", "g+", "a", "a+", "b",  };
-	return noteNames[(note + 3) % 12];
-}
-
-static int noteOctave(int note) {
-	return (note + 3) / 12;
-}
-
-static char channelName(uint8_t chan) {
-	if(chan < 8) return 'A' + chan;
-	if(chan < 16) return 'P' + chan - 8;
-	return '!';
-}
-
 void handleRest(uint8_t duration) { printf("Rest %d (192 / %d)\n", duration, duration == 0 ? 0 : 192 / duration); }
-void handleNote(uint8_t note, uint8_t duration) { printf("Note %d (%s%d) duration %d (192 / %d)\n", note, noteName(note), noteOctave(note), duration, duration == 0 ? 0 : 192 / duration); }
+void handleNote(uint8_t note, uint8_t duration) { printf("Note %d (%s%d) duration %d (192 / %d)\n", note, mdx_note_name(note), mdx_note_octave(note), duration, duration == 0 ? 0 : 192 / duration); }
 void handleCommand(uint8_t c, ...) { /* printf("Command 0x%02x: %s\n", c, commandName(c)); */ }
 void handlePCM8ExpansionShift() { printf("PCM8ExpansionShift\n"); }
 void handleUndefinedCommand(uint8_t b) { printf("UndefinedCommand %d\n", b); }
-void handleChannelStart(int chan) { printf("ChannelStart %c (%d)\n", channelName(chan), chan); }
-void handleChannelEnd(int chan) { printf("ChannelEnd %c (%d)\n", channelName(chan), chan); }
+void handleChannelStart(int chan) { printf("ChannelStart %c (%d)\n", mdx_channel_name(chan), chan); }
+void handleChannelEnd(int chan) { printf("ChannelEnd %c (%d)\n", mdx_channel_name(chan), chan); }
 
 /* ff */ void handleSetTempo(uint8_t t) { printf("SetTempo %d BPM (%d)\n", 78125 / (16 * (256 - t)), t); }
 /* fe */ void handleSetOPMRegister(uint8_t reg, uint8_t val) { printf("SetOPMRegister 0x%02x 0x%02x;\n", reg, val); }
@@ -115,7 +67,7 @@ static void run_through_file(struct mdx_file *f, int *num_cmds_out, int *pcm8_ou
 				pcm_notes_out[*p - 0x80]++;
 			}
 
-			printf("channel=%d file_offset=0x%08x channel_offset=0x%08x length=%d ", i, j + (chan->data - f->data), j, l);
+			// printf("channel=%d file_offset=0x%08x channel_offset=0x%08x length=%d ", i, j + (chan->data - f->data), j, l);
 
 			if(*p <= 0x7f) {
 				handleRest(*p);
