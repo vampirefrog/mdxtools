@@ -4,7 +4,7 @@
 #include "stream.h"
 #include "tools.h"
 
-int stream_seek(struct stream *stream, long offset, int whence) {
+size_t stream_seek(struct stream *stream, long offset, int whence) {
 	return stream->seek(stream, offset, whence);
 }
 
@@ -16,21 +16,21 @@ int stream_eof(struct stream *stream) {
 	return stream->eof(stream);
 }
 
-int stream_write(struct stream *stream, void *ptr, size_t size) {
+ssize_t stream_write(struct stream *stream, void *ptr, size_t size) {
 	return stream->write(stream, ptr, size);
 }
 
-int stream_write_big_uint16(struct stream *stream, uint16_t i) {
+ssize_t stream_write_big_uint16(struct stream *stream, uint16_t i) {
 	uint8_t buf[2] = { i >> 8, i & 0xff };
 	return stream_write(stream, buf, 2);
 }
 
-int stream_write_big_uint32(struct stream *stream, uint32_t i) {
+ssize_t stream_write_big_uint32(struct stream *stream, uint32_t i) {
 	uint8_t buf[4] = { i >> 24, i >> 16, i >> 8, i };
 	return stream_write(stream, buf, 4);
 }
 
-int stream_write_buffer(struct stream *stream, struct buffer *buffer) {
+ssize_t stream_write_buffer(struct stream *stream, struct buffer *buffer) {
 	return stream_write(stream, buffer->data, buffer->data_len);
 }
 
@@ -68,8 +68,9 @@ size_t mem_stream_write(struct stream *stream, void *ptr, size_t size) {
 	struct mem_stream *mem_stream = (struct mem_stream *)stream;
 	if(mem_stream->buffer->data_len < stream->position + size) {
 		int err = buffer_reserve(mem_stream->buffer, stream->position + size - mem_stream->buffer->data_len);
-		mem_stream->buffer->data_len += stream->position + size - mem_stream->buffer->data_len;
 		stream->_errno = errno;
+		if(err) return 0;
+		mem_stream->buffer->data_len += stream->position + size - mem_stream->buffer->data_len;
 	}
 	memcpy(mem_stream->buffer->data + stream->position, ptr, size);
 
@@ -80,7 +81,7 @@ size_t mem_stream_write(struct stream *stream, void *ptr, size_t size) {
 
 size_t mem_stream_read(struct stream *stream, void *ptr, size_t size) {
 	struct mem_stream *mem_stream = (struct mem_stream *)stream;
-	int read_len = MIN(mem_stream->buffer->data_size - stream->position, size);
+	int read_len = MIN(mem_stream->buffer->data_len - stream->position, size);
 	memcpy(ptr, mem_stream->buffer->data + stream->position, read_len);
 	stream->position += read_len;
 	stream->_errno = errno;
@@ -88,15 +89,15 @@ size_t mem_stream_read(struct stream *stream, void *ptr, size_t size) {
 }
 
 size_t mem_stream_seek(struct stream *stream, long offset, int whence) {
-	struct mem_stream *stream = (struct mem_stream *)stream;
-	stream->position = MIN(offset, stream->data_size);
+	struct mem_stream *mem_stream = (struct mem_stream *)stream;
+	stream->position = MIN(offset, mem_stream->buffer->data_len);
 	stream->_errno = 0;
 	return stream->position;
 }
 
 int mem_stream_eof(struct stream *stream) {
-	struct mem_stream *stream = (struct mem_stream *)stream;
-	stream->position = stream->position >= stream->data_size;
+	struct mem_stream *mem_stream = (struct mem_stream *)stream;
+	stream->position = stream->position >= mem_stream->buffer->data_len;
 	return stream->position;
 }
 
@@ -119,42 +120,42 @@ int mem_stream_init(struct mem_stream *stream, struct buffer *buffer) {
 }
 
 size_t file_stream_read(struct stream *stream, void *ptr, size_t size) {
-	struct file_stream *stream = (struct file_stream *)stream;
-	size_t r = fread(ptr, 1, size, stream->f);
+	struct file_stream *file_stream = (struct file_stream *)stream;
+	size_t r = fread(ptr, 1, size, file_stream->f);
 	stream->_errno = errno;
 	return r;
 }
 
 size_t file_stream_write(struct stream *stream, void *ptr, size_t size) {
-	struct file_write_stream *write_stream = (struct file_write_stream *)stream;
+	struct file_stream *write_stream = (struct file_stream *)stream;
 	size_t r = fwrite(ptr, 1, size, write_stream->f);
 	stream->_errno = errno;
 	return r;
 }
 
 size_t file_stream_seek(struct stream *stream, long offset, int whence) {
-	struct file_stream *stream = (struct file_stream *)stream;
-	size_t r = fseek(stream->f, offset, whence);
+	struct file_stream *file_stream = (struct file_stream *)stream;
+	size_t r = fseek(file_stream->f, offset, whence);
 	stream->_errno = errno;
 	return r;
 }
 
 int file_stream_eof(struct stream *stream) {
-	struct file_stream *stream = (struct file_stream *)stream;
-	int r = feof(stream->f);
+	struct file_stream *file_stream = (struct file_stream *)stream;
+	int r = feof(file_stream->f);
 	stream->_errno = errno;
 	return r;
 }
 
 long file_stream_tell(struct stream *stream) {
-	struct file_stream *stream = (struct file_stream *)stream;
-	long r = ftell(stream->f);
+	struct file_stream *file_stream = (struct file_stream *)stream;
+	long r = ftell(file_stream->f);
 	stream->_errno = errno;
 	return r;
 }
 
-int file_stream_init(struct file_stream *stream, char *filename) {
-	stream->f = fopen(filename, "rb");
+int file_stream_init(struct file_stream *stream, char *filename, const char *mode) {
+	stream->f = fopen(filename, mode);
 	stream->stream._errno = errno;
 	if(!stream->f) return -1;
 
