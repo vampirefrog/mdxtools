@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "pdx.h"
 #include "adpcm.h"
 
