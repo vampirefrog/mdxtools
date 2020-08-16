@@ -140,7 +140,7 @@ static void mdxinfo(const char *filename) {
 			if(f.pdx_filename_len) {
 				char pdxbuf[512], pdxutf[512];
 				f.pdx_filename[f.pdx_filename_len] = 0;
-				int ul = sjis_to_utf8(f.pdx_filename, f.pdx_filename_len, pdxutf, sizeof(pdxutf));
+				int ul = sjis_to_utf8(f.pdx_filename, f.pdx_filename_len, (uint8_t *)pdxutf, sizeof(pdxutf));
 				pdxutf[ul] = 0;
 				find_pdx_file(filename, pdxutf, pdxbuf, sizeof(pdxbuf));
 				printf("%s\t", pdxbuf);
