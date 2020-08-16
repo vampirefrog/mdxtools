@@ -1,0 +1,14 @@
+- switch to windows
+	- write tests for mml2mlx
+		- finish mml2mdx
+			- rewrite mdx driver code (split into interpreter + driver)
+				- rewrite mdxstat
+				- write mdx2vgm with mdx driver
+				- rewrite mdx2midi with mdx driver
+			- rewrite the adpcm driver code
+				- rewrite pdx2sf2
+
+	- make mididump more readable (echo time offset)
+
+	- write sjis2utf8
+	- write utf82sjis

@@ -1,6 +1,6 @@
 struct adpcm_status {
-    short last;
-    short step_index;
+	short last;
+	short step_index;
 };
 
 void adpcm_init(struct adpcm_status *);

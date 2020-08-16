@@ -487,7 +487,7 @@ static int mdx_driver_advance_channel(struct mdx_driver *r, int chan_num) {
 				chan->pos += 6;
 			}
 			break;
-		case 0xea:
+		case 0xea: // MHON/MHOF/MH
 			if(chan->data[chan->pos + 1] == 0x80) {
 				//printf("%d: MHOF\n", chan_num);
 				chan->mhon = 0;
@@ -512,7 +512,7 @@ static int mdx_driver_advance_channel(struct mdx_driver *r, int chan_num) {
 				chan->pos += 6;
 			}
 			break;
-		case 0xe9:
+		case 0xe9: // LFO Delay
 			chan->lfo_delay = chan->data[chan->pos + 1];
 			chan->pos += 2;
 			break;
