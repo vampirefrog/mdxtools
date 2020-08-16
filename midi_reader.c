@@ -40,7 +40,7 @@ void midi_reader_init(struct midi_reader *r) {
 	r->handle_nrpn_lsb = 0;
 }
 
-int midi_reader_load(struct midi_reader *r, struct read_stream *s) {
+int midi_reader_load(struct midi_reader *r, struct stream *s) {
 	r->stream = s;
 
 	midi_reader_read_header(r);

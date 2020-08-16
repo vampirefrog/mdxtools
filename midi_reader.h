@@ -3,7 +3,7 @@
 #include "midi.h"
 
 struct midi_reader {
-	struct stream *read_stream;
+	struct stream *stream;
 
 	uint8_t rpn_msb, rpn_lsb;
 	unsigned nrpn:1;
@@ -69,7 +69,7 @@ struct midi_reader {
 };
 
 void midi_reader_init(struct midi_reader *r);
-int midi_reader_load(struct midi_reader *r, struct read_stream *s);
+int midi_reader_load(struct midi_reader *r, struct stream *s);
 int midi_reader_read_header(struct midi_reader *r);
 int midi_reader_read_track(struct midi_reader *r, int i);
 void midi_reader_eat(struct midi_reader *r, uint8_t b);
