@@ -254,7 +254,7 @@ static void run_through_file(struct mdx_file *f, int *num_cmds_out, int *pcm8_ou
 			if(*p <= 0x7f) {
 				handleRest(*p);
 			} else if(*p <= 0xdf) {
-				handleNote(*p - 0x80, p[1]);
+				handleNote(*p - 0x80, p[1] + 1);
 			} else switch(*p) {
 				case 0xff: handleSetTempo(p[1]); break;
 				case 0xfe: handleSetOPMRegister(p[1], p[2]); break;
