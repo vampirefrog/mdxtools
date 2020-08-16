@@ -45,8 +45,8 @@ void mdx_compiler_save(struct mdx_compiler *compiler, const char *filename) {
 	int total_data_len = 0;
 	int total_channels = compiler->ex_pcm ? 16 : 9;
 	for(int i = 0; i < total_channels; i++) {
-		buffer_put(&compiler->channels[i].buf, 0xf1);
-		buffer_put(&compiler->channels[i].buf, 0x00);
+		buffer_write_uint8(&compiler->channels[i].buf, 0xf1);
+		buffer_write_uint8(&compiler->channels[i].buf, 0x00);
 		total_data_len += compiler->channels[i].buf.data_len;
 	}
 	total_data_len += total_channels * 2 + 2;
@@ -122,7 +122,7 @@ void mdx_compiler_write(struct mdx_compiler *compiler, int chan_mask, ...) {
 		for(int i = 0, m = 1; i < 16; i++, m <<= 1) {
 			if(chan_mask & m) {
 				struct mdx_compiler_channel *chan = &compiler->channels[i];
-				buffer_put(&chan->buf, c);
+				buffer_write_uint8(&chan->buf, c);
 			}
 		}
 	}
@@ -173,9 +173,9 @@ void mdx_compiler_note(struct mdx_compiler *compiler, int chan_mask, int note, s
 	for(int i = 0, m = 1; i < 16; i++, m <<= 1) {
 		if(chan_mask & m) {
 			struct mdx_compiler_channel *chan = &compiler->channels[i];
-			buffer_put(&chan->buf, 0x80 + mdx_compiler_note_value(chan->octave, note));
+			buffer_write_uint8(&chan->buf, 0x80 + mdx_compiler_note_value(chan->octave, note));
 			int ticks = mdx_compiler_calc_notelength(l, chan->default_note_length);
-			buffer_put(&chan->buf, ticks-1);
+			buffer_write_uint8(&chan->buf, ticks-1);
 			chan->total_ticks += ticks;
 		}
 	}
@@ -186,7 +186,7 @@ void mdx_compiler_rest(struct mdx_compiler *compiler, int chan_mask, struct mml_
 		if(chan_mask & m) {
 			struct mdx_compiler_channel *chan = &compiler->channels[i];
 			int ticks = mdx_compiler_calc_notelength(l, chan->default_note_length);
-			buffer_put(&chan->buf, ticks-1);
+			buffer_write_uint8(&chan->buf, ticks-1);
 			chan->total_ticks += ticks;
 		}
 	}
@@ -234,9 +234,9 @@ void mdx_compiler_note_num(struct mdx_compiler *compiler, int chan_mask, int not
 	for(int i = 0, m = 1; i < 16; i++, m <<= 1) {
 		if(chan_mask & m) {
 			struct mdx_compiler_channel *chan = &compiler->channels[i];
-			buffer_put(&chan->buf, 0x80 + note);
+			buffer_write_uint8(&chan->buf, 0x80 + note);
 			int ticks = mdx_compiler_calc_notelength(l, chan->default_note_length);
-			buffer_put(&chan->buf, ticks-1);
+			buffer_write_uint8(&chan->buf, ticks-1);
 			chan->total_ticks += ticks;
 		}
 	}
@@ -255,7 +255,7 @@ void mdx_compiler_legato(struct mdx_compiler *compiler, int chan_mask) {
 		if(chan_mask & m) {
 			struct mdx_compiler_channel *chan = &compiler->channels[i];
 			if(chan->buf.data_len > 2) {
-				buffer_put(&chan->buf, chan->buf.data[chan->buf.data_len - 1]);
+				buffer_write_uint8(&chan->buf, chan->buf.data[chan->buf.data_len - 1]);
 				chan->buf.data[chan->buf.data_len - 2] = chan->buf.data[chan->buf.data_len - 3];
 				chan->buf.data[chan->buf.data_len - 3] = 0xf7;
 			}
