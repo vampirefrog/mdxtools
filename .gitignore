@@ -5,8 +5,8 @@
 *.vgz
 *.mus
 *.MUS
-*.mml
-*.MML
+./*.mml
+./*.MML
 *.P
 *.mid
 *.opm
