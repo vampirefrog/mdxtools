@@ -11,8 +11,8 @@ mididump
 all: $(PROGS)
 
 ifneq (,$(findstring MINGW,$(shell uname -s)))
-CFLAGS+=-I../portaudio/include
-LIBS=-lz -liconv -lws2_32
+CFLAGS+=-I../portaudio/include -static-libgcc
+LIBS=-lz -liconv -lws2_32 -static-libgcc
 else
 CFLAGS+=$(shell pkg-config portaudio-2.0 --cflags)
 LIBS=-lz
