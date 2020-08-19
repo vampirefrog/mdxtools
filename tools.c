@@ -3,14 +3,16 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
-#include <libgen.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <dirent.h>
+#ifndef WIN32
+#include <libgen.h>
+#include <unistd.h>
 #ifndef __EMSCRIPTEN__
 #include <zlib.h>
 #endif /* __EMSCRIPTEN */
+#endif
 #include "tools.h"
 
 uint8_t *load_file(const char *filename, size_t *size_out) {
@@ -45,6 +47,7 @@ uint8_t *load_file(const char *filename, size_t *size_out) {
 	return data;
 }
 
+#ifndef WIN32
 #ifndef __EMSCRIPTEN__
 uint8_t *load_gzfile(const char *filename, size_t *size_out) {
 	gzFile f = gzopen(filename, "rb");
@@ -93,7 +96,13 @@ uint8_t *load_gzfile(const char *filename, size_t *size_out) {
 	return data;
 }
 #endif /* __EMSCRIPTEN */
+#endif /* WIN32 */
 
+#ifdef __MINGW32__
+int alphasort(const struct dirent **a, const struct dirent **b) {
+	return strcmp((*a)->d_name, (*b)->d_name);
+}
+#endif
 
 int gcd(int a, int b) {
 	int c = a % b;
@@ -108,7 +117,7 @@ int gcd(int a, int b) {
 }
 int find_pdx_file(const char *mdx_file_path, const char *pdx_filename, char *out, int out_len) {
 	char *s = strdup(mdx_file_path);
-	char *d = dirname(s);
+	char *dn = dirname(s);
 
 	char buf[256];
 	struct stat st;
@@ -127,17 +136,19 @@ int find_pdx_file(const char *mdx_file_path, const char *pdx_filename, char *out
 			goto good;
 		}
 
+		DIR *d;
+		struct dirent *dir;
+		d = opendir(dn);
 		int found = 0;
-		struct dirent **namelist;
-		int n = scandir(d, &namelist, NULL, alphasort);
-		while(n--) {
-			if(!found && !strcasecmp(namelist[n]->d_name, buf)) {
-				snprintf(out, out_len, "%s/%s", d, namelist[n]->d_name);
-				found = 1;
+		if(d) {
+			while((dir = readdir(d)) != NULL) {
+				if(!strcasecmp(dir->d_name, buf)) {
+					snprintf(out, out_len, "%s/%s", dn, dir->d_name);
+					found = 1;
+				}
 			}
-			free(namelist[n]);
+			closedir(d);
 		}
-		free(namelist);
 
 		if(found)
 			goto good;

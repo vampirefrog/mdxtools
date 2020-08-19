@@ -1,4 +1,4 @@
-CFLAGS=-ggdb -Wall -DFIXED_POINT -DOUTSIDE_SPEEX -DRANDOM_PREFIX=speex -DEXPORT=
+CFLAGS=-ggdb -Wall -DFIXED_POINT -DOUTSIDE_SPEEX -DRANDOM_PREFIX=speex -DEXPORT= -D_GNU_SOURCE -DHAVE_MEMCPY -I../portaudio/include
 CC=gcc
 YACC=bison
 LEX=flex
@@ -17,7 +17,8 @@ endif
 
 .SECONDEXPANSION:
 mdxplay_SRCS=mdx.c pdx.c mdx_driver.c adpcm_driver.c adpcm.c mdx_player.c mdx_renderer.c timer.c tools.c sjis_unicode.c sjis.c ym2151.c okim6258.c cmdline.c resample.c
-mdxplay_LIBS=-lao
+mdxplay_LIBS=../portaudio/lib/.libs/libportaudio.a -lwinmm
+mdxplay_CFLAGS=-I../portaudio/include
 mdx2pcm_SRCS=mdx.c mdx_driver.c adpcm_driver.c mdx_player.c mdx_renderer.c timer.c adpcm_driver.c adpcm.c pdx.c tools.c ym2151.c okim6258.c wav.c resample.c cmdline.c
 mdx2vgm_SRCS=mdx.c mdx_driver.c adpcm_driver.c adpcm.c resample.c timer.c tools.c sjis_unicode.c sjis.c ym2151.c okim6258.c vgm.c
 mdxinfo_SRCS=mdx.c tools.c sjis_unicode.c sjis.c cmdline.c md5.c

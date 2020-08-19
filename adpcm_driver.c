@@ -19,6 +19,8 @@ void adpcm_mixer_init(
 		adpcm_init(&mixer->channels[i].decoder_status);
 		mixer->channels[i].resampler_state =
 			speex_resampler_init(1, 15625, target_rate, 5, 0);
+		mixer->channels[i].cur_sample = 0;
+		mixer->channels[i].data = 0;
 	}
 }
 
