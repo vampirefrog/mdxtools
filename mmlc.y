@@ -1,6 +1,3 @@
-%define parse.error verbose
-%define parse.lac full
-
 %union
 {
 	char  cval;
@@ -36,7 +33,7 @@ struct mdx_compiler compiler;
 %%
 
 input:
-	%empty              {}
+	/* empty */         {}
 	| input declaration {}
 	;
 
@@ -74,7 +71,7 @@ mmldata:
 	MMLCHANNELS mmlcommands '\n' {  }
 
 mmlcommands:
-	%empty
+	/* empty */
 	| mmlcommand mmlcommands;
 
 mmlnote:
@@ -136,7 +133,7 @@ notelen:
 	;
 
 notelendiv:
-	  %empty                { $$ = 0; }
+	  /* empty */                { $$ = 0; }
 	| INT                   { $$ = malloc(sizeof(struct mml_notelength)); $$->type = NoteLenInt; $$->val = $1; }
 	| notelendiv '.'        { $$ = malloc(sizeof(struct mml_notelength)); $$->type = NoteLenDot; $$->n1 = $1; }
 	;
@@ -150,7 +147,7 @@ whitespace:
 	WHITESPACE;
 
 whitespace_optional:
-	%empty | whitespace;
+	/* empty */ | whitespace;
 
 %%
 

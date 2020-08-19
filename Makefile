@@ -32,7 +32,7 @@ pdxinfo_SRCS=pdx.c tools.c cmdline.c md5.c adpcm.c
 mdxdump_SRCS=mdx.c tools.c
 pdx2wav_SRCS=pdx.c wav.c tools.c adpcm.c
 mdx2mml_SRCS=mdx.c mml.c tools.c cmdline.c sjis.c sjis_unicode.c
-mml2mdx_SRCS=mml2mdx.c mml.tab.c mml.yy.c buffer.c
+mml2mdx_SRCS=mml2mdx.c mmlc.tab.c mmlc.yy.c buffer.c
 mdx2opm_SRCS=mdx2opm.c tools.c mdx.c
 adpcm-encode_SRCS=adpcm.c
 adpcm-decode_SRCS=adpcm.c
@@ -46,10 +46,10 @@ $(OBJS): Makefile
 $(PROGS): $$(sort $$@.o $$(patsubst %.c,%.o,$$(patsubst %.cpp,%.o,$$($$@_SRCS))))
 	$(CXX) $^ -o $@ $(CFLAGS) $(LIBS) $($@_LIBS)
 
-mml.tab.c: mml.y
+mmlc.tab.c: mmlc.y
 	$(YACC) -v -o $@ $^ --defines=mml.tab.h
 
-mml.yy.c: mml.l
+mmlc.yy.c: mmlc.l
 	$(LEX) -o $@ $^
 
 %.o: %.cpp
