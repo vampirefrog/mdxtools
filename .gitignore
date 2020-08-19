@@ -17,6 +17,10 @@
 *.sublime-workspace
 sounds/*.txt
 
+mmlc.tab.c
+mmlc.tab.h
+mmlc.yy.c
+
 data/
 
 mdxstat
