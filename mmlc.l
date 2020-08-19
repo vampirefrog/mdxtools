@@ -4,7 +4,7 @@
 %top {
 	#include <stdint.h>
 	#include <string.h>
-	#include "mml.tab.h"
+	#include "mmlc.tab.h"
 	void count(void);
 	int chan_mask;
 	int parse_chan_mask(char *str) {

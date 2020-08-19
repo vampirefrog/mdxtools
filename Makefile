@@ -47,7 +47,7 @@ $(PROGS): $$(sort $$@.o $$(patsubst %.c,%.o,$$(patsubst %.cpp,%.o,$$($$@_SRCS)))
 	$(CXX) $^ -o $@ $(CFLAGS) $(LIBS) $($@_LIBS)
 
 mmlc.tab.c: mmlc.y
-	$(YACC) -v -o $@ $^ --defines=mml.tab.h
+	$(YACC) -v -o $@ $^ --defines=mmlc.tab.h
 
 mmlc.yy.c: mmlc.l
 	$(LEX) -o $@ $^
