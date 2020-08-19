@@ -1,4 +1,4 @@
-CFLAGS=-ggdb -Wall -DFIXED_POINT -DOUTSIDE_SPEEX -DRANDOM_PREFIX=speex -DEXPORT= -D_GNU_SOURCE -DHAVE_MEMCPY -I../portaudio/include
+CFLAGS=-ggdb -Wall -DFIXED_POINT -DOUTSIDE_SPEEX -DRANDOM_PREFIX=speex -DEXPORT= -D_GNU_SOURCE -DHAVE_MEMCPY
 CC=gcc
 YACC=bison
 LEX=flex
@@ -10,15 +10,21 @@ adpcm-encode adpcm-decode \
 mididump
 all: $(PROGS)
 
-LIBS=-lz
 ifneq (,$(findstring MINGW,$(shell uname -s)))
-LIBS+=-liconv -lws2_32
+CFLAGS+=-I../portaudio/include
+LIBS=-lz -liconv -lws2_32
+else
+CFLAGS+=$(shell pkg-config portaudio-2.0 --cflags)
+LIBS=-lz
 endif
 
 .SECONDEXPANSION:
 mdxplay_SRCS=mdx.c pdx.c mdx_driver.c adpcm_driver.c adpcm.c mdx_player.c mdx_renderer.c timer.c tools.c sjis_unicode.c sjis.c ym2151.c okim6258.c cmdline.c resample.c
+ifneq (,$(findstring MINGW,$(shell uname -s)))
 mdxplay_LIBS=../portaudio/lib/.libs/libportaudio.a -lwinmm
-mdxplay_CFLAGS=-I../portaudio/include
+else
+mdxplay_LIBS=$(shell pkg-config portaudio-2.0 --libs)
+endif
 mdx2pcm_SRCS=mdx.c mdx_driver.c adpcm_driver.c mdx_player.c mdx_renderer.c timer.c adpcm_driver.c adpcm.c pdx.c tools.c ym2151.c okim6258.c wav.c resample.c cmdline.c
 mdx2vgm_SRCS=mdx.c mdx_driver.c adpcm_driver.c adpcm.c resample.c timer.c tools.c sjis_unicode.c sjis.c ym2151.c okim6258.c vgm.c
 mdxinfo_SRCS=mdx.c tools.c sjis_unicode.c sjis.c cmdline.c md5.c
@@ -38,7 +44,7 @@ OBJS=$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(foreach prog,$(PROGS),$(prog).cpp
 $(OBJS): Makefile
 
 $(PROGS): $$(sort $$@.o $$(patsubst %.c,%.o,$$(patsubst %.cpp,%.o,$$($$@_SRCS))))
-	$(CXX) $^ -o $@ $(CFLAGS) $($@_CFLAGS) $(LIBS) $($@_LIBS)
+	$(CXX) $^ -o $@ $(CFLAGS) $(LIBS) $($@_LIBS)
 
 mml.tab.c: mml.y
 	$(YACC) -v -o $@ $^ --defines=mml.tab.h
