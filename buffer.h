@@ -9,6 +9,7 @@ struct buffer {
 };
 
 void buffer_init(struct buffer *buf);
+void buffer_destroy(struct buffer *buf);
 void buffer_put(struct buffer *buf, uint8_t b);
 int buffer_reserve(struct buffer *buf, int len);
 int buffer_write(struct buffer *buf, uint8_t *data, int len);

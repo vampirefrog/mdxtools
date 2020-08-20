@@ -155,7 +155,7 @@ static int mdx_compiler_calc_notelength(struct mml_notelength *l, int def) {
 }
 
 static uint8_t mdx_compiler_note_value(int octave, int note) {
-	// d+ is 0               a  b  c   d  e  f  g
+	// d+ is 0           a  b   c   d  e  f  g
 	int note_table[] = { 6, 8, -3, -1, 1, 2, 4 };
 	int n = note & 0xff;
 	if(n < 0) n = 0;
@@ -178,7 +178,8 @@ void mdx_compiler_note(struct mdx_compiler *compiler, int chan_mask, int note, s
 	for(int i = 0, m = 1; i < 16; i++, m <<= 1) {
 		if(chan_mask & m) {
 			struct mdx_compiler_channel *chan = &compiler->channels[i];
-			buffer_write_uint8(&chan->buf, 0x80 + mdx_compiler_note_value(chan->octave, note));
+			int note_value = mdx_compiler_note_value(chan->octave, note);
+			buffer_write_uint8(&chan->buf, 0x80 + note_value);
 			int ticks = mdx_compiler_calc_notelength(l, chan->default_note_length);
 			buffer_write_uint8(&chan->buf, ticks-1);
 			chan->total_ticks += ticks;
@@ -251,8 +252,20 @@ void mdx_compiler_staccato(struct mdx_compiler *compiler, int chan_mask, int q, 
 	mdx_compiler_write(compiler, chan_mask, 0xf8, at ? 128 + q : q, -1);
 }
 
-void mdx_compiler_portamento(struct mdx_compiler *compiler, int chan_mask) {
-
+void mdx_compiler_portamento(struct mdx_compiler *compiler, int chan_mask, int note, struct mml_notelength *l, int note2) {
+	for(int i = 0, m = 1; i < 16; i++, m <<= 1) {
+		if(chan_mask & m) {
+			struct mdx_compiler_channel *chan = &compiler->channels[i];
+			int ticks = mdx_compiler_calc_notelength(l, chan->default_note_length);
+			int note_value_1 = mdx_compiler_note_value(chan->octave, note);
+			int note_value_2 = mdx_compiler_note_value(chan->octave, note2);
+			int portamento = 16384 * (note_value_2 - note_value_1) / (ticks);
+			buffer_write_uint8(&chan->buf, 0xf2);
+			buffer_write_big_int16(&chan->buf, portamento);
+			buffer_write_uint8(&chan->buf, 0x80 + note_value_1);
+			buffer_write_uint8(&chan->buf, ticks-1);
+		}
+	}
 }
 
 void mdx_compiler_legato(struct mdx_compiler *compiler, int chan_mask) {

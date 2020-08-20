@@ -62,7 +62,7 @@ void mdx_compiler_octave_up(struct mdx_compiler *compiler, int chan_mask);
 void mdx_compiler_tempo(struct mdx_compiler *compiler, int chan_mask, int tempo, int at);
 void mdx_compiler_rest(struct mdx_compiler *compiler, int chan_mask, struct mml_notelength *l);
 void mdx_compiler_staccato(struct mdx_compiler *compiler, int chan_mask, int q, int at);
-void mdx_compiler_portamento(struct mdx_compiler *compiler, int chan_mask);
+void mdx_compiler_portamento(struct mdx_compiler *compiler, int chan_mask, int note, struct mml_notelength *l, int note2);
 void mdx_compiler_legato(struct mdx_compiler *compiler, int chan_mask);
 void mdx_compiler_set_voice(struct mdx_compiler *compiler, int chan_mask, int voice);
 void mdx_compiler_volume(struct mdx_compiler *compiler, int chan_mask, int v, int at);

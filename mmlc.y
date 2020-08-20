@@ -84,8 +84,8 @@ mmlcommands:
 
 mmlnote:
 	MML_NOTE             { $$ = $1; }
-	| MML_NOTE '-'       { $$ = $1 | MML_NOTE_SHARP; }
-	| MML_NOTE '+'       { $$ = $1 | MML_NOTE_FLAT; }
+	| MML_NOTE '-'       { $$ = $1 | MML_NOTE_FLAT; }
+	| MML_NOTE '+'       { $$ = $1 | MML_NOTE_SHARP; }
 	;
 
 mmlcommand:
@@ -100,7 +100,7 @@ mmlcommand:
 	| 'r' notelen         { mdx_compiler_rest(&compiler, chan_mask, $2); }
 	| 'q' staccato        { mdx_compiler_staccato(&compiler, chan_mask, $2, 0); }
 	| '@' 'q' staccato    { mdx_compiler_staccato(&compiler, chan_mask, $3, 1); }
-	| '_'                 { mdx_compiler_portamento(&compiler, chan_mask); }
+	| mmlnote notelen '_' mmlnote { mdx_compiler_portamento(&compiler, chan_mask, $1, $2, $4); }
 	| '&'                 { mdx_compiler_legato(&compiler, chan_mask); }
 	| 'v' INT             { mdx_compiler_volume(&compiler, chan_mask, $2, 0); }
 	| '@' 't' INT         { mdx_compiler_tempo(&compiler, chan_mask, $3, 1); }

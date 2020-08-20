@@ -62,3 +62,7 @@ void buffer_write_uint8(struct buffer *buf, uint8_t b) {
 	buf->data[buf->data_len++] = b;
 }
 
+void buffer_write_big_int16(struct buffer *buf, uint16_t i) {
+	buffer_write_uint8(buf, i >> 8);
+	buffer_write_uint8(buf, i);
+}
