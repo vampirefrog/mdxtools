@@ -18,7 +18,7 @@ SAMP bufL[BUFFER_SIZE], bufR[BUFFER_SIZE], chipBufL[BUFFER_SIZE], chipBufR[BUFFE
 int16_t buf[BUFFER_SIZE * 2];
 struct mdx_renderer r;
 
-static void sigint_handler(int s){
+static void sigint_handler(int s) {
 	signal(SIGINT, SIG_DFL);
 	printf("Fading out...\n");
 	mdx_driver_start_fadeout(&r.player.driver, 4);
@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
 			TYPE_INT, &opt_loops
 		},
 		CMDLINE_ARG_TERMINATOR
-	}, 1, 0, "<file.mdx>");
+	}, 1, 1, "<file.mdx>");
 
 	if(optind < 0) exit(-optind);
 

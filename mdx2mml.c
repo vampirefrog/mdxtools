@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
 			TYPE_INT, &opt_ticks_only
 		},
 		CMDLINE_ARG_TERMINATOR
-	}, 1, 0, "<file.mdx>");
+	}, 1, 1, "<file.mdx>");
 
 	if(optind < 0) exit(-optind);
 
