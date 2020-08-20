@@ -6,8 +6,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
-#ifndef WIN32
 #include <libgen.h>
+#ifndef WIN32
 #include <unistd.h>
 #ifndef __EMSCRIPTEN__
 #include <zlib.h>
@@ -211,4 +211,22 @@ void csv_quote(char *str, size_t len) {
 
 void hex_dump(const uint8_t *data, size_t len) {
 	for(size_t i = 0; i < len; i++) printf("%02x", data[i]);
+}
+
+int replace_ext(char *out, size_t out_size, const char *in, const char *ext) {
+	int inlen = strlen(in);
+	int extlen = strlen(ext);
+	if(out_size < inlen + extlen + 2)
+		return -1;
+	strncpy(out, in, out_size);
+	char *b = basename(out);
+	char *pp = strrchr(b, '.');
+	if(!pp)
+		pp = b + strlen(b);
+	if(pp - out + extlen + 1 > out_size)
+		extlen = out_size - (pp - out + 1);
+	if(extlen > 0)
+		strncpy(pp + 1, ext, extlen);
+
+	return 0;
 }

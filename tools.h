@@ -20,4 +20,6 @@ void each_file(const char **names, int num_names, void (*fn)(char *), int recurs
 
 void hex_dump(const uint8_t *data, size_t len);
 
+int replace_ext(char *out, const size_t out_size, const char *in, const char *ext);
+
 #endif /* TOOLS_H_ */
