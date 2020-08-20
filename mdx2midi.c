@@ -363,7 +363,9 @@ int main(int argc, char **argv) {
 	midi_track_write_track_end(first_track, totalTicks);
 
 	struct file_stream o;
-	file_stream_init(&o, "mdx2midi.mid", "w");
+	char midbuf[256];
+	replace_ext(midbuf, sizeof(midbuf), argv[1], "mid");
+	file_stream_init(&o, midbuf, "w");
 	midi_file_write(&midi_file, (struct stream *)&o);
 	midi_file_clear(&midi_file);
 
