@@ -45,6 +45,7 @@ static int note_octave(int n) {
 }
 
 void mdx_decompiler_init(struct mdx_decompiler *d, char *buf, int columns) {
+	memset(d, 0, sizeof(*d));
 	d->buf = buf;
 	d->columns = columns;
 	d->cur_col = 0;
