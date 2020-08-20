@@ -19,6 +19,13 @@ void mdx_compiler_init(struct mdx_compiler *compiler) {
 	compiler->ex_pcm = 0;
 }
 
+void mdx_compiler_destroy(struct mdx_compiler *compiler) {
+	for(int i = 0; i < 16; i++) {
+		struct mdx_compiler_channel *chan = &compiler->channels[i];
+		buffer_destroy(&chan->buf);
+	}
+}
+
 void mdx_compiler_dump(struct mdx_compiler *compiler) {
 	for(int i = 0; i < 16; i++) {
 		printf("%2d: %5d: ", i, compiler->channels[i].total_ticks);
@@ -66,7 +73,6 @@ void mdx_compiler_save(struct mdx_compiler *compiler, const char *filename) {
 	for(int i = 0; i < 256; i++) {
 		struct mdx_compiler_opm_voice *voice = &compiler->voices[i];
 		if(!voice->used) continue;
-		printf("writing voice %d\n", i);
 		uint8_t buf[3 + 4 * 6];
 		buf[0] = i;
 		buf[1] = voice->fl_con;
@@ -155,7 +161,6 @@ static uint8_t mdx_compiler_note_value(int octave, int note) {
 	if(n < 0) n = 0;
 	if(n > 6) n = 6;
 	int val = octave * 12 + note_table[n] + ((note & MML_NOTE_SHARP) ? 1 : ((note & MML_NOTE_FLAT) ? -1 : 0));
-	printf("note value octave=%d note=%d val=%d\n", octave, n, val);
 	if(val < 0) val = 0;
 	if(val > 95) val = 95;
 	return val;

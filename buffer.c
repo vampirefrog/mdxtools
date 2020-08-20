@@ -9,6 +9,14 @@ void buffer_init(struct buffer *buf) {
 	buf->allocated_len = 1024;
 }
 
+void buffer_destroy(struct buffer *buf) {
+	if(buf->data)
+		free(buf->data);
+	buf->data = 0;
+	buf->data_len = 0;
+	buf->allocated_len = 0;
+}
+
 void buffer_dump(struct buffer *buf) {
 	for(int i = 0; i < buf->data_len; i++) {
 		printf("%02x ", buf->data[i]);

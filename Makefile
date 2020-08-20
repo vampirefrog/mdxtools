@@ -3,11 +3,23 @@ CC=gcc
 YACC=bison
 LEX=flex
 
-PROGS=mdxinfo pdxinfo \
-mdxplay \
-mdx2vgm mdx2pcm pdx2wav mdx2mml mml2mdx mdx2opm mdxdump mdx2midi \
-adpcm-encode adpcm-decode \
-mididump
+PROGS=\
+	adpcm-decode \
+	adpcm-encode \
+	mdx2midi \
+	mdx2mml \
+	mdx2opm \
+	mdx2pcm \
+	mdx2vgm \
+	mdxdump \
+	mdxinfo \
+	mdxplay \
+	mididump \
+	mkpdx \
+	mml2mdx \
+	pdx2wav \
+	pdxinfo
+
 all: $(PROGS)
 
 ifneq (,$(findstring MINGW,$(shell uname -s)))
@@ -19,25 +31,25 @@ LIBS=-lz
 endif
 
 .SECONDEXPANSION:
+adpcm-decode_SRCS=adpcm.c
+adpcm-encode_SRCS=adpcm.c
+mdx2midi_SRCS=mdx.c buffer.c stream.c midi.c tools.c
+mdx2mml_SRCS=mdx.c mml.c tools.c cmdline.c sjis.c sjis_unicode.c
+mdx2opm_SRCS=mdx2opm.c tools.c mdx.c
+mdx2pcm_SRCS=mdx.c mdx_driver.c adpcm_driver.c mdx_player.c mdx_renderer.c timer.c adpcm_driver.c adpcm.c pdx.c tools.c ym2151.c okim6258.c wav.c resample.c cmdline.c
+mdx2vgm_SRCS=mdx.c mdx_driver.c adpcm_driver.c adpcm.c resample.c timer.c tools.c sjis_unicode.c sjis.c ym2151.c okim6258.c vgm.c
+mdxdump_SRCS=mdx.c tools.c
+mdxinfo_SRCS=mdx.c tools.c sjis_unicode.c sjis.c cmdline.c md5.c
 mdxplay_SRCS=mdx.c pdx.c mdx_driver.c adpcm_driver.c adpcm.c mdx_player.c mdx_renderer.c timer.c tools.c sjis_unicode.c sjis.c ym2151.c okim6258.c cmdline.c resample.c
 ifneq (,$(findstring MINGW,$(shell uname -s)))
 mdxplay_LIBS=../portaudio/lib/.libs/libportaudio.a -lwinmm
 else
 mdxplay_LIBS=$(shell pkg-config portaudio-2.0 --libs)
 endif
-mdx2pcm_SRCS=mdx.c mdx_driver.c adpcm_driver.c mdx_player.c mdx_renderer.c timer.c adpcm_driver.c adpcm.c pdx.c tools.c ym2151.c okim6258.c wav.c resample.c cmdline.c
-mdx2vgm_SRCS=mdx.c mdx_driver.c adpcm_driver.c adpcm.c resample.c timer.c tools.c sjis_unicode.c sjis.c ym2151.c okim6258.c vgm.c
-mdxinfo_SRCS=mdx.c tools.c sjis_unicode.c sjis.c cmdline.c md5.c
-pdxinfo_SRCS=pdx.c tools.c cmdline.c md5.c adpcm.c
-mdxdump_SRCS=mdx.c tools.c
-pdx2wav_SRCS=pdx.c wav.c tools.c adpcm.c
-mdx2mml_SRCS=mdx.c mml.c tools.c cmdline.c sjis.c sjis_unicode.c
-mml2mdx_SRCS=mml2mdx.c mmlc.tab.c mmlc.yy.c buffer.c
-mdx2opm_SRCS=mdx2opm.c tools.c mdx.c
-adpcm-encode_SRCS=adpcm.c
-adpcm-decode_SRCS=adpcm.c
 mididump_SRCS=mididump.c midi.c midi_reader.c stream.c tools.c buffer.c
-mdx2midi_SRCS=mdx.c buffer.c stream.c midi.c tools.c
+mml2mdx_SRCS=mml2mdx.c mmlc.tab.c mmlc.yy.c buffer.c cmdline.c tools.c
+pdx2wav_SRCS=pdx.c wav.c tools.c adpcm.c
+pdxinfo_SRCS=pdx.c tools.c cmdline.c md5.c adpcm.c
 
 OBJS=$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(foreach prog,$(PROGS),$(prog).cpp $($(prog)_SRCS))))
 

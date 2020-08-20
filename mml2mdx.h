@@ -45,6 +45,7 @@ struct mml_notelength {
 };
 
 void mdx_compiler_init(struct mdx_compiler *);
+void mdx_compiler_destroy(struct mdx_compiler *);
 void mdx_compiler_dump(struct mdx_compiler *);
 void mdx_compiler_save(struct mdx_compiler *, const char *filename);
 

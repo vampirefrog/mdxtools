@@ -111,9 +111,10 @@ int cmdline_parse_args(int argc, char **argv, struct cmdline_option *opts, int n
 		argv[first_nonopt] = curarg;
 		first_nonopt++;
 	}
-	if(argc - first_nonopt < num_required) {
+	if(argc - first_nonopt < num_required || argc - first_nonopt > max_args) {
 		cmdline_print_help(argv[0], opts, args_text);
 		return -1;
 	}
+
 	return first_nonopt;
 }

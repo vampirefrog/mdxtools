@@ -1,6 +1,8 @@
 %x opmdef directive mmldata
 %x comment
 %option stack noyywrap
+%option nounput
+%option noinput
 %top {
 	#include <stdint.h>
 	#include <string.h>
@@ -20,7 +22,7 @@
 }
 %%
 
-[\t\r ]+    { count(); }
+[\t\r\n ]+    { count(); }
 
 "@"         { count(); BEGIN(opmdef); return '@'; }
 [A-HP-W]+   { count(); BEGIN(mmldata); chan_mask = yylval.ival = parse_chan_mask(yytext); return MMLCHANNELS; }
@@ -34,7 +36,7 @@
 }
 
 <directive>{
-	[a-zA-Z-]+         { count(); yylval.sval = strdup(yytext); return IDENTIFIER; }
+	[a-zA-Z-]+        { count(); yylval.sval = strdup(yytext); return IDENTIFIER; }
 	[\t\r ]+          { count(); return WHITESPACE; }
 	\'(\\.|[^\\'])+\' { count(); yylval.sval = strdup(yytext+1); yylval.sval[strlen(yylval.sval) - 1] = 0; return STRING_LITERAL; }
 	\"(\\.|[^\\"])+\" { count(); yylval.sval = strdup(yytext+1); yylval.sval[strlen(yylval.sval) - 1] = 0; return STRING_LITERAL; }

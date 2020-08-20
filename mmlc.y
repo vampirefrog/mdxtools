@@ -15,9 +15,17 @@
 %type<ival> staccato mmlnote
 %type<nval> notelen notelendiv
 
+// %parse-param {FILE *f}
+
 %{
 #include <stdio.h>
+#include <stdlib.h>
 #include "mml2mdx.h"
+#include "cmdline.h"
+#include "tools.h"
+
+int opt_stats = 0;
+char *opt_output = 0;
 
 int yylex (void);
 extern int line, column, chan_mask;
@@ -151,11 +159,64 @@ whitespace_optional:
 
 %%
 
+extern FILE *yyin;
+
 int main(int argc, char **argv) {
-	mdx_compiler_init(&compiler);
-	yyparse();
-	mdx_compiler_dump(&compiler);
-	mdx_compiler_save(&compiler, "mml2mdx.mdx");
+	int optind = cmdline_parse_args(argc, argv, (struct cmdline_option[]){
+		{
+			's', "stats",
+			"Dump statistics about compilation",
+			0,
+			TYPE_SWITCH,
+			TYPE_INT, &opt_stats
+		},
+		{
+			'o', "output",
+			"Choose output file",
+			"file",
+			TYPE_REQUIRED,
+			TYPE_STRING, &opt_output
+		},
+		CMDLINE_ARG_TERMINATOR
+	}, 1, 1, "<file.mml>");
+
+	if(optind < 0) {
+		exit(-1);
+	}
+
+	for(int i = optind; i < argc; i++) {
+		FILE *f = fopen(argv[i], "r");
+		if(!f) {
+			fprintf(stderr, "Could not open %s: %s\n", argv[i], strerror(errno));
+			continue;
+		}
+
+
+		mdx_compiler_init(&compiler);
+
+		yyin = f;
+		int y = yyparse();
+		if(y == 1) {
+			fprintf(stderr, "parsing failed: invalid input\n");
+		} else if(y == 2) {
+			fprintf(stderr, "parsing failed: memory exhausted\n");
+		} else {
+			if(opt_stats)
+				mdx_compiler_dump(&compiler);
+			char *mdxfilename;
+			if(opt_output) {
+				mdxfilename = opt_output;
+			} else {
+				char mdxbuf[256];
+				replace_ext(mdxbuf, sizeof(mdxbuf), argv[i], "mdx");
+				mdxfilename = mdxbuf;
+			}
+			mdx_compiler_save(&compiler, mdxfilename);
+		}
+
+		mdx_compiler_destroy(&compiler);
+	}
 
 	return 0;
 }
+;
