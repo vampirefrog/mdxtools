@@ -1,12 +1,22 @@
-- switch to windows
-	- write tests for mml2mlx
+# switch to windows
+	- write tests for mml2mdx
 		- finish mml2mdx
+		- error exit status for mml2mdx
 			- rewrite mdx driver code (split into interpreter + driver)
-				- rewrite mdxstat
+				- mdx_interpreter
+					- mdx_midi_driver
+						- mdx_midi_file_renderer
+					- mdx_chip_driver
+						- mdx_pcm_driver
+							- mdx_pcm_renderer
+							- mdx_vgm_renderer
 				- write mdx2vgm with mdx driver
 				- rewrite mdx2midi with mdx driver
+				- rewrite mdxstat
 			- rewrite the adpcm driver code
 				- rewrite pdx2sf2
+		- error handling for every MML command (like wrong tempo value)
+		- error handling for voice definitions
 
 	- make mididump more readable (echo time offset)
 
