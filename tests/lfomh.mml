@@ -1,4 +1,4 @@
-#title "Hello world!"
+#title "OPM LFO test"
 
 @0 = {
 /* AR D1R D2R  RR D1L   TL KS MUL DT1 DT2 AME */
@@ -11,4 +11,4 @@
 }
 
 
-A @0 MHON cdef
+A @0 MHON MH0,2,3,4,5,6,0 MH1,3,3,4,5,6,1 MH2,4,3,4,5,6,0 MH0,0,0,0,0,0,0 MHOF cdef

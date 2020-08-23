@@ -1,4 +1,4 @@
-#title "Portamento test"
+#title "Simple notes test"
 
 @0 = {
 /* AR D1R D2R  RR D1L   TL KS MUL DT1 DT2 AME */
@@ -10,6 +10,5 @@
     4,  7,  15
 }
 
-A @0 c   d_e   f
-B @0 e   e   a
-C @0 g   b_a   > c
+
+A @0 t19 t20 t30 t40 t50 t100 t200 t300 t400 t500 t1000 t2000 t3000 t4000 t4882 c

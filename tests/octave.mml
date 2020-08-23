@@ -1,4 +1,4 @@
-#title "Portamento test"
+#title "Octave test"
 
 @0 = {
 /* AR D1R D2R  RR D1L   TL KS MUL DT1 DT2 AME */
@@ -10,6 +10,6 @@
     4,  7,  15
 }
 
-A @0 c   d_e   f
-B @0 e   e   a
-C @0 g   b_a   > c
+A @0 o0 d+eff+gg+aa+b o1 cc+dd+eff+gg+aa+b > cc+dd+eff+gg+aa+b o4 < cc+dd+eff+gg+aa+b
+A o4 d+eff+gg+aa+b o5 cc+dd+eff+gg+aa+b > cc+dd+eff+gg+aa+b o7 cc+dd+eff+gg+aa+b
+A o8 cc+d

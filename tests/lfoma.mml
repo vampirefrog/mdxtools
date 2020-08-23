@@ -1,4 +1,4 @@
-#title "Portamento test"
+#title "Pitch LFO test"
 
 @0 = {
 /* AR D1R D2R  RR D1L   TL KS MUL DT1 DT2 AME */
@@ -10,6 +10,4 @@
     4,  7,  15
 }
 
-A @0 c   d_e   f
-B @0 e   e   a
-C @0 g   b_a   > c
+A t129 @0 c MAON MA2,4,1 MA2,4,2 MA2,4,3 MA2,4,4 d MAOF e

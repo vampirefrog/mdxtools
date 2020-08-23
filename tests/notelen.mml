@@ -1,4 +1,4 @@
-#title "Portamento test"
+#title "Note length test"
 
 @0 = {
 /* AR D1R D2R  RR D1L   TL KS MUL DT1 DT2 AME */
@@ -10,6 +10,7 @@
     4,  7,  15
 }
 
-A @0 c   d_e   f
-B @0 e   e   a
-C @0 g   b_a   > c
+
+A @0 l192 c l96 d l64 e l48 f l32 g l24 a l16 b l12 >c l6 d l4 e l3 f l2 g l1 a
+A @0 l%192 c l%96 d l%64 e l%48 f l%32 g l%24 a l%16 b l%12 >c l%6 d l%4 e l%3 f l%2 g l%1 a
+A @0 l2^8 cdef cdef
