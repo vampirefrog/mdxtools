@@ -55,7 +55,7 @@ void mdx_compiler_write(struct mdx_compiler *compiler, int chan_mask, ...);
 
 void mdx_compiler_note(struct mdx_compiler *compiler, int chan_mask, int note, struct mml_notelength *l);
 void mdx_compiler_note_num(struct mdx_compiler *compiler, int chan_mask, int note, struct mml_notelength *l);
-void mdx_compiler_set_default_note_length(struct mdx_compiler *compiler, int chan_mask, int len);
+void mdx_compiler_set_default_note_length(struct mdx_compiler *compiler, int chan_mask, struct mml_notelength *l);
 void mdx_compiler_octave(struct mdx_compiler *compiler, int chan_mask, int octave);
 void mdx_compiler_octave_down(struct mdx_compiler *compiler, int chan_mask);
 void mdx_compiler_octave_up(struct mdx_compiler *compiler, int chan_mask);
@@ -77,7 +77,7 @@ void mdx_compiler_opm_noise_freq(struct mdx_compiler *compiler, int chan_mask, i
 void mdx_compiler_adpcm_freq(struct mdx_compiler *compiler, int chan_mask, int f);
 void mdx_compiler_sync_send(struct mdx_compiler *compiler, int chan_mask, int c);
 void mdx_compiler_sync_wait(struct mdx_compiler *compiler, int chan_mask);
-void mdx_compiler_opm_lfo(struct mdx_compiler *compiler, int chan_mask, int lfo, int lfrq, int pmd, int amd, int pms, int ams, int sync);
+void mdx_compiler_mh(struct mdx_compiler *compiler, int chan_mask, int lfo, int lfrq, int pmd, int amd, int pms, int ams, int sync);
 void mdx_compiler_mhon(struct mdx_compiler *compiler, int chan_mask);
 void mdx_compiler_mhof(struct mdx_compiler *compiler, int chan_mask);
 void mdx_compiler_ma(struct mdx_compiler *compiler, int chan_mask, int waveform, int freq, int amplitude);
@@ -86,7 +86,7 @@ void mdx_compiler_maof(struct mdx_compiler *compiler, int chan_mask);
 void mdx_compiler_mp(struct mdx_compiler *compiler, int chan_mask, int waveform, int freq, int amplitude);
 void mdx_compiler_mpon(struct mdx_compiler *compiler, int chan_mask);
 void mdx_compiler_mpof(struct mdx_compiler *compiler, int chan_mask);
-void mdx_compiler_md(struct mdx_compiler *compiler, int chan_mask);
+void mdx_compiler_md(struct mdx_compiler *compiler, int chan_mask, int ticks);
 void mdx_compiler_end(struct mdx_compiler *compiler, int chan_mask);
 
 void mdx_compiler_add_opm_voice(struct mdx_compiler *, int num, uint8_t data[47]);

@@ -20,6 +20,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "mml2mdx.h"
 #include "cmdline.h"
 #include "tools.h"
@@ -96,7 +97,7 @@ mmlcommand:
 	| '>'                 { mdx_compiler_octave_up(&compiler, chan_mask); }
 	| 'n' INT ',' notelen { mdx_compiler_note_num(&compiler, chan_mask, $2, $4); }
 	| 'n' INT             { mdx_compiler_note_num(&compiler, chan_mask, $2, 0); }
-	| 'l' INT             { mdx_compiler_set_default_note_length(&compiler, chan_mask, $2); }
+	| 'l' notelen         { mdx_compiler_set_default_note_length(&compiler, chan_mask, $2); }
 	| 'r' notelen         { mdx_compiler_rest(&compiler, chan_mask, $2); }
 	| 'q' staccato        { mdx_compiler_staccato(&compiler, chan_mask, $2, 0); }
 	| '@' 'q' staccato    { mdx_compiler_staccato(&compiler, chan_mask, $3, 1); }
@@ -119,7 +120,7 @@ mmlcommand:
 	| 'W'                 { mdx_compiler_sync_wait(&compiler, chan_mask); }
 	| 'F' INT             { mdx_compiler_adpcm_freq(&compiler, chan_mask, $2); }
 	| MH INT ',' INT ',' INT ',' INT ',' INT ',' INT ',' INT {
-	  	mdx_compiler_opm_lfo(&compiler, chan_mask, $2, $4, $6, $8, $10, $12, $14);
+	  	mdx_compiler_mh(&compiler, chan_mask, $2, $4, $6, $8, $10, $12, $14);
 	  }
 	| MHON                { mdx_compiler_mhon(&compiler, chan_mask); }
 	| MHOF                { mdx_compiler_mhof(&compiler, chan_mask); }
@@ -129,7 +130,7 @@ mmlcommand:
 	| MP INT ',' INT ',' INT { mdx_compiler_mp(&compiler, chan_mask, $2, $4, $6); }
 	| MPON                { mdx_compiler_mpon(&compiler, chan_mask); }
 	| MPOF                { mdx_compiler_mpof(&compiler, chan_mask); }
-	| MD INT              { mdx_compiler_md(&compiler, chan_mask); }
+	| MD INT              { mdx_compiler_md(&compiler, chan_mask, $2); }
 	;
 
 // Fuck this shit

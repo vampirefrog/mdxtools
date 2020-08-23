@@ -59,7 +59,7 @@
 	MPON       { count(); return MPON; }
 	MPOF       { count(); return MPOF; }
 	MP         { count(); return MP; }
-	MD         { count(); return MH; }
+	MD         { count(); return MD; }
 	.          { count(); }
 }
 
