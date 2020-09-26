@@ -1,7 +1,7 @@
-#include "mdx_player.c"
+#include "mdx_pcm_driver.c"
 
 int main(int argc, char **argv) {
-	struct mdx_player p;
+	struct mdx_pcm_driver p;
 
 	return 0;
 }

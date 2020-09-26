@@ -57,6 +57,7 @@
 #define speex_resampler_init CAT_PREFIX(RANDOM_PREFIX,_resampler_init)
 #define speex_resampler_init_frac CAT_PREFIX(RANDOM_PREFIX,_resampler_init_frac)
 #define speex_resampler_destroy CAT_PREFIX(RANDOM_PREFIX,_resampler_destroy)
+#define speex_resampler_estimate CAT_PREFIX(RANDOM_PREFIX,_resampler_estimate)
 #define speex_resampler_process_float CAT_PREFIX(RANDOM_PREFIX,_resampler_process_float)
 #define speex_resampler_process_int CAT_PREFIX(RANDOM_PREFIX,_resampler_process_int)
 #define speex_resampler_process_interleaved_float CAT_PREFIX(RANDOM_PREFIX,_resampler_process_interleaved_float)
@@ -184,9 +185,24 @@ int speex_resampler_process_float(SpeexResamplerState *st,
  */
 int speex_resampler_process_int(SpeexResamplerState *st,
                                  spx_uint32_t channel_index,
-                                 const spx_int16_t *in,
+                                 const spx_int32_t *in,
                                  spx_uint32_t *in_len,
-                                 spx_int16_t *out,
+                                 spx_int32_t *out,
+                                 spx_uint32_t *out_len);
+
+/** Estimate how much input samples and how much output samples would be consumed.
+ * @param st Resampler state
+ * @param channel_index Index of the channel to process for the multi-channel
+ * base (0 otherwise)
+ * @param in Input buffer
+ * @param in_len Number of input samples in the input buffer. Returns the number
+ * of samples processed
+ * @param out Output buffer
+ * @param out_len Size of the output buffer. Returns the number of samples written
+ */
+int speex_resampler_estimate(SpeexResamplerState *st,
+                                 spx_uint32_t channel_index,
+                                 spx_uint32_t *in_len,
                                  spx_uint32_t *out_len);
 
 /** Resample an interleaved float array. The input and output buffers must *not* overlap.
@@ -214,9 +230,9 @@ int speex_resampler_process_interleaved_float(SpeexResamplerState *st,
  * This is all per-channel.
  */
 int speex_resampler_process_interleaved_int(SpeexResamplerState *st,
-                                             const spx_int16_t *in,
+                                             const spx_int32_t *in,
                                              spx_uint32_t *in_len,
-                                             spx_int16_t *out,
+                                             spx_int32_t *out,
                                              spx_uint32_t *out_len);
 
 /** Set (change) the input/output sampling rates (integer value).

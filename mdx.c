@@ -89,7 +89,7 @@ int mdx_file_load(struct mdx_file *f, uint8_t *data, int len) {
 		return MDX_ERR_LZX;
 	}
 
-	// 1 chunk for OPM voices and 16 chunks for channel data
+	// 1 chunk for OPM voices and 16 chunks for track data
 	struct {
 		int offset, len;
 	} chunks[17];
@@ -105,16 +105,16 @@ int mdx_file_load(struct mdx_file *f, uint8_t *data, int len) {
 			if(i < 10 && chunks[i].offset < min_ofs) min_ofs = chunks[i].offset;
 		}
 	}
-	f->num_channels = (min_ofs - 2) / 2;
-	if(f->num_channels > 16) f->num_channels = 16;
+	f->num_tracks = (min_ofs - 2) / 2;
+	if(f->num_tracks > 16) f->num_tracks = 16;
 	// calculate lengths
 	for(int i = 0; i < 17; i++) {
 		if(!chunks[i].len) continue;
-		if(i > f->num_channels + 1) {
+		if(i > f->num_tracks + 1) {
 			chunks[i].len = 0;
 			continue;
 		}
-		for(int j = 0; j <= f->num_channels; j++) {
+		for(int j = 0; j <= f->num_tracks; j++) {
 			if(!chunks[j].len) continue;
 			if(chunks[i].offset < chunks[j].offset && chunks[i].len > chunks[j].offset - chunks[i].offset)
 				chunks[i].len = chunks[j].offset - chunks[i].offset;
@@ -122,9 +122,9 @@ int mdx_file_load(struct mdx_file *f, uint8_t *data, int len) {
 	}
 
 	// check for overlaps and invalidate
-	for(int i = 0; i <= f->num_channels; i++) {
+	for(int i = 0; i <= f->num_tracks; i++) {
 		if(!chunks[i].len) continue;
-		for(int j = 0; j <= f->num_channels; j++) {
+		for(int j = 0; j <= f->num_tracks; j++) {
 			if(!chunks[j].len) continue;
 			if(chunks[i].offset > chunks[j].offset && chunks[i].offset < chunks[j].offset + chunks[j].len) {
 				chunks[i].len = 0;
@@ -136,10 +136,10 @@ int mdx_file_load(struct mdx_file *f, uint8_t *data, int len) {
 	uint16_t voice_data_offset = offsetstart + chunks[0].offset;
 	uint16_t voice_data_len = chunks[0].len;
 
-	memset(f->channels, 0, sizeof(f->channels));
-	for(int i = 0; i < f->num_channels; i++) {
-		f->channels[i].data = f->data + offsetstart + chunks[i+1].offset;
-		f->channels[i].data_len = chunks[i+1].len;
+	memset(f->tracks, 0, sizeof(f->tracks));
+	for(int i = 0; i < f->num_tracks; i++) {
+		f->tracks[i].data = f->data + offsetstart + chunks[i+1].offset;
+		f->tracks[i].data_len = chunks[i+1].len;
 	}
 
 	// load @voices
@@ -147,8 +147,6 @@ int mdx_file_load(struct mdx_file *f, uint8_t *data, int len) {
 	f->num_voices = voice_data_len / 27;
 	for(int i = 0; i < f->num_voices; i++) {
 		uint8_t *vptr = f->data + voice_data_offset + i * 27;
-		// printf("voice_data_offset=%d voice_data_len=%d voices[%d].offset = %p\n",
-		// 	voice_data_offset, voice_data_len, i, vptr);
 		f->voices[f->data[voice_data_offset + i * 27]] = vptr;
 	}
 
@@ -162,7 +160,7 @@ const char *mdx_lfo_waveform_name(uint8_t waveform) {
 	return waveform <= 2 ? waveform_names[waveform] : "invalid";
 }
 
-const char mdx_channel_name(uint8_t chan) {
+const char mdx_track_name(uint8_t chan) {
 	if(chan < 8) return 'A' + chan;
 	if(chan < 16) return 'P' + chan - 8;
 	return '!';

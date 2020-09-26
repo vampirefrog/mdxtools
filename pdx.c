@@ -4,7 +4,7 @@
 #include "adpcm.h"
 
 // TODO: check out of bounds conditions
-int pdx_load(struct pdx *f, uint8_t *data, int len) {
+int pdx_file_load(struct pdx_file *f, uint8_t *data, int len) {
 	if(data == 0 || len == 0) return -1;
 
 	int total_samples = 0;

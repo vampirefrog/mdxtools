@@ -10,11 +10,11 @@ struct pdx_sample {
 	int num_samples;
 };
 
-struct pdx {
+struct pdx_file {
 	struct pdx_sample samples[96];
 	int num_samples;
 };
 
-int pdx_load(struct pdx *pdx, uint8_t *data, int data_len);
+int pdx_file_load(struct pdx_file *pdx, uint8_t *data, int data_len);
 
 #endif /* PDX_H_ */

@@ -35,12 +35,12 @@
 #ifndef FIXED_GENERIC_H
 #define FIXED_GENERIC_H
 
-#define QCONST16(x,bits) ((spx_word16_t)(.5+(x)*(((spx_word32_t)1)<<(bits))))
+#define QCONST16(x,bits) ((spx_word32_t)(.5+(x)*(((spx_word32_t)1)<<(bits))))
 #define QCONST32(x,bits) ((spx_word32_t)(.5+(x)*(((spx_word32_t)1)<<(bits))))
 
 #define NEG16(x) (-(x))
 #define NEG32(x) (-(x))
-#define EXTRACT16(x) ((spx_word16_t)(x))
+#define EXTRACT16(x) ((spx_word32_t)(x))
 #define EXTEND32(x) ((spx_word32_t)(x))
 #define SHR16(a,shift) ((a) >> (shift))
 #define SHL16(a,shift) ((a) << (shift))
@@ -62,17 +62,17 @@
 #define SATURATE(x,a) (((x)>(a) ? (a) : (x)<-(a) ? -(a) : (x)))
 
 
-#define ADD16(a,b) ((spx_word16_t)((spx_word16_t)(a)+(spx_word16_t)(b)))
-#define SUB16(a,b) ((spx_word16_t)(a)-(spx_word16_t)(b))
+#define ADD16(a,b) ((spx_word32_t)((spx_word32_t)(a)+(spx_word32_t)(b)))
+#define SUB16(a,b) ((spx_word32_t)(a)-(spx_word32_t)(b))
 #define ADD32(a,b) ((spx_word32_t)(a)+(spx_word32_t)(b))
 #define SUB32(a,b) ((spx_word32_t)(a)-(spx_word32_t)(b))
 
 
 /* result fits in 16 bits */
-#define MULT16_16_16(a,b)     ((((spx_word16_t)(a))*((spx_word16_t)(b))))
+#define MULT16_16_16(a,b)     ((((spx_word32_t)(a))*((spx_word32_t)(b))))
 
-/* (spx_word32_t)(spx_word16_t) gives TI compiler a hint that it's 16x16->32 multiply */
-#define MULT16_16(a,b)     (((spx_word32_t)(spx_word16_t)(a))*((spx_word32_t)(spx_word16_t)(b)))
+/* (spx_word32_t)(spx_word32_t) gives TI compiler a hint that it's 16x16->32 multiply */
+#define MULT16_16(a,b)     (((spx_word32_t)(spx_word32_t)(a))*((spx_word32_t)(spx_word32_t)(b)))
 
 #define MAC16_16(c,a,b) (ADD32((c),MULT16_16((a),(b))))
 #define MULT16_32_Q12(a,b) ADD32(MULT16_16((a),SHR((b),12)), SHR(MULT16_16((a),((b)&0x00000fff)),12))
@@ -102,9 +102,9 @@
 
 #define MUL_16_32_R15(a,bh,bl) ADD32(MULT16_16((a),(bh)), SHR(MULT16_16((a),(bl)),15))
 
-#define DIV32_16(a,b) ((spx_word16_t)(((spx_word32_t)(a))/((spx_word16_t)(b))))
-#define PDIV32_16(a,b) ((spx_word16_t)(((spx_word32_t)(a)+((spx_word16_t)(b)>>1))/((spx_word16_t)(b))))
+#define DIV32_16(a,b) ((spx_word32_t)(((spx_word32_t)(a))/((spx_word32_t)(b))))
+#define PDIV32_16(a,b) ((spx_word32_t)(((spx_word32_t)(a)+((spx_word32_t)(b)>>1))/((spx_word32_t)(b))))
 #define DIV32(a,b) (((spx_word32_t)(a))/((spx_word32_t)(b)))
-#define PDIV32(a,b) (((spx_word32_t)(a)+((spx_word16_t)(b)>>1))/((spx_word32_t)(b)))
+#define PDIV32(a,b) (((spx_word32_t)(a)+((spx_word32_t)(b)>>1))/((spx_word32_t)(b)))
 
 #endif

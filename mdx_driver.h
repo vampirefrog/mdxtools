@@ -2,11 +2,13 @@
 #define MDX_DRIVER_H_
 
 #include <stdint.h>
-
 #include "mdx.h"
+#include "pdx.h"
+#include "timer_driver.h"
+#include "fm_driver.h"
 #include "adpcm_driver.h"
 
-struct mdx_driver_channel {
+struct mdx_driver_track {
 	uint8_t *data;
 	int len;
 	int pos;
@@ -29,39 +31,38 @@ struct mdx_driver_channel {
 	int sample_pos;
 
 	int skipNoteOff, skipNoteOn;
-#define REPEAT_STACK_LIMIT 10
-	int repeat_stack[REPEAT_STACK_LIMIT], repeat_stack_depth;
 
-	// MP pitch LFO
+	// MDX LFOs
 	int lfo_delay, lfo_delay_counter;
 	struct mdx_lfo pitch_lfo, amplitude_lfo;
 
 	// MH OPM LFO
 	uint8_t pms_ams, keysync, mhon;
-
 };
 
 struct mdx_driver {
-	struct mdx_file *f;
-	struct mdx_driver_channel channels[16];
-	struct adpcm_mixer *adpcm_mixer;
-	int channel_mask;
+	struct mdx_file *mdx_file;
+	struct pdx_file *pdx_file;
 
-	int max_loops, cur_loop, loop_chan;
+	struct timer_driver *timer_driver;
+	struct fm_driver *fm_driver;
+	struct adpcm_driver *adpcm_driver;
 
-	uint8_t opm_cache[256]; // to avoid spamming duplicate commands
-
-	void *data_ptr;
-	void (*write_opm)(struct mdx_driver *r, uint8_t reg, uint8_t val, void *data_ptr);
-	void (*set_tempo)(struct mdx_driver *r, int tempo, void *data_ptr);
-	void (*tick_cb)(struct mdx_driver *r, void *data_ptr);
+	struct mdx_driver_track tracks[16];
 
 	int ended;
 	int fade_rate, fade_counter, fade_value;
+	int track_mask;
+	int loop_track, cur_loop, max_loops;
+
+	void *data_ptr;
+	void (*set_tempo)(struct mdx_driver *, int track_num, void *data_ptr);
+	void (*unknown_command_cb)(struct mdx_driver *, int track_num, uint8_t cmd, void *data_ptr);
 };
 
-void mdx_driver_init(struct mdx_driver *r, struct mdx_file *f);
-void mdx_driver_tick(struct mdx_driver *r);
-void mdx_driver_start_fadeout(struct mdx_driver *r, int rate); // rate is expressed in ticks and represents the time between volume decrements
+void mdx_driver_init(struct mdx_driver *driver, struct timer_driver *timer_driver, struct fm_driver *fm_driver, struct adpcm_driver *adpcm_driver);
+void mdx_driver_deinit(struct mdx_driver *driver);
+void mdx_driver_tick(struct mdx_driver *driver);
+int mdx_driver_load(struct mdx_driver *driver, struct mdx_file *file, struct pdx_file *pfile);
 
 #endif /* MDX_DRIVER_H_ */

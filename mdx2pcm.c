@@ -8,7 +8,7 @@
 #include "wav.h"
 #include "sjis.h"
 #include "cmdline.h"
-#include "mdx_renderer.h"
+#include "mdx_pcm_renderer.h"
 #include "adpcm_driver.h"
 
 #define BUFFER_SIZE 4096
@@ -56,8 +56,8 @@ int main(int argc, char **argv) {
 	adpcm_pcm_driver_init(&d, SAMPLE_RATE, decode_buf, BUFFER_SIZE, resample_buf, BUFFER_SIZE);
 
 	SAMP bufL[BUFFER_SIZE], bufR[BUFFER_SIZE], chipBufL[BUFFER_SIZE], chipBufR[BUFFER_SIZE];
-	struct mdx_renderer r;
-	mdx_renderer_init(
+	struct mdx_pcm_renderer r;
+	mdx_pcm_renderer_init(
 		&r, &f, (struct adpcm_driver *)&d, SAMPLE_RATE,
 		bufL, bufR, chipBufL, chipBufR, BUFFER_SIZE
 	);
@@ -66,9 +66,8 @@ int main(int argc, char **argv) {
 
 	struct wav w;
 	wav_open(&w, "mdxout.wav", SAMPLE_RATE, 2, 16);
-	int numbufs = argc >= 3 ? atoi(argv[2]) : 100;
 	while(!r.player.driver.ended) {
-		mdx_renderer_render(&r);
+		mdx_pcm_renderer_render(&r);
 		for(int j = 0; j < BUFFER_SIZE; j++) {
 			wav_write_stereo_sample(&w, bufL[j], bufR[j]);
 		}

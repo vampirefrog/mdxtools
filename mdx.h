@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-#include "pdx.h"
-
 #define OPM_CLOCK 4000000
 
 enum {
@@ -21,7 +19,7 @@ struct mdx_lfo {
 	int enable, waveform, period, amplitude, phase, pitch;
 };
 
-struct mdx_channel {
+struct mdx_track {
 	uint8_t *data;
 	int data_len;
 	int pos;
@@ -54,17 +52,15 @@ struct mdx_file {
 	uint8_t *voices[256];
 	int num_voices;
 
-	struct pdx pdx;
-
-	struct mdx_channel channels[16];
-	int num_channels;
+	struct mdx_track tracks[16];
+	int num_tracks;
 };
 
 int mdx_file_load(struct mdx_file *f, uint8_t *data, int len);
 
 int mdx_cmd_len(uint8_t *data, int pos, int len);
 const char *mdx_lfo_waveform_name(uint8_t waveform);
-const char mdx_channel_name(uint8_t channel);
+const char mdx_track_name(uint8_t track);
 int mdx_note_octave(int note);
 const char *mdx_error_name(int err);
 const char *mdx_note_name(int note);

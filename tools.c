@@ -226,7 +226,7 @@ int replace_ext(char *out, size_t out_size, const char *in, const char *ext) {
 	if(pp - out + extlen + 1 > out_size)
 		extlen = out_size - (pp - out + 1);
 	if(extlen > 0)
-		strncpy(pp + 1, ext, extlen);
+		strncpy(pp + 1, ext, extlen+1);
 
 	return 0;
 }

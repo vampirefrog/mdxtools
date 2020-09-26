@@ -1790,3 +1790,6 @@ void ym2151_set_mutemask(struct ym2151 *chip, uint32_t MuteMask) {
 	for (CurChn = 0; CurChn < 8; CurChn ++)
 		chip->Muted[CurChn] = (MuteMask >> CurChn) & 0x01;
 }
+
+void ym2151_shutdown(struct ym2151 *ym2151) {
+}

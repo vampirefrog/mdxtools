@@ -5,7 +5,7 @@
 
 #include "tools.h"
 #include "cmdline.h"
-#include "mdx_renderer.h"
+#include "mdx_pcm_renderer.h"
 #include "adpcm_driver.h"
 
 #define SAMPLE_RATE 44100
@@ -16,7 +16,7 @@ int opt_loops = 1;
 
 SAMP bufL[BUFFER_SIZE], bufR[BUFFER_SIZE], chipBufL[BUFFER_SIZE], chipBufR[BUFFER_SIZE];
 int16_t buf[BUFFER_SIZE * 2];
-struct mdx_renderer r;
+struct mdx_pcm_renderer r;
 
 static void sigint_handler(int s) {
 	signal(SIGINT, SIG_DFL);
@@ -70,11 +70,10 @@ int main(int argc, char **argv) {
 		}
 	} else printf("No PDX file\n");
 
-	struct adpcm_pcm_driver d;
-	int16_t decode_buf[BUFFER_SIZE], resample_buf[BUFFER_SIZE];
-	adpcm_pcm_driver_init(&d, SAMPLE_RATE, decode_buf, BUFFER_SIZE, resample_buf, BUFFER_SIZE);
+	struct adpcm_pcm_mix_driver d;
+	adpcm_pcm_mix_driver_init(&d, SAMPLE_RATE, BUFFER_SIZE);
 
-	mdx_renderer_init(
+	mdx_pcm_renderer_init(
 		&r, &f, (struct adpcm_driver *)&d, SAMPLE_RATE,
 		bufL, bufR, chipBufL, chipBufR, BUFFER_SIZE
 	);
@@ -105,7 +104,7 @@ int main(int argc, char **argv) {
 	if( err != paNoError ) goto error;
 
 	while(!r.player.driver.ended) {
-		mdx_renderer_render(&r);
+		mdx_pcm_renderer_render(&r);
 		int16_t *out = buf;
 		for(int i = 0; i < BUFFER_SIZE; i++) {
 			*out++ = bufL[i];
