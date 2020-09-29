@@ -70,6 +70,7 @@ static void mdx_driver_track_init(struct mdx_driver_track *track) {
 
 	track->used = 0;
 	track->ended = 0;
+	track->loop_num = 0;
 
 	track->key_on_delay = 0;
 	track->key_on_delay_counter = 0;
@@ -78,6 +79,7 @@ static void mdx_driver_track_init(struct mdx_driver_track *track) {
 
 	track->ticks_remaining = 0;
 	track->volume = 8;
+	track->opm_volume = mdx_volume_to_opm(track->volume);
 	track->voice_num = -1;
 	track->skipNoteOff = 0;
 	track->skipNoteOn = 0;
@@ -225,7 +227,8 @@ static int mdx_driver_track_advance(struct mdx_driver *driver, int track_num) {
 		if(track->staccato <= 8) {
 			track->staccato_counter = track->staccato * track->ticks_remaining / 8;
 		} else {
-			track->staccato_counter = track->staccato;
+			track->staccato_counter = track->ticks_remaining - (256 - track->staccato);
+			if(track->staccato_counter < 0) track->staccato_counter = 0;
 		}
 
 		if(track->key_on_delay) {
@@ -266,21 +269,34 @@ static int mdx_driver_track_advance(struct mdx_driver *driver, int track_num) {
 		case 0xfb: // Set volume
 			track->volume = track->data[track->pos+1];
 			track->opm_volume = mdx_volume_to_opm(track->volume);
-			if(driver->mdx_file->voices[track->voice_num] && track->voice_num >= 0) {
-				fm_driver_set_tl(driver->fm_driver, track_num, track->opm_volume, driver->mdx_file->voices[track->voice_num]);
+			if(track_num < 8) {
+				if(track->voice_num >= 0)
+					fm_driver_set_tl(driver->fm_driver, track_num, track->opm_volume, driver->mdx_file->voices[track->voice_num]);
+			} else {
+				adpcm_driver_set_volume(driver->adpcm_driver, track_num - 8, track->opm_volume);
 			}
 			track->pos += 2;
 			break;
 		case 0xfa: // Decrease volume
 			mdx_driver_track_dec_volume(track);
 			track->opm_volume = mdx_volume_to_opm(track->volume);
-			fm_driver_set_tl(driver->fm_driver, track_num, track->opm_volume, driver->mdx_file->voices[track->voice_num]);
+			if(track_num < 8) {
+				if(track->voice_num >= 0)
+					fm_driver_set_tl(driver->fm_driver, track_num, track->opm_volume, driver->mdx_file->voices[track->voice_num]);
+			} else {
+				adpcm_driver_set_volume(driver->adpcm_driver, track_num - 8, track->opm_volume);
+			}
 			track->pos++;
 			break;
 		case 0xf9: // Increase volume
 			mdx_driver_track_inc_volume(track);
 			track->opm_volume = mdx_volume_to_opm(track->volume);
-			fm_driver_set_tl(driver->fm_driver, track_num, track->opm_volume, driver->mdx_file->voices[track->voice_num]);
+			if(track_num < 8) {
+				if(track->voice_num >= 0)
+					fm_driver_set_tl(driver->fm_driver, track_num, track->opm_volume, driver->mdx_file->voices[track->voice_num]);
+			} else {
+				adpcm_driver_set_volume(driver->adpcm_driver, track_num - 8, track->opm_volume);
+			}
 			track->pos++;
 			break;
 		case 0xf8: // Staccato (q)
@@ -335,12 +351,33 @@ static int mdx_driver_track_advance(struct mdx_driver *driver, int track_num) {
 				track->pos += 2;
 			} else {
 				int16_t ofs = (track->data[track->pos + 1] << 8) | track->data[track->pos + 2];
-				if(driver->loop_track < 0)
-					driver->loop_track = track_num;
-				if(track_num == driver->loop_track) {
+				int old_min_loop = -1;
+				for(int i = 0; i < driver->mdx_file->num_tracks; i++) {
+					if(!driver->tracks[i].used)
+						continue;
+					if(driver->tracks[i].ended)
+						continue;
+					if(old_min_loop == -1 || driver->tracks[i].loop_num < old_min_loop)
+						old_min_loop = driver->tracks[i].loop_num;
+				}
+
+				track->loop_num++;
+
+				int min_loop = -1;
+				for(int i = 0; i < driver->mdx_file->num_tracks; i++) {
+					if(!driver->tracks[i].used)
+						continue;
+					if(driver->tracks[i].ended)
+						continue;
+					if(min_loop == -1 || driver->tracks[i].loop_num < min_loop)
+						min_loop = driver->tracks[i].loop_num;
+				}
+
+				if(min_loop >= 0 && old_min_loop >= 0 && min_loop != old_min_loop) {
 					driver->cur_loop++;
-					if(driver->cur_loop >= driver->max_loops && driver->fade_rate == 0)
+					if(driver->cur_loop >= driver->max_loops && driver->fade_rate == 0) {
 						mdx_driver_start_fadeout(driver, 26);
+					}
 				}
 				track->pos += ofs + 3;
 			}
@@ -460,11 +497,9 @@ void mdx_driver_track_tick(struct mdx_driver *driver, int track_num) {
 			mdx_driver_note_on(driver, track_num);
 	}
 
-	if(track->staccato_counter > 0) {
-		track->staccato_counter--;
-		if(track->staccato_counter == 0 && track->key_on_delay_counter == 0)
-			mdx_driver_note_off(driver, track_num);
-	}
+	track->staccato_counter--;
+	if(track->staccato_counter <= 0 && track->key_on_delay_counter == 0)
+		mdx_driver_note_off(driver, track_num);
 
 	track->ticks_remaining--;
 	if(track->ticks_remaining == 0) {
@@ -553,7 +588,6 @@ void mdx_driver_init(struct mdx_driver *driver, struct timer_driver *timer_drive
 	driver->pdx_file = 0;
 
 	driver->track_mask = 0xffff;
-	driver->loop_track = -1;
 	driver->ended = 0;
 	driver->max_loops = 2;
 	driver->fade_rate = 0;
@@ -572,7 +606,6 @@ int mdx_driver_load(struct mdx_driver *driver, struct mdx_file *mfile, struct pd
 	if(!mfile) return 1;
 
 	driver->track_mask = 0xffff;
-	driver->loop_track = -1;
 	driver->ended = 0;
 	driver->max_loops = 2;
 	driver->fade_rate = 0;

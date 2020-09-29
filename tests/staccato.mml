@@ -1,4 +1,4 @@
-#title "Volume test"
+#title "Staccato test"
 
 @0 = {
 /* AR D1R D2R  RR D1L   TL KS MUL DT1 DT2 AME */
@@ -10,8 +10,23 @@
     4,  7,  15
 }
 
+
 A @0 t120
+A q1 c
+A q2 c
+A q3 c
+A q4 c
+A q5 c
+A q6 c
+A q7 c
+A q8 c
 
-A v15 c v14 c v13 c v12 c v11 c v10 c v9 c v8 c v7 c v6 c v5 c v4 c v3 c v2 c v1 c v0 c
-
-A @v0 d @v1 d @v2 d @v3 d @v4 d @v5 d @v10 d @v20 d @v30 d @v50 d @v100 d
+A @q1 d
+A @q10 d
+A @q20 d
+A @q30 d
+A @q40 d
+A @q50 d
+A @q100 d
+A @q150 d
+A @q192 d

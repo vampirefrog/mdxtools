@@ -244,7 +244,10 @@ void mdx_decompiler_decompile(struct mdx_decompiler *d, struct mdx_file *f) {
 					MMLF(")")
 					break;
 				case 0xf8:
-					MMLF("q%d", b[1])
+					if(b[1] <= 8)
+						MMLF("q%d", b[1])
+					else
+						MMLF("@q%d", 256 - b[1])
 					break;
 				case 0xf7:
 					d->next_key_off = 1;

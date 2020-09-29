@@ -291,7 +291,7 @@ void mdx_compiler_note_num(struct mdx_compiler *compiler, int chan_mask, int not
 }
 
 void mdx_compiler_staccato(struct mdx_compiler *compiler, int chan_mask, int q, int at) {
-	mdx_compiler_write(compiler, chan_mask, 0xf8, at ? 128 + q : q, -1);
+	mdx_compiler_write(compiler, chan_mask, 0xf8, at ? 256 - q : q, -1);
 }
 
 void mdx_compiler_portamento(struct mdx_compiler *compiler, int chan_mask, int note, struct mml_notelength *l, int note2) {

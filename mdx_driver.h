@@ -16,7 +16,7 @@ struct mdx_driver_track {
 	int used;
 
 	// state
-	int ended, waiting;
+	int ended, waiting, loop_num;
 	int ticks_remaining;
 	int volume, opm_volume; // cache computed OPM volume
 
@@ -28,7 +28,6 @@ struct mdx_driver_track {
 	int adpcm_freq_num;
 	int16_t detune;
 	int16_t portamento;
-	int sample_pos;
 
 	int skipNoteOff, skipNoteOn;
 
@@ -53,7 +52,7 @@ struct mdx_driver {
 	int ended;
 	int fade_rate, fade_counter, fade_value;
 	int track_mask;
-	int loop_track, cur_loop, max_loops;
+	int cur_loop, max_loops;
 
 	void *data_ptr;
 	void (*set_tempo)(struct mdx_driver *, int track_num, void *data_ptr);
