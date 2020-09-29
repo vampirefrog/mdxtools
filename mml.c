@@ -3,7 +3,7 @@
 #include "mml.h"
 #include "sjis.h"
 
-static char channel_name(int c) {
+static char track_name(int c) {
 	return c < 8 ? 'A' + c : (c < 16 ? 'P' + c - 8 : '?');
 }
 
@@ -31,7 +31,7 @@ static int note_octave(int n) {
 }
 
 #define PRINTLINE(s) d->line(s); s[0] = 0; d->cur_col = 0;
-#define PRINTMMLLINE(s) memmove(s + 2, s, d->columns - 2); s[0] = channel_name(i); s[1] = ' ';  PRINTLINE(s);
+#define PRINTMMLLINE(s) memmove(s + 2, s, d->columns - 2); s[0] = track_name(i); s[1] = ' ';  PRINTLINE(s);
 #define LINEF(fmt...) { snprintf(d->buf, d->columns, fmt); PRINTLINE(d->buf) }
 #define MMLF(fmt...) { \
 	char buf[40]; \
@@ -109,15 +109,15 @@ void mdx_decompiler_decompile(struct mdx_decompiler *d, struct mdx_file *f) {
 	}
 
 	const char *note_names[12] = { "d+", "e", "f", "f+", "g", "g+", "a", "a+", "b", "c", "c+", "d" };
-	for(int i = 0; i < f->num_channels; i++) {
+	for(int i = 0; i < f->num_tracks; i++) {
 		d->octave = 4;
 		d->rest_ticks = 0;
 		d->next_key_off = 0;
-		LINEF("/* Channel %c */", channel_name(i));
-		struct mdx_channel *chan = &f->channels[i];
+		LINEF("/* Track %c */", track_name(i));
+		struct mdx_track *chan = &f->tracks[i];
 		int pos = 0;
 
-		// run through the entire channel once to find the loop point
+		// run through the entire track once to find the loop point
 		int loop_point = -1;
 		while(1) {
 			int r = mdx_cmd_len(chan->data, pos, chan->data_len);

@@ -34,9 +34,11 @@ int main(int argc, char **argv) {
 
 	int target_samples = 48000 * 6;
 	stream_sample_t bufL[1024], bufR[1024];
-	for(int i = 0; i <= target_samples; i += 1024) {
-		adpcm_pcm_mix_driver_run(&driver, bufL, bufR, sizeof(bufL) / sizeof(bufL[0]));
-		for(int n = 0; n < 1024; n++) {
+	int inc = 1;
+	for(int i = 0; i <= target_samples; i += inc) {
+		int estimated = adpcm_pcm_mix_driver_estimate(&driver, inc);
+		adpcm_pcm_mix_driver_run(&driver, bufL, bufR, inc);
+		for(int n = 0; n < inc; n++) {
 			if(bufL[n] > 32767)
 				bufL[n] = 32767;
 			if(bufL[n] < -32767)

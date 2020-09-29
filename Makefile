@@ -42,8 +42,8 @@ adpcm-encode_SRCS=adpcm.c
 mdx2midi_SRCS=mdx.c buffer.c stream.c midi.c tools.c
 mdx2mml_SRCS=mdx.c mml.c tools.c cmdline.c sjis.c sjis_unicode.c
 mdx2opm_SRCS=mdx2opm.c tools.c mdx.c
-mdx2pcm_SRCS=mdx.c mdx_driver.c adpcm_driver.c mdx_pcm_driver.c mdx_pcm_renderer.c timer.c adpcm_driver.c adpcm.c pdx.c tools.c ym2151.c okim6258.c wav.c resample.c cmdline.c
-mdx2vgm_SRCS=mdx.c mdx_driver.c adpcm_driver.c adpcm.c resample.c timer.c tools.c sjis_unicode.c sjis.c ym2151.c okim6258.c vgm.c
+mdx2pcm_SRCS=mdx.c mdx_driver.c adpcm_driver.c mdx_pcm_driver.c mdx_pcm_renderer.c timer.c adpcm_driver.c adpcm.c pdx.c tools.c ym2151.c okim6258.c wav.c speex_resampler.c cmdline.c
+mdx2vgm_SRCS=mdx.c mdx_driver.c adpcm_driver.c adpcm.c speex_resampler.c timer.c tools.c sjis_unicode.c sjis.c ym2151.c okim6258.c vgm.c
 mdxdump_SRCS=mdx.c tools.c
 mdxinfo_SRCS=mdx.c tools.c sjis_unicode.c sjis.c cmdline.c md5.c
 mdxplay_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c wav.c cmdline.c
@@ -60,9 +60,9 @@ resample-test_SRCS=resample-test.c fixed_resampler.c
 gensinc_SRCS=gensinc.c cmdline.c
 
 fm-driver-test_SRCS=tools.c ym2151.c wav.c fm_driver.c mdx.c
-adpcm-driver-test_SRCS=fixed_resampler.c tools.c adpcm.c resample.c okim6258.c wav.c adpcm_driver.c
+adpcm-driver-test_SRCS=fixed_resampler.c tools.c adpcm.c speex_resampler.c okim6258.c wav.c adpcm_driver.c
 timer-driver-test_SRCS=timer_driver.c tools.c
-mdx-driver-test_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c resample.c ym2151.c fixed_resampler.c mdx.c pdx.c wav.c
+mdx-driver-test_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c wav.c
 
 OBJS=$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(foreach prog,$(PROGS),$(prog).cpp $($(prog)_SRCS))))
 

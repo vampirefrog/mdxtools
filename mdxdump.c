@@ -8,8 +8,8 @@ void handleNote(uint8_t note, uint8_t duration) { printf("Note %d (%s%d) duratio
 void handleCommand(uint8_t c, ...) { /* printf("Command 0x%02x: %s\n", c, commandName(c)); */ }
 void handlePCM8ExpansionShift() { printf("PCM8ExpansionShift\n"); }
 void handleUndefinedCommand(uint8_t b) { printf("UndefinedCommand %d\n", b); }
-void handleChannelStart(int chan) { printf("ChannelStart %c (%d)\n", mdx_channel_name(chan), chan); }
-void handleChannelEnd(int chan) { printf("ChannelEnd %c (%d)\n", mdx_channel_name(chan), chan); }
+void handleChannelStart(int track) { printf("ChannelStart %c (%d)\n", mdx_track_name(track), track); }
+void handleChannelEnd(int track) { printf("ChannelEnd %c (%d)\n", mdx_track_name(track), track); }
 
 /* ff */ void handleSetTempo(uint8_t t) { printf("SetTempo %d BPM (%d)\n", 78125 / (16 * (256 - t)), t); }
 /* fe */ void handleSetOPMRegister(uint8_t reg, uint8_t val) { printf("SetOPMRegister 0x%02x 0x%02x;\n", reg, val); }
@@ -48,18 +48,18 @@ static void run_through_file(struct mdx_file *f, int *num_cmds_out, int *pcm8_ou
 	memset(num_cmds_out, 0, 16 * sizeof(int));
 	if(pcm_notes_out) memset(pcm_notes_out, 0, 96 * sizeof(int));
 
-	for(int i = 0; i < f->num_channels; i++) {
-		struct mdx_channel *chan = &f->channels[i];
+	for(int i = 0; i < f->num_tracks; i++) {
+		struct mdx_track *track = &f->tracks[i];
 
-		for(int j = 0; j < chan->data_len; /* nothing */) {
-			int l = mdx_cmd_len(chan->data, j, chan->data_len - j);
+		for(int j = 0; j < track->data_len; /* nothing */) {
+			int l = mdx_cmd_len(track->data, j, track->data_len - j);
 			if(l < 0) break;
 
-			uint8_t *p = &chan->data[j];
+			uint8_t *p = &track->data[j];
 
 			// stop on performance end command
 			num_cmds_out[i]++;
-			if(*p == 0xf1 && j < chan->data_len - 1 && p[1] == 0) {
+			if(*p == 0xf1 && j < track->data_len - 1 && p[1] == 0) {
 				break;
 			}
 			if(*p == 0xe8) *pcm8_out = 1;
@@ -67,7 +67,7 @@ static void run_through_file(struct mdx_file *f, int *num_cmds_out, int *pcm8_ou
 				pcm_notes_out[*p - 0x80]++;
 			}
 
-			// printf("channel=%d file_offset=0x%08x channel_offset=0x%08x length=%d ", i, j + (chan->data - f->data), j, l);
+			// printf("channel=%d file_offset=0x%08x channel_offset=0x%08x length=%d ", i, j + (track->data - f->data), j, l);
 
 			if(*p <= 0x7f) {
 				handleRest(*p);
@@ -140,6 +140,9 @@ int main(int argc, char **argv) {
 
 	struct mdx_file f;
 	mdx_file_load(&f, data, data_len);
+
+	printf("title %s\n", f.title);
+	printf("pdxfile %s\n", f.pdx_filename);
 
 	int num_cmds_out[16], pcm8_out;
 	run_through_file(&f, num_cmds_out, &pcm8_out, 0);

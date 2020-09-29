@@ -94,19 +94,21 @@ int main(int argc, char **argv) {
 	stream_sample_t in_buf[1024], out_buf[1024];
 	int16_t in_buf16[1024], out_buf16[1024];
 	while(!feof(inf)) {
-		int in_samples = fixed_resampler_estimate(&resampler, sizeof(out_buf) / sizeof(*out_buf));
-		printf("in_samples=%d\n", in_samples);
+		int in_samples = fixed_resampler_estimate(&resampler, 1);
+		// printf("in_samples=%d\n", in_samples);
 
-		fread(in_buf16, sizeof(*in_buf16), in_samples, inf);
-		for(int i = 0; i < in_samples; i++)
-			in_buf[i] = in_buf16[i];
+		if(in_samples > 0) {
+			fread(in_buf16, sizeof(*in_buf16), in_samples, inf);
+			for(int i = 0; i < in_samples; i++)
+				in_buf[i] = in_buf16[i];
+		}
 
-		int in_len = in_samples, out_len = sizeof(out_buf) / sizeof(*out_buf);
+		int in_len = in_samples, out_len = 1;
 		int result = fixed_resampler_resample(&resampler, in_buf, &in_len, out_buf, &out_len);
-		printf("%d %d %d %d  %d %d %d %d\n",
-			in_buf[0], in_buf[1], in_buf[2], in_buf[3],
-			out_buf[0], out_buf[1], out_buf[2], out_buf[3]);
-		printf("result=%d in_len=%d out_len=%d\n", result, in_len, out_len);
+		// printf("%d %d %d %d  %d %d %d %d\n",
+		// 	in_buf[0], in_buf[1], in_buf[2], in_buf[3],
+		// 	out_buf[0], out_buf[1], out_buf[2], out_buf[3]);
+		// printf("result=%d in_len=%d out_len=%d\n", result, in_len, out_len);
 
 		for(int i = 0; i < out_len; i++)
 			out_buf16[i] = out_buf[i];

@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
 			TYPE_NONE, &opt_samples
 		},
 		CMDLINE_ARG_TERMINATOR
-	}, 1, 0, "<file.pdx>");
+	}, 1, 1, "<file.pdx>");
 
 	if(optind < 0) exit(-optind);
 
