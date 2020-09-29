@@ -77,7 +77,7 @@ static void mdx_driver_track_init(struct mdx_driver_track *track) {
 	track->staccato_counter = 0;
 
 	track->ticks_remaining = 0;
-	track->volume = 24;
+	track->volume = 8;
 	track->voice_num = -1;
 	track->skipNoteOff = 0;
 	track->skipNoteOn = 0;
@@ -131,12 +131,14 @@ static uint8_t mdx_adpcm_volume_from_opm(uint8_t volume) {
 	return 0;
 }
 
-void mdx_driver_start_fadeout(struct mdx_driver *r, int rate) {
-	if(r->fade_rate != 0) return; // already fading out
+int mdx_driver_start_fadeout(struct mdx_driver *r, int rate) {
+	if(r->fade_rate != 0) return -1; // already fading out
 
 	r->fade_rate = rate / 2 + 1;
 	r->fade_counter = r->fade_rate;
 	r->fade_value = 0; // attenuation
+
+	return 0;
 }
 
 static void mdx_driver_note_on(struct mdx_driver *r, int track_num) {
@@ -364,7 +366,7 @@ static int mdx_driver_track_advance(struct mdx_driver *driver, int track_num) {
 			if(track_num < 8) {
 				fm_driver_set_noise_freq(driver->fm_driver, track_num, track->data[track->pos + 1]);
 			} else {
-				adpcm_driver_set_freq(driver->adpcm_driver, track_num, track->data[track->pos + 1]);
+				adpcm_driver_set_freq(driver->adpcm_driver, track_num - 8, track->data[track->pos + 1]);
 			}
 			track->pos += 2;
 			break;
@@ -541,6 +543,9 @@ static void mdx_timer_driver_tick_callback(struct timer_driver *timer_driver, vo
 void mdx_driver_init(struct mdx_driver *driver, struct timer_driver *timer_driver, struct fm_driver *fm_driver, struct adpcm_driver *adpcm_driver) {
 	driver->timer_driver = timer_driver;
 	timer_driver_set_tick_callback(timer_driver, mdx_timer_driver_tick_callback, driver);
+	int bpm_tempo = 120;
+	int opm_tempo = 256 - (78125 / (16 * bpm_tempo));
+	timer_driver_set_opm_tempo(timer_driver, opm_tempo);
 	driver->fm_driver = fm_driver;
 	driver->adpcm_driver = adpcm_driver;
 
@@ -552,9 +557,10 @@ void mdx_driver_init(struct mdx_driver *driver, struct timer_driver *timer_drive
 	driver->ended = 0;
 	driver->max_loops = 2;
 	driver->fade_rate = 0;
+	driver->fade_counter = 0;
+	driver->fade_value = 0;
 
 	driver->set_tempo = 0;
-
 	driver->unknown_command_cb = 0;
 
 	for(int i = 0; i < 16; i++) {
@@ -564,6 +570,18 @@ void mdx_driver_init(struct mdx_driver *driver, struct timer_driver *timer_drive
 
 int mdx_driver_load(struct mdx_driver *driver, struct mdx_file *mfile, struct pdx_file *pfile) {
 	if(!mfile) return 1;
+
+	driver->track_mask = 0xffff;
+	driver->loop_track = -1;
+	driver->ended = 0;
+	driver->max_loops = 2;
+	driver->fade_rate = 0;
+	driver->fade_counter = 0;
+	driver->fade_value = 0;
+
+	for(int i = 0; i < 16; i++) {
+		mdx_driver_track_init(&driver->tracks[i]);
+	}
 
 	driver->mdx_file = mfile;
 	driver->pdx_file = pfile;

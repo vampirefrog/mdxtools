@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
 	char wavname[256];
 	replace_ext(wavname, sizeof(wavname), argv[1], "wav");
 	printf("Outputting to %s\n", wavname);
-	wav_open(&wav, wavname, 44100, 2, 16);
+	wav_open(&wav, wavname, opt_sample_rate, 2, 16);
 
 #define BUFFER_SIZE 1024
 	stream_sample_t bufL[BUFFER_SIZE], bufR[BUFFER_SIZE];
@@ -82,17 +82,21 @@ int main(int argc, char **argv) {
 
 			// printf("running adpcm\n");
 			adpcm_pcm_mix_driver_run(&adpcm_driver, bufL, bufR, samples);
+			for(int n = 0; n < samples; n++) {
+				mixBufLp[n] += bufL[n];
+				mixBufRp[n] += bufR[n];
+			}
 			// printf("running fm\n");
 			fm_opm_emu_driver_run(&fm_driver, bufL, bufR, samples);
+			for(int n = 0; n < samples; n++) {
+				mixBufLp[n] += bufL[n];
+				mixBufRp[n] += bufR[n];
+			}
 			// printf("running pcm_timer_driver\n");
 			pcm_timer_driver_advance(&timer_driver, samples);
 
 			samples_remaining -= samples;
 			// printf("timer_samples=%d fm_samples=%d adpcm_samples=%d samples=%d samples_remaining=%d\n", timer_samples, fm_samples, adpcm_samples, samples, samples_remaining);
-			for(int n = 0; n < samples; n++) {
-				mixBufLp[n] += bufL[n];
-				mixBufRp[n] += bufR[n];
-			}
 			mixBufLp += samples;
 			mixBufRp += samples;
 		}

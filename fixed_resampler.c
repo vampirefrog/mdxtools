@@ -3,9 +3,6 @@
 #include <string.h>
 
 int fixed_resampler_init(struct fixed_resampler *resampler, stream_sample_t *table, int table_step, int num_zero_crossings, int numerator, int denominator) {
-	resampler->sample_read_cb_data_ptr = 0;
-	resampler->sample_read_cb = 0;
-
 	resampler->table = table;
 	resampler->table_step = table_step;
 	resampler->num_zero_crossings = num_zero_crossings;
@@ -23,9 +20,6 @@ int fixed_resampler_init(struct fixed_resampler *resampler, stream_sample_t *tab
 }
 
 int fixed_resampler_deinit(struct fixed_resampler *resampler) {
-	resampler->sample_read_cb_data_ptr = 0;
-	resampler->sample_read_cb = 0;
-
 	resampler->table = 0;
 	resampler->table_step = 0;
 	resampler->num_zero_crossings = 0;
@@ -101,7 +95,7 @@ int fixed_resampler_resample(struct fixed_resampler *resampler, stream_sample_t 
 			ilen--;
 
 			resampler->counter -= resampler->denominator;
-			// printf("moving history is=%d\n", is);
+
 			memmove(resampler->history, &resampler->history[1], sizeof(*resampler->history) * (resampler->num_zero_crossings * 2 - 1));
 			resampler->history[resampler->num_zero_crossings * 2 - 1] = is;
 		}

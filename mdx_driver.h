@@ -64,5 +64,6 @@ void mdx_driver_init(struct mdx_driver *driver, struct timer_driver *timer_drive
 void mdx_driver_deinit(struct mdx_driver *driver);
 void mdx_driver_tick(struct mdx_driver *driver);
 int mdx_driver_load(struct mdx_driver *driver, struct mdx_file *file, struct pdx_file *pfile);
+int mdx_driver_start_fadeout(struct mdx_driver *driver, int fade_rate);
 
 #endif /* MDX_DRIVER_H_ */

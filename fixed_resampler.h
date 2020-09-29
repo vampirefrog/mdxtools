@@ -15,9 +15,6 @@ struct fixed_resampler {
 
 	int counter;
 	stream_sample_t *history;
-
-	void *sample_read_cb_data_ptr;
-	stream_sample_t (*sample_read_cb)(struct fixed_resampler *, void *data_ptr);
 };
 
 int fixed_resampler_init(struct fixed_resampler *resampler, stream_sample_t *table, int table_step, int num_zero_crossings, int numerator, int denominator);

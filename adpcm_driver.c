@@ -81,13 +81,21 @@ stream_sample_t sinctbl3[] = {
 #include "sinctbl3.h"
 };
 
+static int adpcm_mix_driver_channel_set_volume(struct adpcm_mix_driver_channel *chan, uint8_t volume) {
+	chan->volume = adpcm_mixer_calc_vol(volume);
+
+	return 0;
+}
+
 static int adpcm_mix_driver_channel_init(struct adpcm_mix_driver_channel *channel) {
 	channel->data = NULL;
 	channel->data_len = 0;
 	adpcm_init(&channel->decoder_status);
+	adpcm_mix_driver_channel_set_volume(channel, 15);
 
 	return 0;
 }
+
 static void adpcm_mix_driver_channel_deinit(struct adpcm_mix_driver_channel *channel) {
 	channel->data = NULL;
 	channel->data_len = 0;
@@ -109,7 +117,7 @@ static stream_sample_t adpcm_mix_driver_channel_get_sample(struct adpcm_mix_driv
 	}
 
 	stream_sample_t sample = adpcm_decode(b, &channel->decoder_status);
-	sample *= 16;
+	sample = channel->volume * sample / 1024;
 	if(sample > 32767) sample = 32767;
 	if(sample < -32767) sample = -32767;
 
@@ -123,16 +131,16 @@ static stream_sample_t adpcm_mix_driver_channel_get_sample(struct adpcm_mix_driv
 	return sample;
 }
 
-static int adpcm_mix_driver_channel_play(struct adpcm_mix_driver_channel *chan, uint8_t *data, int data_len, uint8_t freq_num, uint8_t volume) {
-	adpcm_init(&chan->decoder_status);
+static int adpcm_mix_driver_channel_play(struct adpcm_mix_driver_channel *channel, uint8_t *data, int data_len, uint8_t freq_num, uint8_t volume) {
+	adpcm_init(&channel->decoder_status);
 
-	chan->data = data;
-	chan->data_len = data_len;
-	chan->freq_num = freq_num;
-	chan->volume = volume;
+	channel->data = data;
+	channel->data_len = data_len;
+	channel->freq_num = freq_num;
+	adpcm_mix_driver_channel_set_volume(channel, volume);
 
-	chan->data_pos = 0;
-	chan->nybble = 0;
+	channel->data_pos = 0;
+	channel->nybble = 0;
 
 	return 0;
 }
@@ -143,12 +151,6 @@ static int adpcm_mix_driver_channel_stop(struct adpcm_mix_driver_channel *chan) 
 	chan->volume = 0;
 	chan->data_pos = 0;
 	chan->nybble = 0;
-
-	return 0;
-}
-
-static int adpcm_mix_driver_channel_set_volume(struct adpcm_mix_driver_channel *chan, uint8_t volume) {
-	chan->volume = volume;
 
 	return 0;
 }

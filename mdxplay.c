@@ -1,12 +1,17 @@
 #include <stdio.h>
 #include <signal.h>
+#include <string.h>
 
 #include <portaudio.h>
 
-#include "tools.h"
 #include "cmdline.h"
-#include "mdx_pcm_renderer.h"
+#include "tools.h"
+#include "mdx.h"
+#include "pdx.h"
+#include "mdx_driver.h"
+#include "timer_driver.h"
 #include "adpcm_driver.h"
+#include "fm_driver.h"
 
 #define SAMPLE_RATE 44100
 #define BUFFER_SIZE 2048
@@ -16,12 +21,13 @@ int opt_loops = 1;
 
 SAMP bufL[BUFFER_SIZE], bufR[BUFFER_SIZE], chipBufL[BUFFER_SIZE], chipBufR[BUFFER_SIZE];
 int16_t buf[BUFFER_SIZE * 2];
-struct mdx_pcm_renderer r;
+
+struct mdx_driver mdx_driver;
 
 static void sigint_handler(int s) {
 	signal(SIGINT, SIG_DFL);
 	printf("Fading out...\n");
-	mdx_driver_start_fadeout(&r.player.driver, 4);
+	mdx_driver_start_fadeout(&mdx_driver, 4);
 }
 
 int main(int argc, char **argv) {
@@ -41,44 +47,28 @@ int main(int argc, char **argv) {
 			TYPE_INT, &opt_loops
 		},
 		CMDLINE_ARG_TERMINATOR
-	}, 1, 1, "<file.mdx>");
+	}, 1, -1, "<file.mdx>");
 
 	if(optind < 0) exit(-optind);
 
-	size_t l;
-	uint8_t *mdx_data = load_file(argv[optind], &l);
-	if(!mdx_data) {
-		return 1;
-	}
-	struct mdx_file f;
-	int er = mdx_file_load(&f, mdx_data, l);
-	if(er != MDX_SUCCESS) {
-		printf("Error loading MDX file \"%s\": %s (%d)\n", argv[optind], mdx_error_name(er), er);
-		return 2;
-	}
-	printf("Loaded \"%s\"\n", argv[optind]);
-	if(f.pdx_filename_len > 0) {
-		char buf[256];
-		find_pdx_file(argv[optind], (char *)f.pdx_filename, buf, sizeof(buf));
-		if(buf[0]) {
-			printf("Loading PDX \"%s\" from \"%s\"\n", f.pdx_filename, buf);
-			uint8_t *pdx_data = load_file(buf, &l);
-			if(pdx_data)
-				pdx_load(&f.pdx, pdx_data, l);
-		} else {
-			printf("Could not find \"%s\"\n", f.pdx_filename);
-		}
-	} else printf("No PDX file\n");
+	struct pcm_timer_driver timer_driver;
+	struct adpcm_pcm_mix_driver adpcm_driver;
+	struct fm_opm_emu_driver fm_driver;
 
-	struct adpcm_pcm_mix_driver d;
-	adpcm_pcm_mix_driver_init(&d, SAMPLE_RATE, BUFFER_SIZE);
+	int opt_sample_rate = 44100;
 
-	mdx_pcm_renderer_init(
-		&r, &f, (struct adpcm_driver *)&d, SAMPLE_RATE,
-		bufL, bufR, chipBufL, chipBufR, BUFFER_SIZE
+	pcm_timer_driver_init(&timer_driver, opt_sample_rate);
+	adpcm_pcm_mix_driver_init(&adpcm_driver, opt_sample_rate, 0);
+	fm_opm_emu_driver_init(&fm_driver, opt_sample_rate);
+	mdx_driver_init(
+		&mdx_driver,
+		(struct timer_driver *)&timer_driver,
+		(struct fm_driver *)&fm_driver,
+		(struct adpcm_driver *)&adpcm_driver
 	);
-	r.player.driver.max_loops = opt_loops;
-	r.player.driver.channel_mask = opt_channel_mask;
+
+	stream_sample_t bufL[BUFFER_SIZE], bufR[BUFFER_SIZE];
+	stream_sample_t mixBufL[BUFFER_SIZE], mixBufR[BUFFER_SIZE];
 
 	signal(SIGINT, sigint_handler);
 
@@ -103,15 +93,81 @@ int main(int argc, char **argv) {
 	err = Pa_StartStream( stream );
 	if( err != paNoError ) goto error;
 
-	while(!r.player.driver.ended) {
-		mdx_pcm_renderer_render(&r);
-		int16_t *out = buf;
-		for(int i = 0; i < BUFFER_SIZE; i++) {
-			*out++ = bufL[i];
-			*out++ = bufR[i];
+	for(int i = optind; i < argc; i++) {
+		struct mdx_file mdx_file;
+		struct pdx_file pdx_file;
+
+		size_t mdx_file_size;
+		uint8_t *mdx_file_data = load_file(argv[i], &mdx_file_size);
+		if(!mdx_file_data)
+			continue;
+		mdx_file_load(&mdx_file, mdx_file_data, mdx_file_size);
+		printf("Loaded MDX file \"%s\"\n", argv[i]);
+
+		if(mdx_file.pdx_filename_len > 0) {
+			char buf[256];
+			find_pdx_file(argv[i], (char *)mdx_file.pdx_filename, buf, sizeof(buf));
+			if(buf[0]) {
+				printf("Loading PDX \"%s\" from \"%s\"\n", mdx_file.pdx_filename, buf);
+				size_t pdx_data_size;
+				uint8_t *pdx_file_data = load_file(buf, &pdx_data_size);
+				if(pdx_file_data)
+					pdx_file_load(&pdx_file, pdx_file_data, pdx_data_size);
+			} else {
+				printf("Could not find \"%s\"\n", mdx_file.pdx_filename);
+			}
+		} else printf("No PDX file\n");
+
+		mdx_driver_load(&mdx_driver, &mdx_file, &pdx_file);
+
+		while(!mdx_driver.ended) {
+			stream_sample_t *mixBufLp = mixBufL, *mixBufRp = mixBufR;
+			int16_t *out = buf;
+			int samples_remaining = BUFFER_SIZE;
+
+			memset(mixBufL, 0, sizeof(mixBufL));
+			memset(mixBufR, 0, sizeof(mixBufR));
+
+			while(samples_remaining > 0) {
+				int timer_samples = pcm_timer_driver_estimate(&timer_driver, samples_remaining);
+				int fm_samples = fm_opm_emu_driver_estimate(&fm_driver, samples_remaining);
+				int adpcm_samples = adpcm_pcm_mix_driver_estimate(&adpcm_driver, samples_remaining);
+
+				int samples = timer_samples;
+				if(fm_samples < samples)
+					samples = fm_samples;
+				if(adpcm_samples < samples)
+					samples = adpcm_samples;
+
+				// printf("running adpcm\n");
+				adpcm_pcm_mix_driver_run(&adpcm_driver, bufL, bufR, samples);
+				for(int n = 0; n < samples; n++) {
+					mixBufLp[n] += bufL[n];
+					mixBufRp[n] += bufR[n];
+				}
+				// printf("running fm\n");
+				fm_opm_emu_driver_run(&fm_driver, bufL, bufR, samples);
+				for(int n = 0; n < samples; n++) {
+					mixBufLp[n] += bufL[n];
+					mixBufRp[n] += bufR[n];
+				}
+				// printf("running pcm_timer_driver\n");
+				pcm_timer_driver_advance(&timer_driver, samples);
+
+				samples_remaining -= samples;
+				// printf("timer_samples=%d fm_samples=%d adpcm_samples=%d samples=%d samples_remaining=%d\n", timer_samples, fm_samples, adpcm_samples, samples, samples_remaining);
+				mixBufLp += samples;
+				mixBufRp += samples;
+			}
+
+			for(int n = 0; n < BUFFER_SIZE; n++) {
+				*out++ = mixBufL[n];
+				*out++ = mixBufR[n];
+			}
+
+			err = Pa_WriteStream( stream, buf, BUFFER_SIZE);
+			if( err ) goto error;
 		}
-		err = Pa_WriteStream( stream, buf, BUFFER_SIZE);
-		if( err ) goto error;
 	}
 
 	err = Pa_StopStream( stream );

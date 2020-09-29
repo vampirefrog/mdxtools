@@ -116,31 +116,29 @@ static void fm_opm_driver_set_tl(struct fm_driver *driver, int channel, uint8_t 
 	};
 	int mask = 1;
 	for(int i = 0; i < 4; i++, mask <<= 1) {
+		int op_vol = v[7 + i];
 		if((con_masks[v[1] & 0x07] & mask) > 0) {
-			int vol = tl + v[7 + i];
+			int vol = tl + op_vol;
 			if(vol > 0x7f) vol = 0x7f;
 			fm_opm_driver_write(fmdrv, 0x60 + i * 8 + channel, vol); // TL
 		} else {
-			fm_opm_driver_write(fmdrv, 0x60 + i * 8 + channel, v[7 + i]); // TL
+			fm_opm_driver_write(fmdrv, 0x60 + i * 8 + channel, op_vol); // TL
 		}
 	}
 }
 
 static void fm_opm_driver_note_on(struct fm_driver *driver, int channel, uint8_t op_mask, uint8_t *v) {
 	struct fm_opm_driver *fmdrv = (struct fm_opm_driver *)driver;
-
 	fm_opm_driver_write(fmdrv, 0x08, ((op_mask & 0x0f) << 3) | (channel & 0x07)); // Key On
 }
 
 static void fm_opm_driver_note_off(struct fm_driver *driver, int channel) {
 	struct fm_opm_driver *fmdrv = (struct fm_opm_driver *)driver;
-
 	fm_opm_driver_write(fmdrv, 0x08, channel & 0x07);
 }
 
 static void fm_opm_driver_write_opm_reg(struct fm_driver *driver, uint8_t reg, uint8_t data) {
 	struct fm_opm_driver *fmdrv = (struct fm_opm_driver *)driver;
-
 	fm_opm_driver_write(fmdrv, reg, data);
 }
 
@@ -246,8 +244,8 @@ void fm_opm_emu_driver_run(struct fm_opm_emu_driver *d, stream_sample_t *outL, s
 	SAMP *buffers[2] = { outL, outR };
 	ym2151_update_one(&d->opm, buffers, num_samples);
 	for(int i = 0; i < num_samples; i++) {
-		outL[i] = outL[i] * 16;
-		outR[i] = outR[i] * 16;
+		outL[i] = outL[i] / 2;
+		outR[i] = outR[i] / 2;
 	}
 }
 
