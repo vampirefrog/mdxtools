@@ -1,0 +1,17 @@
+#title "Voice test"
+
+@0 = {
+/* AR D1R D2R  RR D1L   TL KS MUL DT1 DT2 AME */
+   14,  4,  2,  2,  0,  26, 0,  1,  5,  0,  0,
+   15, 12,  2,  9,  2,   0, 0,  1,  0,  0,  0,
+   14,  4,  2,  2,  0,  36, 0,  1,  1,  0,  0,
+   15, 12,  2,  9,  2,   0, 0,  1,  0,  0,  0,
+/* CON FL MASK */
+    4,  7,  15
+}
+
+A @0 t120
+
+A v15 c v14 c v13 c v12 c v11 c v10 c v9 c v8 c v7 c v6 c v5 c v4 c v3 c v2 c v1 c v0 c
+
+A @v0 d @v1 d @v2 d @v3 d @v4 d @v5 d @v10 d @v20 d @v30 d @v50 d @v100 d
