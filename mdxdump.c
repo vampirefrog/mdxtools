@@ -20,7 +20,7 @@ void handleChannelEnd(int track) { printf("ChannelEnd %c (%d)\n", mdx_track_name
 /* f9 */ void handleVolumeInc() { printf("VolumeInc\n"); }
 /* f8 */ void handleSetNoteLength(uint8_t l) { printf("SetNoteLength %d\n", l); }
 /* f7 */ void handleDisableKeyOff() { printf("DisableKeyOff\n"); }
-/* f6 */ void handleRepeatStart(uint8_t r) { printf("RepeatStart %d\n", r); }
+/* f6 */ void handleRepeatStart(uint8_t r, uint8_t n) { printf("RepeatStart %d %d\n", r, n); }
 /* f5 */ void handleRepeatEnd(int16_t r) { printf("RepeatEnd %d\n", r); }
 /* f4 */ void handleRepeatEscape(int16_t r) { printf("RepeatEscape %d\n", r); }
 /* f3 */ void handleDetune(int16_t d) { printf("Detune %d\n", d); }
@@ -83,7 +83,7 @@ static void run_through_file(struct mdx_file *f, int *num_cmds_out, int *pcm8_ou
 				case 0xf9: handleVolumeInc(); break;
 				case 0xf8: handleSetNoteLength(p[1]); break;
 				case 0xf7: handleDisableKeyOff(); break;
-				case 0xf6: handleRepeatStart(p[1]); break;
+				case 0xf6: handleRepeatStart(p[1], p[2]); break;
 				case 0xf5: handleRepeatEnd(p[1] << 8 | p[2]); break;
 				case 0xf4: handleRepeatEscape(p[1] << 8 | p[2]); break;
 				case 0xf3: handleDetune(p[1] << 8 | p[2]); break;
