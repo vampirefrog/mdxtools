@@ -20,6 +20,10 @@ ssize_t stream_write(struct stream *stream, void *ptr, size_t size) {
 	return stream->write(stream, ptr, size);
 }
 
+long stream_tell(struct stream *stream) {
+	return stream->tell(stream);
+}
+
 ssize_t stream_write_big_uint16(struct stream *stream, uint16_t i) {
 	uint8_t buf[2] = { i >> 8, i & 0xff };
 	return stream_write(stream, buf, 2);
@@ -73,7 +77,6 @@ size_t mem_stream_write(struct stream *stream, void *ptr, size_t size) {
 		mem_stream->buffer->data_len += stream->position + size - mem_stream->buffer->data_len;
 	}
 	memcpy(mem_stream->buffer->data + stream->position, ptr, size);
-
 	stream->position += size;
 	stream->_errno = errno;
 	return size;
