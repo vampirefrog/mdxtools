@@ -11,7 +11,7 @@ void handle_byte(struct midi_reader *r, uint8_t b) {
 }
 
 void handle_track(struct midi_reader *r, int number, int length) {
-	printf("Track %d (%db)\n", number, length);
+	printf("Track %d (%d bytes)\n", number, length);
 }
 
 void handle_note_on(struct midi_reader *r, uint8_t channel, int duration, int note, int vel) {
