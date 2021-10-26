@@ -46,7 +46,10 @@ int midi_reader_load(struct midi_reader *r, struct stream *s) {
 	midi_reader_read_header(r);
 	stream_seek((struct stream *)r->stream, r->header_len + 8, SEEK_SET);
 	for(int i = 0; i < r->num_tracks; i++) {
-		midi_reader_read_track(r, i);
+		int ret = midi_reader_read_track(r, i);
+		if(ret != MIDI_SUCCESS) {
+			return ret;
+		}
 	}
 
 	return MIDI_SUCCESS;
