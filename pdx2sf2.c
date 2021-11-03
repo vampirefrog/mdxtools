@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "pdx.h"
 #include "adpcm.h"
 #include "tools.h"
@@ -42,7 +44,7 @@ int main(int argc, char **argv) {
 				h->chCorrection = 0;
 				h->wSampleLink = 0;
 				h->sfSampleType = monoSample;
-				snprintf(h->achSampleName, sizeof(h->achSampleName), "Sample %03hX", x);
+				snprintf(h->achSampleName, sizeof(h->achSampleName), "Sample %03X", x);
 				h->dwStart = curPos;
 				h->dwEnd = curPos + p.samples[j].num_samples + 46;
 				h->dwStartloop = curPos;
