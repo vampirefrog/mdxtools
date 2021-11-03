@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define PDX_NUM_SAMPLES 96
+
 struct pdx_sample {
 	uint8_t *data;
 	int len;
@@ -11,7 +13,7 @@ struct pdx_sample {
 };
 
 struct pdx_file {
-	struct pdx_sample samples[96];
+	struct pdx_sample samples[PDX_NUM_SAMPLES];
 	int num_samples;
 };
 
