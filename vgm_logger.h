@@ -1,5 +1,5 @@
-#ifndef VGM_H_
-#define VGM_H_
+#ifndef VGM_LOGGER_H_
+#define VGM_LOGGER_H_
 
 #include <stdio.h>
 #include <stdint.h>
@@ -18,4 +18,4 @@ int vgm_logger_write_ym2151(struct vgm_logger *log, uint8_t reg, uint8_t val);
 int vgm_logger_write_okim6258(struct vgm_logger *log, uint8_t port, uint8_t val);
 int vgm_logger_end(struct vgm_logger *log);
 
-#endif /* VGM_H_ */
+#endif /* VGM_LOGGER_H_ */
