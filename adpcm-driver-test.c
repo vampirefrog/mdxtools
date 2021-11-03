@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "adpcm_driver.h"
+#include "adpcm_pcm_mix_driver.h"
 #include "tools.h"
 #include "wav.h"
 
@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
 	adpcm_pcm_mix_driver_init(&driver, 48000, 0);
 
 	uint8_t *sample;
-	unsigned int sample_len;
+	size_t sample_len;
 	sample = load_file(argv[1], &sample_len);
 	if(!sample) {
 		fprintf(stderr, "Could not load %s\n", argv[1]);
@@ -37,8 +37,8 @@ int main(int argc, char **argv) {
 	int inc = 1;
 	for(int i = 0; i <= target_samples; i += inc) {
 		int estimated = adpcm_pcm_mix_driver_estimate(&driver, inc);
-		adpcm_pcm_mix_driver_run(&driver, bufL, bufR, inc);
-		for(int n = 0; n < inc; n++) {
+		adpcm_pcm_mix_driver_run(&driver, bufL, bufR, estimated);
+		for(int n = 0; n < estimated; n++) {
 			if(bufL[n] > 32767)
 				bufL[n] = 32767;
 			if(bufL[n] < -32767)

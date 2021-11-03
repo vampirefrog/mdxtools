@@ -19,6 +19,8 @@ typedef UINT32	DWORD;
 typedef DWORD	FOURCC;
 #endif
 
+#include <stdio.h>
+
 // --- General Types ---
 typedef struct _item_chunk ITEM_CHUNK;
 struct _item_chunk

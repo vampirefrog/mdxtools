@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "mdx.h"
-#include "mml.h"
+#include "mdx_decompiler.h"
 #include "tools.h"
 #include "cmdline.h"
 

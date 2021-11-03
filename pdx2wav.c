@@ -12,8 +12,8 @@ int main(int argc, char **argv) {
 	size_t data_len;
 	uint8_t *data = load_file(argv[1], &data_len);
 
-	struct pdx pdx;
-	pdx_load(&pdx, data, data_len);
+	struct pdx_file pdx;
+	pdx_file_load(&pdx, data, data_len);
 
 	for(int i = 0; i < 96; i++) {
 		if(pdx.samples[i].len == 0) continue;

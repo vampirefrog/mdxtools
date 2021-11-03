@@ -11,6 +11,7 @@
 #include "tools.h"
 #include "mdx.h"
 #include "sjis.h"
+#include "utf8.h"
 #include "cmdline.h"
 #include "md5.h"
 
@@ -22,6 +23,48 @@ int opt_opm = 0;
 int opt_pcm = 0;
 FILE *of;
 
+static void print_escaped_string_utf8(uint8_t *sjis_data, int sjis_len) {
+	putchar('"');
+	int last_byte = 0;
+	for(int i = 0; i < sjis_len; i++) {
+		uint8_t b = sjis_data[i];
+		if(last_byte == 0 && SJIS_FIRST_CHAR(b)) {
+			last_byte = b;
+		} else {
+			char buf[4];
+			int l = utf8_encode(sjis_char_to_unicode((last_byte << 8) | b), buf);
+			fwrite(buf, l, 1, stdout);
+			last_byte = 0;
+		}
+	}
+	putchar('"');
+}
+
+static void print_escaped_string(uint8_t *sjis_data, int sjis_len) {
+	putchar('"');
+	int last_byte = 0;
+	for(int i = 0; i < sjis_len; i++) {
+		uint8_t b = sjis_data[i];
+		if(last_byte == 0 && SJIS_FIRST_CHAR(b)) {
+			last_byte = b;
+		} else {
+			char buf[4];
+			int l = 0;
+			if(last_byte) {
+				buf[0] = last_byte;
+				buf[1] = b;
+				l = 2;
+			} else {
+				buf[0] = b;
+				l = 1;
+			}
+			fwrite(buf, l, 1, stdout);
+			last_byte = 0;
+		}
+	}
+	putchar('"');
+}
+
 static void hexdump(FILE *f, uint8_t *data, int len) {
 	for(int i = 0; i < len; i++) {
 		fprintf(f, "%02x", data[i]);
@@ -32,9 +75,9 @@ static void run_through_file(struct mdx_file *f, int *num_cmds_out, int *pcm8_ou
 	*pcm8_out = 0;
 	memset(num_cmds_out, 0, 16 * sizeof(int));
 	if(pcm_notes_out) memset(pcm_notes_out, 0, 96 * sizeof(int));
-	for(int i = 0; i < f->num_channels; i++) {
-		struct mdx_channel *chan = &f->channels[i];
-//		printf("%d/%d len=%d\n", i, f->num_channels, chan->data_len);
+	for(int i = 0; i < f->num_tracks; i++) {
+		struct mdx_track *chan = &f->tracks[i];
+//		printf("%d/%d len=%d\n", i, f->num_tracks, chan->data_len);
 		for(int j = 0; j < chan->data_len;) {
 			int l = mdx_cmd_len(chan->data, j, chan->data_len - j);
 			//printf("cmd=%02x j=%d len=%d calculated=%d l=%d\n", chan->data[j], j, chan->data_len, chan->data_len - j, l);
@@ -102,7 +145,7 @@ static void mdxinfo(const char *filename) {
 				printf("%s\t%d\t%d\n", filename, j, pcm_notes[j]);
 		}
 	} else {
-		printf("%s\t%lu\t%lu\t%s\t%s\t", filename, l, l - f.data_start_ofs, tmbuf, mdx_error_name(r));
+		printf("%s\t%zu\t%zu\t%s\t%s\t", filename, l, l - f.data_start_ofs, tmbuf, mdx_error_name(r));
 
 		struct md5_ctx ctx;
 		uint8_t md5buf[16];
@@ -126,14 +169,10 @@ static void mdxinfo(const char *filename) {
 		printf("\t");
 
 		if(opt_utf8) {
-			putchar('"');
-			sjis_print_utf8_escaped(f.title, f.title_len);
-			putchar('"');
+			print_escaped_string_utf8(f.title, f.title_len);
 			putchar('\t');
 			if(f.pdx_filename_len) {
-				putchar('"');
-				sjis_print_utf8_escaped(f.pdx_filename, f.pdx_filename_len);
-				putchar('"');
+				print_escaped_string_utf8(f.pdx_filename, f.pdx_filename_len);
 			}
 			putchar('\t');
 
@@ -146,14 +185,10 @@ static void mdxinfo(const char *filename) {
 				printf("%s\t", pdxbuf);
 			} else printf("\t");
 		} else {
-			putchar('"');
-			sjis_print_escaped(f.title, f.title_len);
-			putchar('"');
+			print_escaped_string(f.title, f.title_len);
 			putchar('\t');
 			if(f.pdx_filename_len) {
-				putchar('"');
-				sjis_print_escaped(f.pdx_filename, f.pdx_filename_len);
-				putchar('"');
+				print_escaped_string(f.pdx_filename, f.pdx_filename_len);
 			}
 			putchar('\t');
 
@@ -179,11 +214,11 @@ static void mdxinfo(const char *filename) {
 		int pcm8 = 0;
 		run_through_file(&f, num_cmds, &pcm8, 0);
 
-		printf("%d\t", f.num_channels);
+		printf("%d\t", f.num_tracks);
 		printf("%d\t", pcm8);
 
 		for(int i = 0; i < 16; i++) {
-			if(i < f.num_channels) {
+			if(i < f.num_tracks) {
 				printf("%d\t", num_cmds[i]);
 			} else printf("\t");
 		}
@@ -203,15 +238,22 @@ static void mdxinfo_dir(const char *name, int recurse) {
 
 	while((entry = readdir(dir)) != NULL) {
 		char path[1024];
+		if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+			continue;
+		snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
+
+#ifdef DIRENT_HAS_D_TYPE
 		if (entry->d_type == DT_DIR) {
+#else
+		struct stat st;
+		stat(path, &st);
+		if(S_ISDIR(st.st_mode)) {
+#endif
 			if(!recurse)
 				continue;
-			if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-				continue;
-			snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
+
 			mdxinfo_dir(path, recurse);
 		} else {
-			snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
 			mdxinfo(path);
 		}
 	}
@@ -263,7 +305,7 @@ int main(int argc, char **argv) {
 			TYPE_NONE, &opt_pcm
 		},
 		CMDLINE_ARG_TERMINATOR
-	}, 1, 0, "<file.mdx>");
+	}, 1, -1, "<file.mdx>");
 
 	if(optind < 0) exit(-optind);
 
@@ -282,7 +324,7 @@ int main(int argc, char **argv) {
 		} else if(opt_pcm) {
 			printf("File\tSample\tTimes Used\n");
 		} else {
-			printf("File\tSize\tData size\tDate\tError\tMD5\tData MD5\tTitle\tPCM File\tPDX file\tTitle hex\tPCM File hex\tChannels\tPCM8\tA\tB\tC\tD\tE\tF\tG\tH\tP\tQ\tR\tS\tT\tU\tV\tW\n");
+			printf("File\tSize\tData size\tDate\tError\tMD5\tData MD5\tTitle\tPCM File\tPDX file\tTitle hex\tPCM File hex\tTracks\tPCM8\tA\tB\tC\tD\tE\tF\tG\tH\tP\tQ\tR\tS\tT\tU\tV\tW\n");
 		}
 	}
 	for(int i = optind; i < argc; i++) {

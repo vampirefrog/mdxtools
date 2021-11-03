@@ -4,8 +4,9 @@
 #include "Soundfont.h"
 
 int main(int argc, char **argv) {
-	adpcm_status d; // initialize once
+	printf("ass %d\n", argc);
 	for(int i = 1; i < argc; i++) {
+		printf("balls %s\n", argv[i]);
 		size_t data_len = 0;
 		uint8_t *data = load_file(argv[1], &data_len);
 		if(!data) {
@@ -13,15 +14,15 @@ int main(int argc, char **argv) {
 			return 1;
 		}
 
-		struct pdx p;
-		pdx_load(&p, data);
+		struct pdx_file p;
+		pdx_file_load(&p, data, data_len);
 
 		SF2_DATA* s = CreateSF2Base(argv[i]);
 		int totalSamplesSize = 0;
 		int totalSamples = 0;
 		for(int j = 0; j < PDX_NUM_SAMPLES; j++) {
-			if(p.samples[j].length > 0) {
-				totalSamplesSize += p.samples[j].length + 46;
+			if(p.samples[j].len > 0) {
+				totalSamplesSize += p.samples[j].num_samples + 46;
 				totalSamples++;
 			}
 		}
@@ -32,10 +33,8 @@ int main(int argc, char **argv) {
 		sfSample *sampleHeaders = (sfSample *)malloc((totalSamples + 1) * sizeof(sfSample));
 		int x = 0;
 		for(int j = 0; j < PDX_NUM_SAMPLES; j++) {
-			if(p.samples[j].length > 0) {
-				uint8_t *ps = p.loadSample(j);
-				d.decode(ps, p.samples[j].length, samples + curPos);
-				delete[] ps;
+			if(p.samples[j].len > 0) {
+				memcpy(samples + curPos, p.samples[j].decoded_data, p.samples[j].num_samples * sizeof(int16_t));
 
 				sfSample *h = sampleHeaders + x;
 				h->dwSampleRate = 15600;
@@ -45,11 +44,11 @@ int main(int argc, char **argv) {
 				h->sfSampleType = monoSample;
 				snprintf(h->achSampleName, sizeof(h->achSampleName), "Sample %03hX", x);
 				h->dwStart = curPos;
-				h->dwEnd = curPos + p.samples[j].length + 46;
+				h->dwEnd = curPos + p.samples[j].num_samples + 46;
 				h->dwStartloop = curPos;
 				h->dwEndloop = h->dwEnd;
 
-				curPos += (p.samples[j].length + 46);
+				curPos += p.samples[j].num_samples + 46;
 				x++;
 			}
 		}
@@ -73,7 +72,6 @@ int main(int argc, char **argv) {
 		inst[1].wInstBagNdx = totalSamples;
 		ItmChk = Item_MakeChunk(FCC_inst, sizeof(inst), &inst, 0);
 		List_AddItem(LstChk, ItmChk);
-
 		int bagSize = (totalSamples + 1) * sizeof(sfInstBag);
 		sfInstBag *bags = (sfInstBag *)malloc(bagSize);
 #define GENS_PER_ZONE 3
@@ -90,7 +88,7 @@ int main(int argc, char **argv) {
 		memset(instGenLists, 0, genSize);
 		x = 0;
 		for(int j = 0; j < PDX_NUM_SAMPLES; j++) {
-			if(p.samples[j].length > 0) {
+			if(p.samples[j].num_samples > 0) {
 				int k = x * GENS_PER_ZONE;
 				instGenLists[k].sfGenOper = keyRange;
 				instGenLists[k].genAmount.ranges.byHi = BASE_NOTE + j;
@@ -149,7 +147,11 @@ int main(int argc, char **argv) {
 		ItmChk = Item_MakeChunk(FCC_pmod, sizeof(presetModList), &presetModList, 0);
 		List_AddItem(LstChk, ItmChk);
 
-		WriteSF2toFile(s, replaceExtension(argv[i], "sf2"));
+		char buf[256];
+		replace_ext(buf, sizeof(buf), argv[i], "sf2");
+		printf("Writing to file %s\n", buf);
+		WriteSF2toFile(s, buf);
+
 		free(samples);
 		free(sampleHeaders);
 		free(bags);

@@ -192,7 +192,6 @@ int main(int argc, char **argv) {
 			continue;
 		}
 
-
 		mdx_compiler_init(&compiler);
 
 		yyin = f;

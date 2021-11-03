@@ -1,6 +1,6 @@
 #include <string.h>
 #include <stdio.h>
-#include "mml.h"
+#include "mdx_decompiler.h"
 #include "sjis.h"
 
 static char track_name(int c) {
@@ -260,7 +260,10 @@ void mdx_decompiler_decompile(struct mdx_decompiler *d, struct mdx_file *f) {
 					{
 						int ofs = ((b[1] << 8) | b[2]) - 65535;
 						if(ofs < 0 && pos + ofs >= 0) {
-							MMLF("]%d", chan->data[pos + ofs])
+							if(chan->data[pos + ofs] > 2)
+								MMLF("]%d", chan->data[pos + ofs])
+							else
+								MMLF("]")
 							MMLF("o%d", d->octave)
 						}
 					}

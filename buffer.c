@@ -71,4 +71,3 @@ void buffer_write_big_uint16(struct buffer *buf, uint16_t i) {
 	buffer_write_uint8(buf, i >> 8);
 	buffer_write_uint8(buf, i);
 }
-

@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "mdx.h"
-#include "fm_driver.h"
+#include "fm_opm_emu_driver.h"
 #include "tools.h"
 #include "wav.h"
 

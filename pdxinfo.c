@@ -55,7 +55,7 @@ static void pdxinfo(const char *filename) {
 			num_samples++;
 		}
 
-		printf("%s\t%lu\t%d\t", filename, l, num_samples);
+		printf("%s\t%zu\t%d\t", filename, l, num_samples);
 
 		struct md5_ctx ctx;
 		md5_init_ctx(&ctx);
@@ -80,12 +80,20 @@ static void pdxinfo_dir(const char *name, int recurse) {
 
 	while((entry = readdir(dir)) != NULL) {
 		char path[1024];
+		if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+			continue;
+		snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
+
+#ifdef DIRENT_HAS_D_TYPE
 		if (entry->d_type == DT_DIR) {
+#else
+		struct stat st;
+		stat(path, &st);
+		if(S_ISDIR(st.st_mode)) {
+#endif
 			if(!recurse)
 				continue;
-			if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-				continue;
-			snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
+
 			pdxinfo_dir(path, recurse);
 		} else {
 			snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);

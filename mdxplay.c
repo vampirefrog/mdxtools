@@ -9,9 +9,10 @@
 #include "mdx.h"
 #include "pdx.h"
 #include "mdx_driver.h"
-#include "timer_driver.h"
-#include "adpcm_driver.h"
-#include "fm_driver.h"
+#include "pcm_timer_driver.h"
+#include "adpcm_pcm_mix_driver.h"
+#include "fm_opm_emu_driver.h"
+#include "mamedef.h"
 
 #define SAMPLE_RATE 44100
 #define BUFFER_SIZE 2048
@@ -19,7 +20,7 @@
 int opt_channel_mask = 0xffff;
 int opt_loops = 1;
 
-SAMP bufL[BUFFER_SIZE], bufR[BUFFER_SIZE], chipBufL[BUFFER_SIZE], chipBufR[BUFFER_SIZE];
+stream_sample_t bufL[BUFFER_SIZE], bufR[BUFFER_SIZE], chipBufL[BUFFER_SIZE], chipBufR[BUFFER_SIZE];
 int16_t buf[BUFFER_SIZE * 2];
 
 struct mdx_driver mdx_driver;

@@ -5,9 +5,9 @@
 #include "mdx.h"
 #include "pdx.h"
 #include "mdx_driver.h"
-#include "timer_driver.h"
-#include "adpcm_driver.h"
-#include "fm_driver.h"
+#include "pcm_timer_driver.h"
+#include "adpcm_pcm_mix_driver.h"
+#include "fm_opm_emu_driver.h"
 #include "wav.h"
 
 int main(int argc, char **argv) {
