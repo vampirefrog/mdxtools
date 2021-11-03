@@ -1,0 +1,3 @@
+[submodule "x68ksjis"]
+	path = x68ksjis
+	url = git@github.com:vampirefrog/x68ksjis.git
