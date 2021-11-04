@@ -29,6 +29,8 @@ TESTS=\
 	timer-driver-test \
 	mdx-driver-test
 
+TARGETS=$(PROGS) $(TESTS)
+
 all: $(PROGS)
 tests: $(TESTS)
 
@@ -70,11 +72,11 @@ adpcm-driver-test_SRCS=fixed_resampler.c tools.c adpcm.c speex_resampler.c okim6
 timer-driver-test_SRCS=timer_driver.c tools.c pcm_timer_driver.c
 mdx-driver-test_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c wav.c adpcm_pcm_mix_driver.c fm_opm_emu_driver.c pcm_timer_driver.c fm_opm_driver.c
 
-OBJS=$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(foreach prog,$(PROGS) $(TESTS),$(prog).cpp $($(prog)_SRCS))))
+OBJS=$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(foreach prog,$(TARGETS),$(prog).cpp $($(prog)_SRCS))))
 
 $(OBJS): Makefile
 
-$(PROGS) $(TESTS): $$(sort $$@.o $$(patsubst %.c,%.o,$$(patsubst %.cpp,%.o,$$($$@_SRCS))))
+$(TARGETS): $$(sort $$@.o $$(patsubst %.c,%.o,$$(patsubst %.cpp,%.o,$$($$@_SRCS))))
 	$(CXX) $^ -o $@ $(CFLAGS) $(LIBS) $($@_LIBS)
 
 mmlc.tab.c: mmlc.y
@@ -97,4 +99,4 @@ sinctbl3.h: gensinc
 -include $(OBJS:.o=.d)
 
 clean:
-	rm -f $(PROGS) $(TESTS) $(addsuffix .exe,$(PROGS) $(TESTS)) *.o *.d
+	rm -f $(TARGETS) $(addsuffix .exe,$(TARGETS)) *.o *.d
