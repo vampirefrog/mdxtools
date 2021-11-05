@@ -1,10 +1,12 @@
 kind: pipeline
-type: docker
+type: exec
 name: default
-   
+
+platform:
+  os: windows
+  arch: i386
+
 steps:
-- name: test
-  image: alpine
+- name: greeting
   commands:
-  - echo hello
-  - echo world
+  - echo hello world
