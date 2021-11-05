@@ -4,7 +4,7 @@ name: default
 
 platform:
   os: windows
-  arch: i386
+  arch: 386
 
 steps:
 - name: greeting
