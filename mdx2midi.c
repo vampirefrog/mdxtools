@@ -1,8 +1,12 @@
 #include <stdio.h>
 #include <string.h>
+#include "cmdline.h"
 #include "mdx.h"
 #include "tools.h"
 #include "midi.h"
+
+char *opt_output = 0;
+int opt_utf8 = 0;
 
 struct midi_file midi_file;
 struct midi_track midi_track;
@@ -333,14 +337,30 @@ static void run_through_file(struct mdx_file *f, int *num_cmds_out, int *pcm8_ou
 }
 
 int main(int argc, char **argv) {
-	if(argc < 2) {
-		return 1;
-	}
+	int optind = cmdline_parse_args(argc, argv, (struct cmdline_option[]){
+		{
+			'u', "utf8",
+			"Convert strings to UTF-8",
+			0,
+			TYPE_SWITCH,
+			TYPE_INT, &opt_utf8
+		},
+		{
+			'o', "output",
+			"Output to this file. `-' means stdout (default).",
+			"file",
+			TYPE_OPTIONAL,
+			TYPE_STRING, &opt_output
+		},
+		CMDLINE_ARG_TERMINATOR
+	}, 1, 1, "<file.mdx>");
+
+	if(optind < 0) exit(-optind);
 
 	size_t data_len = 0;
-	uint8_t *data = load_file(argv[1], &data_len);
+	uint8_t *data = load_file(argv[optind], &data_len);
 	if(!data) {
-		fprintf(stderr, "Could not load %s\n", argv[1]);
+		fprintf(stderr, "Could not load %s\n", argv[optind]);
 		return 1;
 	}
 
@@ -357,15 +377,17 @@ int main(int argc, char **argv) {
 	struct midi_track *first_track = midi_file_prepend_track(&midi_file);
 	midi_track_write_tempo(first_track, 0, calcTempo(firstTempo ? firstTempo : 200));
 	midi_track_write_time_signature(first_track, 0, 4, 2, 0, 0);
-	char buf[256];
-	snprintf(buf, sizeof(buf), "Converted from %s", argv[1]);
+	char buf[PATH_MAX];
+	snprintf(buf, sizeof(buf), "Converted from %s", argv[optind]);
 	midi_track_write_text(first_track, 0, buf, -1);
 	midi_track_write_track_end(first_track, totalTicks);
-
 	struct file_stream o;
-	char midbuf[256];
-	replace_ext(midbuf, sizeof(midbuf), argv[1], "mid");
-	file_stream_init(&o, midbuf, "wb");
+	if(!opt_output || !opt_output[0]) {
+		char midbuf[PATH_MAX];
+		replace_ext(midbuf, sizeof(midbuf), argv[optind], "mid");
+		opt_output = midbuf;
+	}
+	file_stream_init(&o, opt_output, "wb");
 	midi_file_write(&midi_file, (struct stream *)&o);
 	midi_file_clear(&midi_file);
 

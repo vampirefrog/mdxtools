@@ -45,7 +45,7 @@ endif
 .SECONDEXPANSION:
 adpcm-decode_SRCS=adpcm.c
 adpcm-encode_SRCS=adpcm.c
-mdx2midi_SRCS=mdx.c buffer.c stream.c midi.c tools.c
+mdx2midi_SRCS=mdx.c buffer.c stream.c midi.c tools.c cmdline.c
 mdx2mml_SRCS=mdx.c mdx_decompiler.c tools.c cmdline.c x68ksjis/sjis.c x68ksjis/sjis_unicode.c x68ksjis/utf8.c
 mdx2opm_SRCS=mdx2opm.c tools.c mdx.c
 mdx2pcm_SRCS=mdx.c mdx_driver.c adpcm_driver.c mdx_pcm_driver.c mdx_pcm_renderer.c timer.c adpcm_driver.c adpcm.c pdx.c tools.c ym2151.c okim6258.c wav.c speex_resampler.c cmdline.c
