@@ -45,20 +45,20 @@ endif
 .SECONDEXPANSION:
 adpcm-decode_SRCS=adpcm.c
 adpcm-encode_SRCS=adpcm.c
-mdx2midi_SRCS=mdx.c buffer.c stream.c midi.c tools.c cmdline.c
+mdx2midi_SRCS=mdx.c buffer.c stream.c midi.c midi_file.c midi_track.c tools.c cmdline.c
 mdx2mml_SRCS=mdx.c mdx_decompiler.c tools.c cmdline.c x68ksjis/sjis.c x68ksjis/sjis_unicode.c x68ksjis/utf8.c
 mdx2opm_SRCS=mdx2opm.c tools.c mdx.c
 mdx2pcm_SRCS=mdx.c mdx_driver.c adpcm_driver.c mdx_pcm_driver.c mdx_pcm_renderer.c timer.c adpcm_driver.c adpcm.c pdx.c tools.c ym2151.c okim6258.c wav.c speex_resampler.c cmdline.c
 mdx2vgm_SRCS=mdx.c mdx_driver.c adpcm_driver.c adpcm.c speex_resampler.c timer.c tools.c x68ksjis/sjis_unicode.c x68ksjis/sjis.c ym2151.c okim6258.c vgm.c
 mdxdump_SRCS=mdx.c tools.c
 mdxinfo_SRCS=mdx.c tools.c x68ksjis/sjis_unicode.c x68ksjis/sjis.c x68ksjis/utf8.c cmdline.c md5.c
-mdxplay_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c wav.c cmdline.c adpcm_pcm_mix_driver.c fm_opm_emu_driver.c pcm_timer_driver.c fm_opm_driver.c
+mdxplay_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c wav.c cmdline.c adpcm_pcm_mix_driver.c fm_opm_emu_driver.c pcm_timer_driver.c fm_opm_driver.c sinctbl4.h sinctbl3.h
 ifneq (,$(findstring MINGW,$(shell uname -s)))
 mdxplay_LIBS=../portaudio/lib/.libs/libportaudio.dll.a -lwinmm
 else
 mdxplay_LIBS=$(shell pkg-config portaudio-2.0 --libs)
 endif
-mididump_SRCS=mididump.c midi.c midi_reader.c stream.c tools.c buffer.c
+mididump_SRCS=mididump.c midi.c midi_file.c midi_track.c midi_reader.c stream.c tools.c buffer.c
 mml2mdx_SRCS=mml2mdx.c mmlc.tab.c mmlc.yy.c buffer.c cmdline.c tools.c
 pdx2wav_SRCS=pdx.c wav.c tools.c adpcm.c
 pdx2sf2_SRCS=pdx.c tools.c adpcm.c Soundfont.c
@@ -66,18 +66,22 @@ pdxinfo_SRCS=pdx.c tools.c cmdline.c md5.c adpcm.c
 gensinc_SRCS=gensinc.c cmdline.c
 
 # Tests
-resample-test_SRCS=resample-test.c fixed_resampler.c
+resample-test_SRCS=resample-test.c fixed_resampler.c sinctbl4.h sinctbl3.h
 fm-driver-test_SRCS=tools.c ym2151.c wav.c fm_driver.c fm_opm_driver.c fm_opm_emu_driver.c mdx.c
 adpcm-driver-test_SRCS=fixed_resampler.c tools.c adpcm.c speex_resampler.c okim6258.c wav.c adpcm_driver.c adpcm_pcm_mix_driver.c
 timer-driver-test_SRCS=timer_driver.c tools.c pcm_timer_driver.c
 mdx-driver-test_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c wav.c adpcm_pcm_mix_driver.c fm_opm_emu_driver.c pcm_timer_driver.c fm_opm_driver.c
 
-OBJS=$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(foreach prog,$(TARGETS),$(prog).cpp $($(prog)_SRCS))))
+adpcm_pcm_mix_driver.c resample-test.c: sinctbl3.h sinctbl4.h
+
+CPPOBJS=$(patsubst %.cpp,%.o,$(filter %.cpp,$(TARGETS)))
+COBJS=$(patsubst %.c,%.o,$(filter %.c,$(TARGETS)))
+OBJS=$(CPPOBJS) $(COBJS)
 
 $(OBJS): Makefile
 
-$(TARGETS): $$(sort $$@.o $$(patsubst %.c,%.o,$$(patsubst %.cpp,%.o,$$($$@_SRCS))))
-	$(CXX) $^ -o $@ $(CFLAGS) $(LIBS) $($@_LIBS)
+$(TARGETS):$$(sort $$@.o $$(patsubst %.cpp,%.o,$$(patsubst %.c,%.o,$$($$@_SRCS))))
+	$(CXX) $(filter %.o, $^) -o $@ $(CFLAGS) $(LIBS) $($@_LIBS)
 
 mmlc.tab.c: mmlc.y
 	$(YACC) -v -o $@ $^ --defines=mmlc.tab.h
@@ -85,9 +89,9 @@ mmlc.tab.c: mmlc.y
 mmlc.yy.c: mmlc.l
 	$(LEX) -o $@ $^
 
-%.o: %.cpp
+$(CPPOBJS): %.cpp
 	$(CXX) -MMD -c $< -o $@ $(CFLAGS)
-%.o: %.c
+$(COBJS): %.c
 	$(CC) -MMD -c $< -o $@ $(CFLAGS)
 
 sinctbl4.h: gensinc
