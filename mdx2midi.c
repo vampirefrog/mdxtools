@@ -4,6 +4,9 @@
 #include "mdx.h"
 #include "tools.h"
 #include "midi.h"
+#include "midi_file.h"
+#include "midi_track.h"
+#include "stream.h"
 
 char *opt_output = 0;
 int opt_utf8 = 0;

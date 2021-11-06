@@ -1,6 +1,7 @@
 #pragma once
 
 #include "midi.h"
+#include "stream.h"
 
 struct midi_reader {
 	struct stream *stream;
