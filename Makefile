@@ -14,6 +14,7 @@ PROGS=\
 	mdxdump \
 	mdxinfo \
 	mdxplay \
+	mdx2pcm \
 	mididump \
 	mkpdx \
 	mml2mdx \
@@ -48,16 +49,16 @@ adpcm-encode_SRCS=adpcm.c
 mdx2midi_SRCS=mdx.c buffer.c stream.c midi.c midi_file.c midi_track.c tools.c cmdline.c
 mdx2mml_SRCS=mdx.c mdx_decompiler.c tools.c cmdline.c x68ksjis/sjis.c x68ksjis/sjis_unicode.c x68ksjis/utf8.c
 mdx2opm_SRCS=mdx2opm.c tools.c mdx.c
-mdx2pcm_SRCS=mdx.c mdx_driver.c adpcm_driver.c mdx_pcm_driver.c mdx_pcm_renderer.c timer.c adpcm_driver.c adpcm.c pdx.c tools.c ym2151.c okim6258.c wav.c speex_resampler.c cmdline.c
 mdx2vgm_SRCS=mdx.c mdx_driver.c adpcm_driver.c adpcm.c speex_resampler.c timer.c tools.c x68ksjis/sjis_unicode.c x68ksjis/sjis.c ym2151.c okim6258.c vgm.c
 mdxdump_SRCS=mdx.c tools.c
 mdxinfo_SRCS=mdx.c tools.c x68ksjis/sjis_unicode.c x68ksjis/sjis.c x68ksjis/utf8.c cmdline.c md5.c
-mdxplay_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c wav.c cmdline.c adpcm_pcm_mix_driver.c fm_opm_emu_driver.c pcm_timer_driver.c fm_opm_driver.c sinctbl4.h sinctbl3.h
+mdxplay_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c cmdline.c adpcm_pcm_mix_driver.c fm_opm_emu_driver.c pcm_timer_driver.c fm_opm_driver.c sinctbl4.h sinctbl3.h
 ifneq (,$(findstring MINGW,$(shell uname -s)))
 mdxplay_LIBS=../portaudio/lib/.libs/libportaudio.dll.a -lwinmm
 else
 mdxplay_LIBS=$(shell pkg-config portaudio-2.0 --libs)
 endif
+mdx2pcm_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c wav.c cmdline.c adpcm_pcm_mix_driver.c fm_opm_emu_driver.c pcm_timer_driver.c fm_opm_driver.c sinctbl4.h sinctbl3.h
 mididump_SRCS=mididump.c midi.c midi_file.c midi_track.c midi_reader.c stream.c tools.c buffer.c
 mml2mdx_SRCS=mml2mdx.c mmlc.tab.c mmlc.yy.c buffer.c cmdline.c tools.c
 pdx2wav_SRCS=pdx.c wav.c tools.c adpcm.c
