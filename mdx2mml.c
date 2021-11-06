@@ -14,7 +14,7 @@ int opt_ticks_only = 0;
 FILE *of;
 
 void line_cb(const char *ln) {
-	if(ln) printf("%s\n", ln);
+	if(ln) fprintf(of, "%s\n", ln);
 }
 
 int main(int argc, char **argv) {
