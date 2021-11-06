@@ -20,6 +20,7 @@ sounds/*.txt
 mmlc.tab.c
 mmlc.tab.h
 mmlc.yy.c
+mmlc.yy.h
 mmlc.output
 
 data/

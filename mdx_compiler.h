@@ -1,8 +1,10 @@
-#ifndef MML2MDX_H_
-#define MML2MDX_H_
+#pragma once
 
 #include <stdint.h>
+
 #include "buffer.h"
+
+typedef void* yyscan_t;
 
 #define MML_FLAG_AT (1 << 16)
 #define MML_NOTE_FLAT (1 << 16)
@@ -30,6 +32,9 @@ struct mdx_compiler {
 	struct mdx_compiler_opm_voice voices[256];
 	int ex_pcm;
 	char *title, *pcmfile;
+
+	yyscan_t scanner;
+	int chan_mask;
 };
 
 struct mml_notelength {
@@ -46,6 +51,7 @@ struct mml_notelength {
 
 void mdx_compiler_init(struct mdx_compiler *);
 void mdx_compiler_destroy(struct mdx_compiler *);
+int  mdx_compiler_parse(struct mdx_compiler *, FILE *f);
 void mdx_compiler_dump(struct mdx_compiler *);
 void mdx_compiler_save(struct mdx_compiler *, const char *filename);
 
@@ -88,7 +94,4 @@ void mdx_compiler_mpon(struct mdx_compiler *compiler, int chan_mask);
 void mdx_compiler_mpof(struct mdx_compiler *compiler, int chan_mask);
 void mdx_compiler_md(struct mdx_compiler *compiler, int chan_mask, int ticks);
 void mdx_compiler_end(struct mdx_compiler *compiler, int chan_mask);
-
 void mdx_compiler_add_opm_voice(struct mdx_compiler *, int num, uint8_t data[47]);
-
-#endif /* MML2MDX_H_ */

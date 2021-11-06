@@ -3,7 +3,7 @@ CC=gcc
 YACC=bison
 LEX=flex
 
-#	mdx2vgm \
+#	mdx2vgm
 
 PROGS=\
 	adpcm-decode \
@@ -60,7 +60,7 @@ mdxplay_LIBS=$(shell pkg-config portaudio-2.0 --libs)
 endif
 mdx2pcm_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c wav.c cmdline.c adpcm_pcm_mix_driver.c fm_opm_emu_driver.c pcm_timer_driver.c fm_opm_driver.c sinctbl4.h sinctbl3.h
 mididump_SRCS=mididump.c midi.c midi_file.c midi_track.c midi_reader.c stream.c tools.c buffer.c
-mml2mdx_SRCS=mml2mdx.c mmlc.tab.c mmlc.yy.c buffer.c cmdline.c tools.c
+mml2mdx_SRCS=mml2mdx.c mmlc.tab.c mmlc.yy.c buffer.c cmdline.c tools.c mdx_compiler.c mmlc.yy.h mmlc.tab.h
 pdx2wav_SRCS=pdx.c wav.c tools.c adpcm.c
 pdx2sf2_SRCS=pdx.c tools.c adpcm.c Soundfont.c
 pdxinfo_SRCS=pdx.c tools.c cmdline.c md5.c adpcm.c
@@ -84,11 +84,14 @@ $(OBJS): Makefile
 $(TARGETS):$$(sort $$@.o $$(patsubst %.cpp,%.o,$$(patsubst %.c,%.o,$$($$@_SRCS))))
 	$(CXX) $(filter %.o, $^) -o $@ $(CFLAGS) $(LIBS) $($@_LIBS)
 
-mmlc.tab.c: mmlc.y
-	$(YACC) -v -o $@ $^ --defines=mmlc.tab.h
+mmlc.tab.c mmlc.tab.h: mmlc.y
+	$(YACC) -v -o mmlc.tab.c --defines=mmlc.tab.h $(filter %.y,$^)
 
-mmlc.yy.c: mmlc.l
-	$(LEX) -o $@ $^
+mdx_compiler.o: mmlc.yy.h
+mmlc.yy.h: mmlc.tab.h
+
+mmlc.yy.c mmlc.yy.h: mmlc.l
+	$(LEX) -o mmlc.yy.c --header-file=$(patsubst %.c,%.h,$@) $(filter %.l,$^)
 
 $(CPPOBJS): %.cpp
 	$(CXX) -MMD -c $< -o $@ $(CFLAGS)
