@@ -2,6 +2,9 @@
 #include <string.h>
 #include <errno.h>
 #include <signal.h>
+#ifdef __linux__
+#include <linux/limits.h>
+#endif
 
 #include "wav.h"
 #include "cmdline.h"

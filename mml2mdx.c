@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#ifdef __linux__
+#include <linux/limits.h>
+#endif
 #include "mdx_compiler.h"
 #include "cmdline.h"
 #include "tools.h"

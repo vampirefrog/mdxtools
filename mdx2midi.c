@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <string.h>
+#ifdef __linux__
+#include <linux/limits.h>
+#endif
 #include "cmdline.h"
 #include "mdx.h"
 #include "tools.h"
