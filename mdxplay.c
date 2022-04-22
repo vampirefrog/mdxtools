@@ -130,33 +130,33 @@ int main(int argc, char **argv) {
 			memset(mixBufR, 0, sizeof(mixBufR));
 
 			while(samples_remaining > 0) {
+				// compute the number of samples to render
+				int samples = samples_remaining;
+
 				int timer_samples = pcm_timer_driver_estimate(&timer_driver, samples_remaining);
+				if(timer_samples < samples) samples = timer_samples;
+				
 				int fm_samples = fm_opm_emu_driver_estimate(&fm_driver, samples_remaining);
+				if(fm_samples < samples) samples = fm_samples;
+				
 				int adpcm_samples = adpcm_pcm_mix_driver_estimate(&adpcm_driver, samples_remaining);
+				if(adpcm_samples < samples) samples = adpcm_samples;
 
-				int samples = timer_samples;
-				if(fm_samples < samples)
-					samples = fm_samples;
-				if(adpcm_samples < samples)
-					samples = adpcm_samples;
-
-				// printf("running adpcm\n");
 				adpcm_pcm_mix_driver_run(&adpcm_driver, bufL, bufR, samples);
 				for(int n = 0; n < samples; n++) {
 					mixBufLp[n] += bufL[n];
 					mixBufRp[n] += bufR[n];
 				}
-				// printf("running fm\n");
+
 				fm_opm_emu_driver_run(&fm_driver, bufL, bufR, samples);
 				for(int n = 0; n < samples; n++) {
 					mixBufLp[n] += bufL[n];
 					mixBufRp[n] += bufR[n];
 				}
-				// printf("running pcm_timer_driver\n");
+
 				pcm_timer_driver_advance(&timer_driver, samples);
 
 				samples_remaining -= samples;
-				// printf("timer_samples=%d fm_samples=%d adpcm_samples=%d samples=%d samples_remaining=%d\n", timer_samples, fm_samples, adpcm_samples, samples, samples_remaining);
 				mixBufLp += samples;
 				mixBufRp += samples;
 			}
