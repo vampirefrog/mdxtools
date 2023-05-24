@@ -42,3 +42,8 @@ mdx2pcm
 adpcm-encode
 adpcm-decode
 pdxinfo
+gensinc
+mdx2midi
+mididump
+mkpdx
+sinctbl[34].h
