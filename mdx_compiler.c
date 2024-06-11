@@ -5,7 +5,7 @@
 
 #include "mdx_compiler.h"
 #include "mmlc.yy.h"
-#include "buffer.h"
+#include "midilib/buffer.h"
 
 void mdx_compiler_init(struct mdx_compiler *compiler) {
 	for(int i = 0; i < 16; i++) {

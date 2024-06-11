@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "buffer.h"
+#include "midilib/buffer.h"
 
 typedef void* yyscan_t;
 

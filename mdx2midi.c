@@ -3,13 +3,14 @@
 #ifdef __linux__
 #include <linux/limits.h>
 #endif
+#include <errno.h>
 #include "cmdline.h"
 #include "mdx.h"
 #include "tools.h"
-#include "midi.h"
-#include "midi_file.h"
-#include "midi_track.h"
-#include "stream.h"
+#include "midilib/midi.h"
+#include "midilib/midi_file.h"
+#include "midilib/midi_track.h"
+#include "midilib/stream.h"
 
 char *opt_output = 0;
 int opt_utf8 = 0;
@@ -53,7 +54,7 @@ void handleChannelEnd(struct mdx_file *f, struct mdx_track *mdx_track, int chann
 	if(midi_track.buffer.data_len == 0)
 		return;
 
-	struct midi_track *track = midi_file_append_track(&midi_file);
+	struct midi_track *track = midi_file_append_empty_track(&midi_file);
 
 	char buf[256];
 	snprintf(buf, sizeof(buf), "Channel %c (%s)", mdx_track_name(channelNum), channelNum < 8 ? "FM" : "ADPCM");
@@ -342,6 +343,10 @@ static void run_through_file(struct mdx_file *f, int *num_cmds_out, int *pcm8_ou
 	}
 }
 
+static int write_cb(void *buf, int len, void *data_ptr) {
+	return fwrite(buf, 1, len, (FILE *)data_ptr);
+}
+
 int main(int argc, char **argv) {
 	int optind = cmdline_parse_args(argc, argv, (struct cmdline_option[]){
 		{
@@ -380,21 +385,25 @@ int main(int argc, char **argv) {
 
 	free(data);
 
-	struct midi_track *first_track = midi_file_prepend_track(&midi_file);
+	struct midi_track *first_track = midi_file_prepend_empty_track(&midi_file);
 	midi_track_write_tempo(first_track, 0, calcTempo(firstTempo ? firstTempo : 200));
 	midi_track_write_time_signature(first_track, 0, 4, 2, 0, 0);
 	char buf[PATH_MAX];
 	snprintf(buf, sizeof(buf), "Converted from %s", argv[optind]);
 	midi_track_write_text(first_track, 0, buf, -1);
 	midi_track_write_track_end(first_track, totalTicks);
-	struct file_stream o;
 	if(!opt_output || !opt_output[0]) {
 		char midbuf[PATH_MAX];
 		replace_ext(midbuf, sizeof(midbuf), argv[optind], "mid");
 		opt_output = midbuf;
 	}
-	file_stream_init(&o, opt_output, "wb");
-	midi_file_write(&midi_file, (struct stream *)&o);
+	FILE *o = fopen(opt_output, "wb");
+	if(!o) {
+		fprintf(stderr, "Could not open %s: %s (%d)\n", opt_output, strerror(errno), errno);
+		return -1;
+	}
+	midi_file_write(&midi_file, write_cb, o);
+	fclose(o);
 	midi_file_clear(&midi_file);
 
 	return 0;

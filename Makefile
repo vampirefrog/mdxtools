@@ -15,7 +15,6 @@ PROGS=\
 	mdxinfo \
 	mdxplay \
 	mdx2pcm \
-	mididump \
 	mkpdx \
 	mml2mdx \
 	pdx2sf2 \
@@ -46,7 +45,7 @@ endif
 .SECONDEXPANSION:
 adpcm-decode_SRCS=adpcm.c
 adpcm-encode_SRCS=adpcm.c
-mdx2midi_SRCS=mdx.c buffer.c stream.c midi.c midi_file.c midi_track.c tools.c cmdline.c
+mdx2midi_SRCS=mdx.c tools.c cmdline.c
 mdx2mml_SRCS=mdx.c mdx_decompiler.c tools.c cmdline.c x68ksjis/sjis.c x68ksjis/sjis_unicode.c x68ksjis/utf8.c
 mdx2opm_SRCS=mdx2opm.c tools.c mdx.c
 mdx2vgm_SRCS=mdx.c mdx_driver.c adpcm_driver.c adpcm.c speex_resampler.c timer.c tools.c x68ksjis/sjis_unicode.c x68ksjis/sjis.c ym2151.c okim6258.c vgm.c
@@ -59,12 +58,16 @@ else
 mdxplay_LIBS=$(shell pkg-config portaudio-2.0 --libs)
 endif
 mdx2pcm_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c wav.c cmdline.c adpcm_pcm_mix_driver.c fm_opm_emu_driver.c pcm_timer_driver.c fm_opm_driver.c sinctbl4.h sinctbl3.h
-mididump_SRCS=mididump.c midi.c midi_file.c midi_track.c midi_reader.c stream.c tools.c buffer.c
-mml2mdx_SRCS=mml2mdx.c mmlc.tab.c mmlc.yy.c buffer.c cmdline.c tools.c mdx_compiler.c mmlc.yy.h mmlc.tab.h
+mml2mdx_SRCS=mml2mdx.c mmlc.tab.c mmlc.yy.c cmdline.c tools.c mdx_compiler.c mmlc.yy.h mmlc.tab.h
 pdx2wav_SRCS=pdx.c wav.c tools.c adpcm.c
 pdx2sf2_SRCS=pdx.c tools.c adpcm.c Soundfont.c
 pdxinfo_SRCS=pdx.c tools.c cmdline.c md5.c adpcm.c
 gensinc_SRCS=gensinc.c cmdline.c
+
+mdx2midi: midilib/libmidi.a
+
+mdx2midi_LIBS=midilib/libmidi.a
+mml2mdx_LIBS=midilib/libmidi.a
 
 # Tests
 resample-test_SRCS=resample-test.c fixed_resampler.c sinctbl4.h sinctbl3.h
@@ -104,7 +107,11 @@ sinctbl4.h: gensinc
 sinctbl3.h: gensinc
 	./gensinc --zero-crossings 26 --denominator 3 --alpha 5.0 > $@
 
+midilib/libmidi.a:
+	cd midilib && make libmidi.a
+
 -include $(OBJS:.o=.d)
 
 clean:
 	rm -f $(TARGETS) $(addsuffix .exe,$(TARGETS)) *.o *.d
+	cd midilib && make clean
