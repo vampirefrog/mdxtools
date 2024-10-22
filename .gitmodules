@@ -1,6 +1,6 @@
 [submodule "x68ksjis"]
 	path = x68ksjis
-	url = git@github.com:vampirefrog/x68ksjis.git
+	url = https://github.com/vampirefrog/x68ksjis.git
 [submodule "midilib"]
 	path = midilib
 	url = https://github.com/vampirefrog/midilib.git
