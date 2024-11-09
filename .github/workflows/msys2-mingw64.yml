@@ -1,0 +1,25 @@
+name: MSYS2 MINGW64 Build
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  msys2-mingw64:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: git make pkg-config mingw64/mingw-w64-x86_64-gcc mingw64/mingw-w64-x86_64-portaudio
+      - name: Build with make
+        run: make
