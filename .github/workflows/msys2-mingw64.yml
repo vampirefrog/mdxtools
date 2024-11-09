@@ -20,6 +20,13 @@ jobs:
         with:
           msystem: MINGW64
           update: true
-          install: git make pkg-config mingw64/mingw-w64-x86_64-gcc mingw64/mingw-w64-x86_64-portaudio bison flex
+          install: git make pkg-config mingw64/mingw-w64-x86_64-gcc mingw64/mingw-w64-x86_64-portaudio bison flex zip
       - name: Build with make
         run: make
+      - name: Create zip archive
+        run: zip *.exe mdxtools.zip
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: mdxtools.zip
+          path: .
