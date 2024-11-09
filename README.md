@@ -1,7 +1,7 @@
 mdxtools
 ========
 
-[![Linux Build](https://github.com/vampirefrog/mdxtools/actions/workflows/linux.yml/badge.svg)](https://github.com/vampirefrog/mdxtools/actions/workflows/linux.yml)
+[![Linux Build](https://github.com/vampirefrog/mdxtools/actions/workflows/linux.yml/badge.svg)](https://github.com/vampirefrog/mdxtools/actions/workflows/linux.yml) [![MSYS2 MINGW64 Build](https://github.com/vampirefrog/mdxtools/actions/workflows/msys2-mingw64.yml/badge.svg)](https://github.com/vampirefrog/mdxtools/actions/workflows/msys2-mingw64.yml)
 
 A bunch of tools for handling the MDX music format (music for the Sharp X68000 using the MXDRV sound driver).
 
