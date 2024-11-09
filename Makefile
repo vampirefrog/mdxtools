@@ -35,7 +35,7 @@ all: $(PROGS)
 tests: $(TESTS)
 
 ifneq (,$(findstring MINGW,$(shell uname -s)))
-CFLAGS+=-I../portaudio/include -static-libgcc
+CFLAGS+=$(shell pkg-config portaudio-2.0 --cflags) -static-libgcc
 LIBS=-lz -liconv -lws2_32 -static-libgcc
 else
 CFLAGS+=$(shell pkg-config portaudio-2.0 --cflags)
@@ -52,11 +52,7 @@ mdx2vgm_SRCS=mdx.c mdx_driver.c adpcm_driver.c adpcm.c speex_resampler.c timer.c
 mdxdump_SRCS=mdx.c tools.c
 mdxinfo_SRCS=mdx.c tools.c x68ksjis/sjis_unicode.c x68ksjis/sjis.c x68ksjis/utf8.c cmdline.c md5.c
 mdxplay_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c cmdline.c adpcm_pcm_mix_driver.c fm_opm_emu_driver.c pcm_timer_driver.c fm_opm_driver.c sinctbl4.h sinctbl3.h
-ifneq (,$(findstring MINGW,$(shell uname -s)))
-mdxplay_LIBS=../portaudio/lib/.libs/libportaudio.dll.a -lwinmm
-else
 mdxplay_LIBS=$(shell pkg-config portaudio-2.0 --libs)
-endif
 mdx2pcm_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c wav.c cmdline.c adpcm_pcm_mix_driver.c fm_opm_emu_driver.c pcm_timer_driver.c fm_opm_driver.c sinctbl4.h sinctbl3.h
 mml2mdx_SRCS=mml2mdx.c mmlc.tab.c mmlc.yy.c cmdline.c tools.c mdx_compiler.c mmlc.yy.h mmlc.tab.h
 pdx2wav_SRCS=pdx.c wav.c tools.c adpcm.c
