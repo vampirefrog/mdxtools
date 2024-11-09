@@ -343,7 +343,7 @@ static void run_through_file(struct mdx_file *f, int *num_cmds_out, int *pcm8_ou
 	}
 }
 
-static int write_cb(void *buf, int len, void *data_ptr) {
+static int write_cb(void *buf, size_t len, void *data_ptr) {
 	return fwrite(buf, 1, len, (FILE *)data_ptr);
 }
 
