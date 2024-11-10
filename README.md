@@ -107,3 +107,5 @@ Contributing
 ------------
 
 If you would like to improve or contribute to this project, I highly encourage you to submit pull requests instead of maintaining your own fork. This way, it is less confusing for users. I will do my best to include your patches.
+
+[![Stargazers over time](https://starchart.cc/vampirefrog/mdxtools.svg?variant=adaptive)](https://starchart.cc/vampirefrog/mdxtools)
