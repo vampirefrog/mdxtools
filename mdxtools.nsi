@@ -3,7 +3,7 @@ Unicode True
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "MDX Tools"
-!define PRODUCT_VERSION "0.2rc1"
+!define PRODUCT_VERSION "{{VERSION}}"
 !define PRODUCT_PUBLISHER "Vampi Tech"
 !define PRODUCT_WEB_SITE "https://vampi.tech/mdx-tools"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\MDXTools"
@@ -50,7 +50,7 @@ FunctionEnd
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "mdxtools-installer.exe"
+OutFile "mdxtools-${PRODUCT_VERSION}.exe"
 InstallDir "$PROGRAMFILES\MDXTools"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
