@@ -71,6 +71,7 @@ Section "MainSection" SEC01
   File "mdx2opm.exe"
   File "mdx2mml.exe"
   File "mdx2midi.exe"
+  File "libportaudio.dll"
 SectionEnd
 
 Section "-Add to path"
@@ -128,6 +129,7 @@ Section Uninstall
   Delete "$INSTDIR\pdx2sf2.exe"
   Delete "$INSTDIR\pdx2wav.exe"
   Delete "$INSTDIR\pdxinfo.exe"
+  Delete "$INSTDIR\libportaudio.dll"
 
   Delete "$SMPROGRAMS\MDX Tools\Uninstall MDX Tools.lnk"
   Delete "$SMPROGRAMS\MDX Tools\Website.lnk"
