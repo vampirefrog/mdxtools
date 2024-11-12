@@ -442,7 +442,7 @@ void mdx_compiler_maof(struct mdx_compiler *compiler, int chan_mask) {
 
 void mdx_compiler_mp(struct mdx_compiler *compiler, int chan_mask, int waveform, int freq, int amplitude) {
 	mdx_compiler_write(compiler, chan_mask, 0xec, waveform & 0x03, -1);
-	mdx_compiler_write16(compiler, chan_mask, freq * 2, amplitude * 128, -1);
+	mdx_compiler_write16(compiler, chan_mask, freq * 2, (amplitude & 0xff) << 8, -1);
 }
 
 void mdx_compiler_mpon(struct mdx_compiler *compiler, int chan_mask) {

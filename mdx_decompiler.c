@@ -303,7 +303,7 @@ void mdx_decompiler_decompile(struct mdx_decompiler *d, struct mdx_file *f) {
 					else if(b[1] == 0x81)
 						MMLF("MPON")
 					else
-						MMLF("MP%d,%d,%d", b[1], b[2] << 8 | b[3], b[4] << 8 | b[5])
+						MMLF("MP%d,%d,%d", b[1], b[2] << 8 | b[3], b[4] >= 128 ? b[4] - 256 : b[4])
 					break;
 				case 0xeb:
 					if(b[1] == 0x80)
