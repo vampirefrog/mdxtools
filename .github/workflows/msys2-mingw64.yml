@@ -25,8 +25,11 @@ jobs:
         run: make
       - name: Copy DLLs over
         run: cp $MSYSTEM_PREFIX/bin/libportaudio.dll .
+      - name: Set outputs
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mdxtools
+          name: mdxtools-${{steps.vars.outputs.sha_short}}
           path: "*.exe *.dll"
