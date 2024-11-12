@@ -20,17 +20,13 @@ jobs:
         with:
           msystem: MINGW64
           update: true
-          install: git make pkg-config mingw64/mingw-w64-x86_64-gcc mingw64/mingw-w64-x86_64-portaudio mingw64/mingw-w64-x86_64-nsis bison flex zip unzip
+          install: git make pkg-config mingw64/mingw-w64-x86_64-gcc mingw64/mingw-w64-x86_64-portaudio mingw64/mingw-w64-x86_64-nsis bison flex zip
       - name: Build with make
         run: make
       - name: Copy DLLs over
         run: cp $MSYSTEM_PREFIX/bin/libportaudio.dll .
-      - name: Install NSIS EnvVar plugin
-        run: (cd $MSYSTEM_PREFIX/share/nsis && wget https://nsis.sourceforge.io/mediawiki/images/7/7f/EnVar_plugin.zip && unzip EnVar_plugin.zip && cp Plugins/amd64-unicode/EnVar.dll Plugins/unicode/EnVar.dll)
-      - name: Create NSIS installer
-        run: makensis mdxtools.nsi
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: mdxtools
-          path: "*.exe"
+          path: "*.exe *.dll"
