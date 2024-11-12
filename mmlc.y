@@ -138,6 +138,7 @@ mmlcommand:
 	| '['                 { mdx_compiler_repeat_start(compiler, compiler->chan_mask); }
 	| '/'                 { mdx_compiler_repeat_escape(compiler, compiler->chan_mask); }
 	| ']' INT             { mdx_compiler_repeat_end(compiler, compiler->chan_mask, $2); }
+	| ']'                 { mdx_compiler_repeat_end(compiler, compiler->chan_mask, 2); }
 	;
 
 // Fuck this shit
