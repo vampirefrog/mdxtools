@@ -14,6 +14,9 @@ void mdx_compiler_init(struct mdx_compiler *compiler) {
 		chan->total_ticks = 0;
 		chan->default_note_length = 48;
 		chan->octave = 4;
+		memset(chan->repeat_stack, 0xff, sizeof(chan->repeat_stack)); // -1
+		chan->repeat_stack_pos = 0;
+		chan->loop_pos = -1;
 	}
 	memset(compiler->voices, 0, sizeof(compiler->voices));
 	compiler->title = compiler->pcmfile = 0;
@@ -26,6 +29,7 @@ void mdx_compiler_destroy(struct mdx_compiler *compiler) {
 		buffer_destroy(&chan->buf);
 	}
 }
+
 // https://stackoverflow.com/questions/48850242/thread-safe-reentrant-bison-flex
 int mdx_compiler_parse(struct mdx_compiler *compiler, FILE *f) {
 	yylex_init_extra(compiler, &compiler->scanner);
@@ -63,7 +67,13 @@ void mdx_compiler_save(struct mdx_compiler *compiler, const char *filename) {
 	int total_channels = compiler->ex_pcm ? 16 : 9;
 	for(int i = 0; i < total_channels; i++) {
 		buffer_write_uint8(&compiler->channels[i].buf, 0xf1);
-		buffer_write_uint8(&compiler->channels[i].buf, 0x00);
+		if(compiler->channels[i].loop_pos >= 0) {
+			int16_t ofs = compiler->channels[i].loop_pos - compiler->channels[i].buf.data_len - 2;
+			buffer_write_uint8(&compiler->channels[i].buf, ofs >> 8);
+			buffer_write_uint8(&compiler->channels[i].buf, ofs & 0xff);
+		} else {
+			buffer_write_uint8(&compiler->channels[i].buf, 0x00);
+		}
 		total_data_len += compiler->channels[i].buf.data_len;
 	}
 	total_data_len += total_channels * 2 + 2;
@@ -371,10 +381,6 @@ void mdx_compiler_key_on_delay(struct mdx_compiler *compiler, int chan_mask, int
 	mdx_compiler_write(compiler, chan_mask, 0xf0, k & 0xff, -1);
 }
 
-void mdx_compiler_loop_start(struct mdx_compiler *compiler, int chan_mask) {
-
-}
-
 void mdx_compiler_detune(struct mdx_compiler *compiler, int chan_mask, int d) {
 	mdx_compiler_write(compiler, chan_mask, 0xf3, d, -1);
 }
@@ -449,4 +455,55 @@ void mdx_compiler_mpof(struct mdx_compiler *compiler, int chan_mask) {
 
 void mdx_compiler_md(struct mdx_compiler *compiler, int chan_mask, int ticks) {
 	mdx_compiler_write(compiler, chan_mask, 0xe9, ticks, -1);
+}
+
+void mdx_compiler_repeat_start(struct mdx_compiler *compiler, int chan_mask) {
+	for(int i = 0, m = 1; i < 16; i++, m <<= 1) {
+		if((chan_mask & m) == 0) continue;
+		struct mdx_compiler_channel *channel = compiler->channels + i;
+		channel->repeat_stack[channel->repeat_stack_pos].start_location = channel->buf.data_len;
+		channel->repeat_stack_pos++;
+		buffer_write_uint8(&channel->buf, 0xf6);
+		buffer_write_uint8(&channel->buf, 0x00);
+		buffer_write_uint8(&channel->buf, 0x00);
+	}
+}
+
+void mdx_compiler_repeat_end(struct mdx_compiler *compiler, int chan_mask, int num_loops) {
+	for(int i = 0, m = 1; i < 16; i++, m <<= 1) {
+		if((chan_mask & m) == 0) continue;
+		struct mdx_compiler_channel *channel = compiler->channels + i;
+		channel->repeat_stack_pos--;
+		if(channel->repeat_stack[channel->repeat_stack_pos].start_location >= 0) {
+			channel->buf.data[channel->repeat_stack[channel->repeat_stack_pos].start_location + 1] = num_loops;
+		}
+		if(channel->repeat_stack[channel->repeat_stack_pos].escape_location >= 0) {
+			int16_t escape_ofs = channel->buf.data_len - channel->repeat_stack[channel->repeat_stack_pos].escape_location + 1;
+			channel->buf.data[channel->repeat_stack[channel->repeat_stack_pos].escape_location + 1] = escape_ofs >> 8;
+			channel->buf.data[channel->repeat_stack[channel->repeat_stack_pos].escape_location + 2] = escape_ofs & 0xff;
+		}
+		buffer_write_uint8(&channel->buf, 0xf5);
+		int16_t ofs = channel->repeat_stack[channel->repeat_stack_pos].start_location - channel->buf.data_len + 1;
+		buffer_write_uint8(&channel->buf, ofs >> 8);
+		buffer_write_uint8(&channel->buf, ofs & 0xff);
+	}
+}
+
+void mdx_compiler_repeat_escape(struct mdx_compiler *compiler, int chan_mask) {
+	for(int i = 0, m = 1; i < 16; i++, m <<= 1) {
+		if((chan_mask & m) == 0) continue;
+		struct mdx_compiler_channel *channel = compiler->channels + i;
+		channel->repeat_stack[channel->repeat_stack_pos].escape_location = channel->buf.data_len;
+		buffer_write_uint8(&channel->buf, 0xf4);
+		buffer_write_uint8(&channel->buf, 0x00);
+		buffer_write_uint8(&channel->buf, 0x00);
+	}
+}
+
+void mdx_compiler_loop_start(struct mdx_compiler *compiler, int chan_mask) {
+	for(int i = 0, m = 1; i < 16; i++, m <<= 1) {
+		if((chan_mask & m) == 0) continue;
+		struct mdx_compiler_channel *channel = compiler->channels + i;
+		channel->loop_pos = channel->buf.data_len;
+	}
 }

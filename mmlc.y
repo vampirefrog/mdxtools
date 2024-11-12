@@ -135,6 +135,9 @@ mmlcommand:
 	| MPON                { mdx_compiler_mpon(compiler, compiler->chan_mask); }
 	| MPOF                { mdx_compiler_mpof(compiler, compiler->chan_mask); }
 	| MD INT              { mdx_compiler_md(compiler, compiler->chan_mask, $2); }
+	| '['                 { mdx_compiler_repeat_start(compiler, compiler->chan_mask); }
+	| '/'                 { mdx_compiler_repeat_escape(compiler, compiler->chan_mask); }
+	| ']' INT             { mdx_compiler_repeat_end(compiler, compiler->chan_mask, $2); }
 	;
 
 // Fuck this shit

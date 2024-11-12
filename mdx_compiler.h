@@ -15,6 +15,14 @@ struct mdx_compiler_channel {
 	int total_ticks;
 	int default_note_length;
 	int octave;
+
+	// repeat tracking
+	struct {
+		int start_location;
+		int escape_location;
+	} repeat_stack[32];
+	int repeat_stack_pos;
+	int loop_pos;
 };
 
 struct mdx_compiler_opm_voice_op {
@@ -54,11 +62,9 @@ void mdx_compiler_destroy(struct mdx_compiler *);
 int  mdx_compiler_parse(struct mdx_compiler *, FILE *f);
 void mdx_compiler_dump(struct mdx_compiler *);
 void mdx_compiler_save(struct mdx_compiler *, const char *filename);
-
 void mdx_compiler_directive(struct mdx_compiler *compiler, char *directive, char *value);
 void mdx_compiler_opmdef(struct mdx_compiler *compiler, int voice_num, uint8_t *data);
 void mdx_compiler_write(struct mdx_compiler *compiler, int chan_mask, ...);
-
 void mdx_compiler_note(struct mdx_compiler *compiler, int chan_mask, int note, struct mml_notelength *l);
 void mdx_compiler_note_num(struct mdx_compiler *compiler, int chan_mask, int note, struct mml_notelength *l);
 void mdx_compiler_set_default_note_length(struct mdx_compiler *compiler, int chan_mask, struct mml_notelength *l);
@@ -93,5 +99,8 @@ void mdx_compiler_mp(struct mdx_compiler *compiler, int chan_mask, int waveform,
 void mdx_compiler_mpon(struct mdx_compiler *compiler, int chan_mask);
 void mdx_compiler_mpof(struct mdx_compiler *compiler, int chan_mask);
 void mdx_compiler_md(struct mdx_compiler *compiler, int chan_mask, int ticks);
+void mdx_compiler_repeat_start(struct mdx_compiler *compiler, int chan_mask);
+void mdx_compiler_repeat_end(struct mdx_compiler *compiler, int chan_mask, int num_loops);
+void mdx_compiler_repeat_escape(struct mdx_compiler *compiler, int chan_mask);
 void mdx_compiler_end(struct mdx_compiler *compiler, int chan_mask);
 void mdx_compiler_add_opm_voice(struct mdx_compiler *, int num, uint8_t data[47]);
