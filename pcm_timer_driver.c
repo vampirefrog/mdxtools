@@ -35,9 +35,8 @@ int pcm_timer_driver_estimate(struct pcm_timer_driver *driver, int samples) {
 	int denom = driver->remainder;
 	for(int i = 1; i <= samples; i++) {
 		denom += driver->denominator;
-		if(denom >= driver->numerator) {
+		if(denom >= driver->numerator)
 			return i;
-		}
 	}
 
 	return samples;
