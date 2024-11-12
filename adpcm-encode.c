@@ -30,16 +30,15 @@ int main(int argc, char **argv) {
 
 	while(!feof(fin)) {
 		int16_t i;
-		int r;
 
-		r = fread(&i, sizeof(i), 1, fin);
+		fread(&i, sizeof(i), 1, fin);
 		i /= 16;
 		uint8_t u1 = adpcm_encode(i, &st);
-		r = fread(&i, sizeof(i), 1, fin);
+		fread(&i, sizeof(i), 1, fin);
 		i /= 16;
 		uint8_t u2 = adpcm_encode(i, &st);
 		uint8_t u = (u2 << 4) | (u1 & 0x0f);
-		r = fwrite(&u, 1, 1, fout);
+		fwrite(&u, 1, 1, fout);
 	}
 
 	return 0;
