@@ -311,7 +311,7 @@ void mdx_decompiler_decompile(struct mdx_decompiler *d, struct mdx_file *f) {
 					else if(b[1] == 0x81)
 						MMLF("MAON")
 					else
-						MMLF("MA%d,%d,%d", b[1], b[2] << 8 | b[3], b[4] << 8 | b[5])
+						MMLF("MA%d,%d,%d", b[1], b[2] << 8 | b[3], b[4] >= 128 ? b[4] - 256 : b[4])
 					break;
 				case 0xea:
 					if(b[1] == 0x80)
