@@ -56,7 +56,7 @@
 <mmldata>{
 	[\t\r ]+   /* ignore whitespace */
 	[a-g]      yylval->cval = yytext[0] - 'a'; return MML_NOTE;
-	[@to<>lnrq_&\+v()LD\[\]/ykwSWF!,%\.^] return yytext[0];
+	[@to<>lnrq_&\+v()LD\[\]/ypkwSWF!,%\.^] return yytext[0];
 	-          return '-';
 	-?[0-9]+   yylval->ival = atoi(yytext); return INT;
 	\n         BEGIN(INITIAL); return '\n';
