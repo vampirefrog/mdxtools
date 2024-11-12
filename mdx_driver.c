@@ -351,32 +351,24 @@ static int mdx_driver_track_advance(struct mdx_driver *driver, int track_num) {
 				track->pos += 2;
 			} else {
 				int16_t ofs = (track->data[track->pos + 1] << 8) | track->data[track->pos + 2];
-				int old_min_loop = -1;
-				for(int i = 0; i < driver->mdx_file->num_tracks; i++) {
-					if(!driver->tracks[i].used)
-						continue;
-					if(driver->tracks[i].ended)
-						continue;
-					if(old_min_loop == -1 || driver->tracks[i].loop_num < old_min_loop)
-						old_min_loop = driver->tracks[i].loop_num;
-				}
-
 				track->loop_num++;
 
-				int min_loop = -1;
-				for(int i = 0; i < driver->mdx_file->num_tracks; i++) {
-					if(!driver->tracks[i].used)
-						continue;
-					if(driver->tracks[i].ended)
-						continue;
-					if(min_loop == -1 || driver->tracks[i].loop_num < min_loop)
-						min_loop = driver->tracks[i].loop_num;
-				}
-
-				if(min_loop >= 0 && old_min_loop >= 0 && min_loop != old_min_loop) {
-					driver->cur_loop++;
-					if(driver->cur_loop >= driver->max_loops && driver->fade_rate == 0) {
-						mdx_driver_start_fadeout(driver, 26);
+				if(driver->fade_rate == 0 && driver->max_loops > 0) {
+					int have_unfinished_track = 0;
+					for(int i = 0; i < driver->mdx_file->num_tracks; i++) {
+						if(!driver->tracks[i].used) continue;
+						if(driver->tracks[i].ended) continue;
+						if(driver->tracks[i].loop_num < driver->max_loops) {
+							have_unfinished_track = 1;
+							break;
+						}
+					}
+					if(!have_unfinished_track) {
+						driver->fade_rate = 26;
+						for(int i = 0; i < driver->mdx_file->num_tracks; i++) {
+							driver->fade_counter = driver->fade_rate;
+							driver->fade_value = 0; // attenuation
+						}
 					}
 				}
 				track->pos += ofs + 3;
@@ -597,9 +589,8 @@ void mdx_driver_init(struct mdx_driver *driver, struct timer_driver *timer_drive
 	driver->set_tempo = 0;
 	driver->unknown_command_cb = 0;
 
-	for(int i = 0; i < 16; i++) {
+	for(int i = 0; i < 16; i++)
 		mdx_driver_track_init(&driver->tracks[i]);
-	}
 }
 
 int mdx_driver_load(struct mdx_driver *driver, struct mdx_file *mfile, struct pdx_file *pfile) {
@@ -612,9 +603,8 @@ int mdx_driver_load(struct mdx_driver *driver, struct mdx_file *mfile, struct pd
 	driver->fade_counter = 0;
 	driver->fade_value = 0;
 
-	for(int i = 0; i < 16; i++) {
+	for(int i = 0; i < 16; i++)
 		mdx_driver_track_init(&driver->tracks[i]);
-	}
 
 	driver->mdx_file = mfile;
 	driver->pdx_file = pfile;
