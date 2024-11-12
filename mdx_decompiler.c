@@ -187,7 +187,7 @@ void mdx_decompiler_decompile(struct mdx_decompiler *d, struct mdx_file *f) {
 						else if(d->octave - o == 1)
 							MMLF("<")
 						else
-							MMLF("o%d", o);
+							MMLF("o%d", o)
 						d->octave = o;
 					}
 					if(t)
@@ -196,8 +196,8 @@ void mdx_decompiler_decompile(struct mdx_decompiler *d, struct mdx_file *f) {
 						MMLF("%s%%%d", note_names[n % 12], b[1] + 1)
 				}
 				if(d->portamento && i < 8) {
+					int next_note = n + d->portamento * (ticks+1) / 16384;
 					MMLF("_");
-					int next_note = n + d->portamento * ticks / 16384;
 					o = note_octave(next_note);
 					if(o != d->octave) {
 						if(o - d->octave == 1)
@@ -205,13 +205,13 @@ void mdx_decompiler_decompile(struct mdx_decompiler *d, struct mdx_file *f) {
 						else if(d->octave - o == 1)
 							MMLF("<")
 						else
-							MMLF("o%d", o);
+							MMLF("o%d", o)
 						d->octave = o;
 					}
 					if(d->fm_note_nums)
 						MMLF("n%d", next_note)
 					else
-						MMLF("%s", note_names[n%12]);
+						MMLF("%s", note_names[next_note%12])
 					d->portamento = 0;
 				}
 				if(d->next_key_off) {
