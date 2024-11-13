@@ -23,9 +23,9 @@
 }
 
 %token INT NOTE DIRECTIVE_NAME IDENTIFIER MMLCHANNELS MML_NOTE MML_AT
-%token WHITESPACE STRING_LITERAL MP MPON MPOF MA MAON MAOF MD MH MHON MHOF
+%token WHITESPACE STRING_LITERAL MP MPON MPOF MA MAON MAOF MD MH MHON MHOF SYNC
 
-%type<ival> INT MMLCHANNELS MML_NOTE
+%type<ival> INT MMLCHANNELS MML_NOTE SYNC
 %type<sval> DIRECTIVE_NAME IDENTIFIER STRING_LITERAL
 %type<cval> NOTE MML_AT
 %type<ival> staccato mmlnote
@@ -121,6 +121,7 @@ mmlcommand:
 	| 'w' INT             { mdx_compiler_opm_noise_freq(compiler, compiler->chan_mask, $2); }
 	| 'y' INT ',' INT     { mdx_compiler_opm_write(compiler, compiler->chan_mask, $2, $4); }
 	| 'S' INT             { mdx_compiler_sync_send(compiler, compiler->chan_mask, $2); }
+	| SYNC                { mdx_compiler_sync_send(compiler, compiler->chan_mask, $1 >= 'P' ? $1 - 'P' + 8 : $1 - 'A'); }
 	| 'W'                 { mdx_compiler_sync_wait(compiler, compiler->chan_mask); }
 	| 'F' INT             { mdx_compiler_adpcm_freq(compiler, compiler->chan_mask, $2); }
 	| MH INT ',' INT ',' INT ',' INT ',' INT ',' INT ',' INT {

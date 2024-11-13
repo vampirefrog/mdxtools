@@ -286,7 +286,7 @@ void mdx_decompiler_decompile(struct mdx_decompiler *d, struct mdx_file *f) {
 					MMLF("k%d", b[1])
 					break;
 				case 0xef:
-					MMLF("S%d", b[1])
+					MMLF("S%C", b[1] >= 8 ? 'P' + b[1] - 8 : 'A' + b[1])
 					break;
 				case 0xee:
 					MMLF("W")

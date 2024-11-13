@@ -70,6 +70,7 @@
 	MPOF       return MPOF;
 	MP         return MP;
 	MD         return MD;
+	S[A-HP-W]  yylval->ival = yytext[1]; return SYNC;
 	.          ;
 }
 
