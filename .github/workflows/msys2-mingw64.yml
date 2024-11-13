@@ -32,4 +32,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mdxtools-${{steps.vars.outputs.sha_short}}
-          path: "*.exe *.dll"
+          path: |
+            *.exe
+            *.dll
