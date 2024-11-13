@@ -258,8 +258,16 @@ void mdx_decompiler_decompile(struct mdx_decompiler *d, struct mdx_file *f) {
 					break;
 				case 0xf5:
 					{
-						int ofs = ((b[1] << 8) | b[2]) - 65535;
+						int16_t ofs = ((b[1] << 8) | b[2]) + 1;
 						if(ofs < 0 && pos + ofs >= 0) {
+							if(d->rest_ticks > 0) {
+								int t = ticks_to_division(d->rest_ticks);
+								if(t)
+									MMLF("r%d", t)
+								else
+									MMLF("r%%%d", d->rest_ticks)
+								d->rest_ticks = 0;
+							}
 							if(chan->data[pos + ofs] > 2)
 								MMLF("]%d", chan->data[pos + ofs])
 							else
