@@ -214,7 +214,6 @@ void mdx_decompiler_decompile(struct mdx_decompiler *d, struct mdx_file *f) {
 							// 	MMLF("o%d", o)
 							d->octave = o;
 						}
-						printf("echoing noteee %d next_key_off=%d\n", n, d->next_key_off);
 						if(t)
 							MMLF("%s%d%s%s", note_names[n % 12], t, d->next_key_off ? "&" : "", dot ? "." : "")
 						else
@@ -272,7 +271,6 @@ void mdx_decompiler_decompile(struct mdx_decompiler *d, struct mdx_file *f) {
 							MMLF("@q%d", 256 - b[1])
 						break;
 					case 0xf7:
-						printf("NEXT KEY OFFFF\n");
 						d->next_key_off = 1;
 						break;
 					case 0xf6:
