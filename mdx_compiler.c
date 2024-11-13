@@ -340,14 +340,12 @@ void mdx_compiler_portamento(struct mdx_compiler *compiler, int chan_mask, int n
 
 void mdx_compiler_legato(struct mdx_compiler *compiler, int chan_mask) {
 	for(int i = 0, m = 1; i < 16; i++, m <<= 1) {
-		if(chan_mask & m) {
-			struct mdx_compiler_channel *chan = &compiler->channels[i];
-			if(chan->buf.data_len > 2) {
-				buffer_write_uint8(&chan->buf, chan->buf.data[chan->buf.data_len - 1]);
-				chan->buf.data[chan->buf.data_len - 2] = chan->buf.data[chan->buf.data_len - 3];
-				chan->buf.data[chan->buf.data_len - 3] = 0xf7;
-			}
-		}
+		if((chan_mask & m) == 0) continue;
+		struct mdx_compiler_channel *chan = &compiler->channels[i];
+		if(chan->buf.data_len < 2) continue;
+		buffer_write_uint8(&chan->buf, chan->buf.data[chan->buf.data_len - 1]);
+		chan->buf.data[chan->buf.data_len - 2] = chan->buf.data[chan->buf.data_len - 3];
+		chan->buf.data[chan->buf.data_len - 3] = 0xf7;
 	}
 }
 
