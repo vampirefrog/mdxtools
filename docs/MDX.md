@@ -95,7 +95,7 @@ Each command consists of one byte, followed by specific parameters. Integers are
 <tr><td><code>0xfa</code></td><td><code>(</code></td><td>Decrease volume.</td></tr>
 <tr><td><code>0xf9</code></td><td><code>)</code></td><td>Increase volume.</td></tr>
 <tr><td><code>0xf8</code> <code>n</code></td><td><code>q#</code></td><td>Set note length (staccato).</td></tr>
-<tr><td><code>0xf7</code></td><td><code>&amp;</code>*</td><td>Legato. Disable key off for next note. Corresponds to MML command <b>&amp;</b>, except it precedes the note instead of following it.</td></tr>
+<tr><td><code>0xf7</code></td><td><code>&amp;</code></td><td>Legato. Disable key off for next note. Corresponds to MML command <code>&amp;</code>, except it precedes the note instead of following it.</td></tr>
 <tr><td><code>0xf6</code> <code>n</code> <code>0x00</code></td><td><code>[</code></td><td>Repeat <code>n</code> times until a Repeat end command. Corresponds to MML command <code>[</code>, but loop multiplier is specified here instead of the closing <code>]</code>.</td></tr>
 <tr><td><code>0xf5</code> <code>nn</code></td><td><code>]</code></td><td>Repeat end. Loop back <code>nn</code> (signed word) bytes.</td></tr>
 <tr><td><code>0xf4</code> <code>nn</code></td><td><code>/</code></td><td>Repeat escape. In the last repetition, skip <code>nn</code> bytes, thus shortening it. Loosely corresponds to MML command <code>/</code>, inside <code>[]</code>.</td></tr>
