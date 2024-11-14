@@ -19,7 +19,7 @@ jobs:
         with:
           msystem: MINGW64
           update: true
-          install: git make pkg-config mingw64/mingw-w64-x86_64-gcc mingw64/mingw-w64-x86_64-portaudio mingw64/mingw-w64-x86_64-nsis bison flex zip unzip
+          install: git make pkg-config mingw64/mingw-w64-x86_64-gcc mingw64/mingw-w64-x86_64-portaudio mingw64/mingw-w64-x86_64-audiofile mingw64/mingw-w64-x86_64-nsis bison flex zip unzip
       - name: Build with make
         run: make
       - name: Copy DLLs over
