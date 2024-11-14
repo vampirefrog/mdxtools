@@ -54,18 +54,20 @@ int main(int argc, char **argv) {
 		int y = mdx_compiler_parse(&compiler, f);
 		if(y == 1) {
 			fprintf(stderr, "parsing failed: invalid input\n");
-		} else if(y == 2) {
-			fprintf(stderr, "parsing failed: memory exhausted\n");
-		} else {
-			if(opt_stats)
-				mdx_compiler_dump(&compiler);
-			if(!opt_output || !opt_output[0]) {
-				char mdxbuf[PATH_MAX];
-				replace_ext(mdxbuf, sizeof(mdxbuf), argv[i], "mdx");
-				opt_output = mdxbuf;
-			}
-			mdx_compiler_save(&compiler, opt_output);
+			return 1;
 		}
+		if(y == 2) {
+			fprintf(stderr, "parsing failed: memory exhausted\n");
+			return 2;
+		}
+		if(opt_stats)
+			mdx_compiler_dump(&compiler);
+		if(!opt_output || !opt_output[0]) {
+			char mdxbuf[PATH_MAX];
+			replace_ext(mdxbuf, sizeof(mdxbuf), argv[i], "mdx");
+			opt_output = mdxbuf;
+		}
+		mdx_compiler_save(&compiler, opt_output);
 
 		mdx_compiler_destroy(&compiler);
 	}
