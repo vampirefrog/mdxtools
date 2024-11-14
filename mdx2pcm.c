@@ -5,8 +5,8 @@
 #ifdef __linux__
 #include <linux/limits.h>
 #endif
+#include <audiofile.h>
 
-#include "wav.h"
 #include "cmdline.h"
 #include "tools.h"
 #include "mdx.h"
@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
 	mdx_driver.max_loops = opt_loops;
 
 	stream_sample_t bufL[BUFFER_SIZE], bufR[BUFFER_SIZE];
-	stream_sample_t mixBufL[BUFFER_SIZE], mixBufR[BUFFER_SIZE];
+	int16_t mixBuf[BUFFER_SIZE * 2];
 
 	if(!opt_output || !opt_output[0]) {
 		char midbuf[PATH_MAX];
@@ -96,10 +96,16 @@ int main(int argc, char **argv) {
 		opt_output = midbuf;
 	}
 
-	struct wav wav;
+	AFfilesetup setup = afNewFileSetup();
+	afInitFileFormat(setup, AF_FILE_WAVE);
+	afInitChannels(setup, AF_DEFAULT_TRACK, 2);
+	afInitRate(setup, AF_DEFAULT_TRACK, opt_sample_rate);
+	afInitSampleFormat(setup, AF_DEFAULT_TRACK, AF_SAMPFMT_TWOSCOMP, 16);
 	printf("Opening %s\n", opt_output);
-	if(wav_open(&wav, opt_output, opt_sample_rate, 2, 16)) {
-		fprintf(stderr, "Could not open output file \"%s\": %s (%d)\n", opt_output, strerror(errno), errno);
+	AFfilehandle file = afOpenFile(opt_output, "w", setup);
+	if(file == AF_NULL_FILEHANDLE) {
+		fprintf(stderr, "Error opening output file.\n");
+		return 1;
 	}
 
 	signal(SIGINT, sigint_handler);
@@ -133,12 +139,9 @@ int main(int argc, char **argv) {
 
 		while(!mdx_driver.ended) {
 			fflush(stdout);
-			stream_sample_t *mixBufLp = mixBufL, *mixBufRp = mixBufR;
 			int samples_remaining = BUFFER_SIZE;
-
-			memset(mixBufL, 0, sizeof(mixBufL));
-			memset(mixBufR, 0, sizeof(mixBufR));
-
+			memset(mixBuf, 0, sizeof(mixBuf));
+			int16_t *mixBufp = mixBuf;
 			while(samples_remaining > 0) {
 				int timer_samples = pcm_timer_driver_estimate(&timer_driver, samples_remaining);
 				int fm_samples = fm_opm_emu_driver_estimate(&fm_driver, samples_remaining);
@@ -153,31 +156,28 @@ int main(int argc, char **argv) {
 				// printf("running adpcm\n");
 				adpcm_pcm_mix_driver_run(&adpcm_driver, bufL, bufR, samples);
 				for(int n = 0; n < samples; n++) {
-					mixBufLp[n] += bufL[n];
-					mixBufRp[n] += bufR[n];
+					mixBufp[n * 2] += bufL[n];
+					mixBufp[n * 2 + 1] += bufR[n];
 				}
 				// printf("running fm\n");
 				fm_opm_emu_driver_run(&fm_driver, bufL, bufR, samples);
 				for(int n = 0; n < samples; n++) {
-					mixBufLp[n] += bufL[n];
-					mixBufRp[n] += bufR[n];
+					mixBufp[n * 2] += bufL[n];
+					mixBufp[n * 2 + 1] += bufR[n];
 				}
 				// printf("running pcm_timer_driver\n");
 				pcm_timer_driver_advance(&timer_driver, samples);
 
 				samples_remaining -= samples;
 				// printf("timer_samples=%d fm_samples=%d adpcm_samples=%d samples=%d samples_remaining=%d\n", timer_samples, fm_samples, adpcm_samples, samples, samples_remaining);
-				mixBufLp += samples;
-				mixBufRp += samples;
+				mixBufp += samples * 2;
 			}
-
-			for(int n = 0; n < BUFFER_SIZE; n++) {
-				wav_write_stereo_sample(&wav, mixBufL[n], mixBufR[n]);
-			}
+			afWriteFrames(file, AF_DEFAULT_TRACK, mixBuf, BUFFER_SIZE);
 		}
 	}
 
-	wav_close(&wav);
+	afCloseFile(file);
+	afFreeFileSetup(setup);
 
 	return 0;
 }

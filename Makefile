@@ -1,9 +1,13 @@
-CFLAGS=-ggdb -Wall -DFIXED_POINT -DOUTSIDE_SPEEX -DRANDOM_PREFIX=speex -DEXPORT= -D_GNU_SOURCE -DHAVE_MEMCPY -DSAMPLE_BITS=16 -Ix68ksjis
 CC=gcc
 YACC=bison
 LEX=flex
 
-#	mdx2vgm
+CFLAGS=-ggdb -Wall -DFIXED_POINT -DOUTSIDE_SPEEX -DRANDOM_PREFIX=speex -DEXPORT= -D_GNU_SOURCE -DHAVE_MEMCPY -DSAMPLE_BITS=16 -Ix68ksjis
+CFLAGS+=$(shell pkg-config portaudio-2.0 audiofile --cflags)
+LIBS=-lz $(shell pkg-config portaudio-2.0 audiofile --libs)
+ifneq (,$(findstring MINGW,$(shell uname -s)))
+LIBS+=-liconv -lws2_32 -static-libgcc
+endif
 
 PROGS=\
 	adpcm-decode \
@@ -34,14 +38,6 @@ TARGETS=$(PROGS) $(TESTS)
 all: $(PROGS)
 tests: $(TESTS)
 
-ifneq (,$(findstring MINGW,$(shell uname -s)))
-CFLAGS+=$(shell pkg-config portaudio-2.0 --cflags) -static-libgcc
-LIBS=-lz -liconv -lws2_32 -static-libgcc
-else
-CFLAGS+=$(shell pkg-config portaudio-2.0 --cflags)
-LIBS=-lz
-endif
-
 .SECONDEXPANSION:
 adpcm-decode_SRCS=adpcm.c
 adpcm-encode_SRCS=adpcm.c
@@ -53,9 +49,9 @@ mdxdump_SRCS=mdx.c tools.c
 mdxinfo_SRCS=mdx.c tools.c x68ksjis/sjis_unicode.c x68ksjis/sjis.c x68ksjis/utf8.c cmdline.c md5.c
 mdxplay_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c cmdline.c adpcm_pcm_mix_driver.c fm_opm_emu_driver.c pcm_timer_driver.c fm_opm_driver.c sinctbl4.h sinctbl3.h vgm_logger.c
 mdxplay_LIBS=$(shell pkg-config portaudio-2.0 --libs)
-mdx2pcm_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c wav.c cmdline.c adpcm_pcm_mix_driver.c fm_opm_emu_driver.c pcm_timer_driver.c fm_opm_driver.c sinctbl4.h sinctbl3.h vgm_logger.c
+mdx2pcm_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c cmdline.c adpcm_pcm_mix_driver.c fm_opm_emu_driver.c pcm_timer_driver.c fm_opm_driver.c sinctbl4.h sinctbl3.h vgm_logger.c
 mml2mdx_SRCS=mml2mdx.c mmlc.tab.c mmlc.yy.c cmdline.c tools.c mdx_compiler.c mmlc.yy.h mmlc.tab.h
-pdx2wav_SRCS=pdx.c wav.c tools.c adpcm.c
+pdx2wav_SRCS=pdx.c tools.c adpcm.c
 pdx2sf2_SRCS=pdx.c tools.c adpcm.c Soundfont.c
 pdxinfo_SRCS=pdx.c tools.c cmdline.c md5.c adpcm.c
 gensinc_SRCS=gensinc.c cmdline.c
@@ -67,10 +63,10 @@ mml2mdx_LIBS=midilib/libmidi.a
 
 # Tests
 resample-test_SRCS=resample-test.c fixed_resampler.c sinctbl4.h sinctbl3.h
-fm-driver-test_SRCS=tools.c ym2151.c wav.c fm_driver.c fm_opm_driver.c fm_opm_emu_driver.c mdx.c
-adpcm-driver-test_SRCS=fixed_resampler.c tools.c adpcm.c speex_resampler.c okim6258.c wav.c adpcm_driver.c adpcm_pcm_mix_driver.c
+fm-driver-test_SRCS=tools.c ym2151.c fm_driver.c fm_opm_driver.c fm_opm_emu_driver.c mdx.c vgm_logger.c vgm_logger.h
+adpcm-driver-test_SRCS=fixed_resampler.c tools.c adpcm.c speex_resampler.c okim6258.c adpcm_driver.c adpcm_pcm_mix_driver.c
 timer-driver-test_SRCS=timer_driver.c tools.c pcm_timer_driver.c
-mdx-driver-test_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c wav.c adpcm_pcm_mix_driver.c fm_opm_emu_driver.c pcm_timer_driver.c fm_opm_driver.c
+mdx-driver-test_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c adpcm_pcm_mix_driver.c fm_opm_emu_driver.c pcm_timer_driver.c fm_opm_driver.c vgm_logger.c vgm_logger.h
 
 adpcm_pcm_mix_driver.c resample-test.c: sinctbl3.h sinctbl4.h
 

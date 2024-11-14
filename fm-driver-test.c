@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <audiofile.h>
 
 #include "mdx.h"
 #include "fm_opm_emu_driver.h"
 #include "tools.h"
-#include "wav.h"
 
 int main(int argc, char **argv) {
 	if(argc < 2) {
@@ -13,10 +13,10 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	int opt_sample_rate = 44100;
+	int opt_sample_rate = 48000;
 
 	struct fm_opm_emu_driver fm_driver;
-	fm_opm_emu_driver_init(&fm_driver, opt_sample_rate);
+	fm_opm_emu_driver_init(&fm_driver, 0, opt_sample_rate);
 
 	struct mdx_file mdx_file;
 
@@ -47,13 +47,22 @@ int main(int argc, char **argv) {
 		fm_driver_note_on((struct fm_driver *)&fm_driver, 2, 0xf, v);
 	}
 
-	struct wav wav;
+	AFfilesetup setup = afNewFileSetup();
+	afInitFileFormat(setup, AF_FILE_WAVE);
+	afInitChannels(setup, AF_DEFAULT_TRACK, 2);
+	afInitRate(setup, AF_DEFAULT_TRACK, 48000);
+	afInitSampleFormat(setup, AF_DEFAULT_TRACK, AF_SAMPFMT_TWOSCOMP, 16);
 	char wavname[256];
 	replace_ext(wavname, sizeof(wavname), argv[1], "wav");
-	wav_open(&wav, wavname, 48000, 2, 16);
+	AFfilehandle file = afOpenFile("output.wav", "w", setup);
+	if(file == AF_NULL_FILEHANDLE) {
+		fprintf(stderr, "Error opening output file.\n");
+		return 1;
+	}
 
 	int target_samples = 1024 * 20;
 	stream_sample_t bufL[1024], bufR[1024];
+	int16_t wavbuf[1024 * 2];
 	for(int i = 0; i <= target_samples; i += sizeof(bufL) / sizeof(bufL[0])) {
 		fm_opm_emu_driver_run(&fm_driver, bufL, bufR, sizeof(bufL) / sizeof(bufL[0]));
 		// printf("%d %d %d %d\n", bufL[0], bufL[1], bufL[2], bufL[3]);
@@ -66,12 +75,14 @@ int main(int argc, char **argv) {
 				bufR[n] = 32767;
 			if(bufR[n] < -32767)
 				bufR[n] = -32767;
-			wav_write_stereo_sample(&wav, bufL[n], bufR[n]);
+			wavbuf[n * 2] = bufL[n];
+			wavbuf[n * 2 + 1] = bufR[n];
 		}
+		afWriteFrames(file, AF_DEFAULT_TRACK, wavbuf, sizeof(bufL) / sizeof(*bufL));
 	}
 
-	wav_close(&wav);
-
+	afCloseFile(file);
+	afFreeFileSetup(setup);
 	fm_opm_emu_driver_deinit(&fm_driver);
 
 	return 0;
