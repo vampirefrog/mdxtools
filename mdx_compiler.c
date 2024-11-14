@@ -34,10 +34,9 @@ void mdx_compiler_destroy(struct mdx_compiler *compiler) {
 int mdx_compiler_parse(struct mdx_compiler *compiler, FILE *f) {
 	yylex_init_extra(compiler, &compiler->scanner);
 	yyset_in(f, compiler->scanner);
-	yyparse(compiler->scanner, compiler);
+	int r = yyparse(compiler->scanner, compiler);
 	yylex_destroy(compiler->scanner);
-
-	return 0;
+	return r;
 }
 
 void mdx_compiler_dump(struct mdx_compiler *compiler) {
@@ -242,11 +241,13 @@ void mdx_compiler_note(struct mdx_compiler *compiler, int chan_mask, int note, s
 
 void mdx_compiler_rest(struct mdx_compiler *compiler, int chan_mask, struct mml_notelength *l) {
 	for(int i = 0, m = 1; i < 16; i++, m <<= 1) {
-		if(chan_mask & m) {
-			struct mdx_compiler_channel *chan = &compiler->channels[i];
-			int ticks = mdx_compiler_calc_notelength(l, chan->default_note_length);
-			buffer_write_uint8(&chan->buf, ticks-1);
-			chan->total_ticks += ticks;
+		if((chan_mask & m) == 0) continue;
+		struct mdx_compiler_channel *chan = &compiler->channels[i];
+		int ticks = mdx_compiler_calc_notelength(l, chan->default_note_length);
+		chan->total_ticks += ticks;
+		while(ticks > 0) {
+			buffer_write_uint8(&chan->buf, ticks > 128 ? 127 : ticks - 1);
+			ticks -= 128;
 		}
 	}
 }
@@ -379,8 +380,8 @@ void mdx_compiler_key_on_delay(struct mdx_compiler *compiler, int chan_mask, int
 	mdx_compiler_write(compiler, chan_mask, 0xf0, k & 0xff, -1);
 }
 
-void mdx_compiler_detune(struct mdx_compiler *compiler, int chan_mask, int d) {
-	mdx_compiler_write(compiler, chan_mask, 0xf3, d, -1);
+void mdx_compiler_detune(struct mdx_compiler *compiler, int chan_mask, int16_t d) {
+	mdx_compiler_write(compiler, chan_mask, 0xf3, d >> 8 & 0xff, d & 0xff, -1);
 }
 
 void mdx_compiler_opm_noise_freq(struct mdx_compiler *compiler, int chan_mask, int w) {

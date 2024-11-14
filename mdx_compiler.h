@@ -83,7 +83,7 @@ void mdx_compiler_volume_up(struct mdx_compiler *compiler, int chan_mask);
 void mdx_compiler_pan(struct mdx_compiler *compiler, int chan_mask, int p);
 void mdx_compiler_key_on_delay(struct mdx_compiler *compiler, int chan_mask, int k);
 void mdx_compiler_loop_start(struct mdx_compiler *compiler, int chan_mask);
-void mdx_compiler_detune(struct mdx_compiler *compiler, int chan_mask, int d);
+void mdx_compiler_detune(struct mdx_compiler *compiler, int chan_mask, int16_t d);
 void mdx_compiler_opm_write(struct mdx_compiler *compiler, int chan_mask, int r, int d);
 void mdx_compiler_opm_noise_freq(struct mdx_compiler *compiler, int chan_mask, int w);
 void mdx_compiler_adpcm_freq(struct mdx_compiler *compiler, int chan_mask, int f);
