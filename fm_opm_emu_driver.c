@@ -6,13 +6,13 @@ static void fm_opm_emu_driver_write(struct fm_opm_driver *driver, uint8_t reg, u
 	ym2151_write_reg(&emudrv->opm, reg, val);
 }
 
-void fm_opm_emu_driver_init(struct fm_opm_emu_driver *driver, int sample_rate) {
+void fm_opm_emu_driver_init(struct fm_opm_emu_driver *driver, struct vgm_logger *vgm_logger, int sample_rate) {
 	driver->sample_rate = sample_rate;
 	ym2151_init(&driver->opm, 4000000, sample_rate);
 	ym2151_reset_chip(&driver->opm);
 	driver->fm_opm_driver.write = fm_opm_emu_driver_write;
 
-	fm_opm_driver_init(&driver->fm_opm_driver);
+	fm_opm_driver_init(&driver->fm_opm_driver, vgm_logger);
 }
 
 void fm_opm_emu_driver_deinit(struct fm_opm_emu_driver *driver) {

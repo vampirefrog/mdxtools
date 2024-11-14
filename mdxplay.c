@@ -11,6 +11,7 @@
 #include "mdx_driver.h"
 #include "pcm_timer_driver.h"
 #include "adpcm_pcm_mix_driver.h"
+#include "vgm_logger.h"
 #include "fm_opm_emu_driver.h"
 #include "mamedef.h"
 
@@ -19,6 +20,7 @@
 
 int opt_channel_mask = 0xffff;
 int opt_loops = 1;
+char *opt_vgm_file = 0;
 
 stream_sample_t bufL[BUFFER_SIZE], bufR[BUFFER_SIZE], chipBufL[BUFFER_SIZE], chipBufR[BUFFER_SIZE];
 int16_t buf[BUFFER_SIZE * 2];
@@ -47,6 +49,13 @@ int main(int argc, char **argv) {
 			TYPE_REQUIRED,
 			TYPE_INT, &opt_loops
 		},
+		{
+			'V', "vgm-file",
+			"Enable VGM logging",
+			"file",
+			TYPE_REQUIRED,
+			TYPE_STRING, &opt_vgm_file
+		},
 		CMDLINE_ARG_TERMINATOR
 	}, 1, -1, "<file.mdx>");
 
@@ -60,7 +69,10 @@ int main(int argc, char **argv) {
 
 	pcm_timer_driver_init(&timer_driver, opt_sample_rate);
 	adpcm_pcm_mix_driver_init(&adpcm_driver, opt_sample_rate, 0);
-	fm_opm_emu_driver_init(&fm_driver, opt_sample_rate);
+	struct vgm_logger vgm_logger;
+	if(opt_vgm_file && *opt_vgm_file)
+		vgm_logger_init(&vgm_logger, opt_vgm_file);
+	fm_opm_emu_driver_init(&fm_driver, opt_vgm_file && *opt_vgm_file ? &vgm_logger : 0, opt_sample_rate);
 	mdx_driver_init(
 		&mdx_driver,
 		(struct timer_driver *)&timer_driver,
@@ -135,10 +147,10 @@ int main(int argc, char **argv) {
 
 				int timer_samples = pcm_timer_driver_estimate(&timer_driver, samples_remaining);
 				if(timer_samples < samples) samples = timer_samples;
-				
+
 				int fm_samples = fm_opm_emu_driver_estimate(&fm_driver, samples_remaining);
 				if(fm_samples < samples) samples = fm_samples;
-				
+
 				int adpcm_samples = adpcm_pcm_mix_driver_estimate(&adpcm_driver, samples_remaining);
 				if(adpcm_samples < samples) samples = adpcm_samples;
 
@@ -153,6 +165,9 @@ int main(int argc, char **argv) {
 					mixBufLp[n] += bufL[n];
 					mixBufRp[n] += bufR[n];
 				}
+
+				if(opt_vgm_file && *opt_vgm_file)
+					vgm_logger_write_wait(&vgm_logger, samples);
 
 				pcm_timer_driver_advance(&timer_driver, samples);
 
@@ -176,6 +191,9 @@ int main(int argc, char **argv) {
 	err = Pa_CloseStream( stream );
 	if( err != paNoError ) goto error;
 	Pa_Terminate();
+
+	if(opt_vgm_file && *opt_vgm_file)
+		vgm_logger_end(&vgm_logger);
 
 	return err;
 

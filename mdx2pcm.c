@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
 
 	pcm_timer_driver_init(&timer_driver, opt_sample_rate);
 	adpcm_pcm_mix_driver_init(&adpcm_driver, opt_sample_rate, 0);
-	fm_opm_emu_driver_init(&fm_driver, opt_sample_rate);
+	fm_opm_emu_driver_init(&fm_driver, 0, opt_sample_rate);
 	mdx_driver_init(
 		&mdx_driver,
 		(struct timer_driver *)&timer_driver,

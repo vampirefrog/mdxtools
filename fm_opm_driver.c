@@ -115,10 +115,13 @@ static void fm_opm_driver_load_lfo(struct fm_driver *driver, int channel, uint8_
 void fm_opm_driver_write(struct fm_opm_driver *driver, uint8_t reg, uint8_t val) {
 	if(driver->write)
 		driver->write(driver, reg, val);
+	if(driver->vgm_logger)
+		vgm_logger_write_ym2151(driver->vgm_logger, reg, val);
 }
 
-void fm_opm_driver_init(struct fm_opm_driver *driver) {
+void fm_opm_driver_init(struct fm_opm_driver *driver, struct vgm_logger *vgm_logger) {
 	fm_driver_init(&driver->fm_driver);
+	driver->vgm_logger = vgm_logger;
 
 	driver->fm_driver.reset_key_sync = fm_opm_driver_reset_key_sync;
 	driver->fm_driver.set_pms_ams    = fm_opm_driver_set_pms_ams;

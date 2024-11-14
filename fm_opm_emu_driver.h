@@ -11,7 +11,7 @@ struct fm_opm_emu_driver {
 	int sample_rate;
 	struct ym2151 opm;
 };
-void fm_opm_emu_driver_init(struct fm_opm_emu_driver *driver, int sample_rate);
+void fm_opm_emu_driver_init(struct fm_opm_emu_driver *driver, struct vgm_logger *vgm_logger, int sample_rate);
 void fm_opm_emu_driver_deinit(struct fm_opm_emu_driver *driver);
 int fm_opm_emu_driver_estimate(struct fm_opm_emu_driver *d, int num_samples);
 void fm_opm_emu_driver_run(struct fm_opm_emu_driver *d, stream_sample_t *outL, stream_sample_t *outR, int num_samples);
