@@ -168,7 +168,7 @@ void mdx_decompiler_decompile(struct mdx_decompiler *d, struct mdx_file *f) {
 				d->rest_ticks += *b + 1;
 				if(d->rest_ticks < 0x7f) {
 					int dot = 0;
-					int t = ticks_to_division(d->rest_ticks, & dot);
+					int t = ticks_to_division(d->rest_ticks, &dot);
 					if(t)
 						MMLF("r%d%s", t, dot ? "." : "")
 					else
@@ -178,7 +178,7 @@ void mdx_decompiler_decompile(struct mdx_decompiler *d, struct mdx_file *f) {
 			} else {
 				if(d->rest_ticks > 0) {
 					int dot = 0;
-					int t = ticks_to_division(d->rest_ticks, & dot);
+					int t = ticks_to_division(d->rest_ticks, &dot);
 					if(t)
 						MMLF("r%d%s", t, dot ? "." : "")
 					else
@@ -215,7 +215,7 @@ void mdx_decompiler_decompile(struct mdx_decompiler *d, struct mdx_file *f) {
 							d->octave = o;
 						}
 						if(t)
-							MMLF("%s%d%s%s", note_names[n % 12], t, d->next_key_off ? "&" : "", dot ? "." : "")
+							MMLF("%s%d%s%s", note_names[n % 12], t, dot ? "." : "", d->next_key_off ? "&" : "")
 						else
 							MMLF("%s%%%d%s", note_names[n % 12], b[1] + 1, d->next_key_off ? "&" : "")
 					}
@@ -346,8 +346,10 @@ void mdx_decompiler_decompile(struct mdx_decompiler *d, struct mdx_file *f) {
 						MMLF("MD%d", b[1])
 						break;
 					case 0xe8:
+						// enable PCM8
 						break;
 					case 0xe7:
+						// fade out
 						break;
 				}
 			}
