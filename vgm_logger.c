@@ -82,14 +82,21 @@ int vgm_logger_write_ym2151(struct vgm_logger *log, uint8_t reg, uint8_t val) {
 	uint8_t buf[3] = { 0x54, reg, val };
 	return log->total_bytes += fwrite(buf, 1, sizeof(buf), log->f);
 }
+
 int vgm_logger_write_okim6258(struct vgm_logger *log, uint8_t port, uint8_t val) {
 	vgm_logger_write_wait_cmd(log);
 	uint8_t buf[3] = { 0xb7, port, val };
 	return log->total_bytes += fwrite(buf, 1, sizeof(buf), log->f);
 }
 
+static int vgm_logger_write_eof(struct vgm_logger *log) {
+	uint8_t eof[] = { 0x66 };
+	return log->total_bytes += fwrite(eof, 1, sizeof(eof), log->f);
+}
+
 int vgm_logger_end(struct vgm_logger *log) {
 	vgm_logger_write_wait_cmd(log);
+	vgm_logger_write_eof(log);
 	fseek(log->f, 0x04, SEEK_SET);
 	uint32_t i = sizeof(vgm_header) + log->total_bytes - 4;
 	fwrite(&i, 1, sizeof(i), log->f);
