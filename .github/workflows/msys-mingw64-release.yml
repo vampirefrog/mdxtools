@@ -23,7 +23,7 @@ jobs:
       - name: Build with make
         run: make
       - name: Copy DLLs over
-        run: cp $MSYSTEM_PREFIX/bin/libportaudio.dll .
+        run: cp $MSYSTEM_PREFIX/bin/libportaudio.dll $MSYSTEM_PREFIX/bin/libsndfile-1.dll .
       - name: Install NSIS EnvVar plugin
         run: (cd $MSYSTEM_PREFIX/share/nsis && wget https://nsis.sourceforge.io/mediawiki/images/7/7f/EnVar_plugin.zip && unzip EnVar_plugin.zip && cp Plugins/amd64-unicode/EnVar.dll Plugins/unicode/EnVar.dll)
       - name: Replace version string
