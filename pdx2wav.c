@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <audiofile.h>
+#include <sndfile.h>
 #include "tools.h"
 #include "pdx.h"
 #include "adpcm.h"
@@ -19,17 +19,17 @@ int main(int argc, char **argv) {
 	for(int i = 0; i < 96; i++) {
 		if(pdx.samples[i].len == 0) continue;
 
-		AFfilesetup setup = afNewFileSetup();
-		afInitFileFormat(setup, AF_FILE_WAVE);
-		afInitChannels(setup, AF_DEFAULT_TRACK, 1);
-		afInitRate(setup, AF_DEFAULT_TRACK, 15625);
-		afInitSampleFormat(setup, AF_DEFAULT_TRACK, AF_SAMPFMT_TWOSCOMP, 16);
+		SF_INFO sfinfo = {
+			.samplerate = 15625,
+			.channels = 1,
+			.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16,
+		};
 		char buf[1024];
 		snprintf(buf, sizeof(buf), "%s.%03d.wav", argv[1], i);
 		printf("Opening %s\n", buf);
-		AFfilehandle file = afOpenFile(buf, "w", setup);
-		if(file == AF_NULL_FILEHANDLE) {
-			fprintf(stderr, "Error opening output file.\n");
+		SNDFILE *file = sf_open(buf, SFM_WRITE, &sfinfo);
+		if(!file) {
+			printf("Failed to open file for writing\n");
 			return 1;
 		}
 
@@ -40,17 +40,16 @@ int main(int argc, char **argv) {
 			int16_t frame[2];
 			frame[0] = adpcm_decode(pdx.samples[i].data[j] & 0x0f, &st) << 3;
 			frame[1] = adpcm_decode(pdx.samples[i].data[j] >> 4, &st) << 3;
-			afWriteFrames(file, AF_DEFAULT_TRACK, frame, 1);
+			sf_write_short(file, frame, 1);
 		}
 		for(int j = 0; j < 24; j++) {
 			int16_t frame[2];
 			frame[0] = adpcm_decode(8, &st) << 3;
 			frame[1] = adpcm_decode(0, &st) << 3;
-			afWriteFrames(file, AF_DEFAULT_TRACK, frame, 1);
+			sf_write_short(file, frame, 1);
 		}
 
-		afCloseFile(file);
-		afFreeFileSetup(setup);
+		sf_close(file);
 	}
 
 	return 0;

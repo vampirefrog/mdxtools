@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include <audiofile.h>
+#include <sndfile.h>
 
 #include "tools.h"
 #include "mdx.h"
@@ -53,17 +53,17 @@ int main(int argc, char **argv) {
 	// load files above
 	mdx_driver_load(&mdx_driver, &mdx_file, &pdx_file);
 
-	AFfilesetup setup = afNewFileSetup();
-	afInitFileFormat(setup, AF_FILE_WAVE);
-	afInitChannels(setup, AF_DEFAULT_TRACK, 2);
-	afInitRate(setup, AF_DEFAULT_TRACK, 48000);
-	afInitSampleFormat(setup, AF_DEFAULT_TRACK, AF_SAMPFMT_TWOSCOMP, 16);
+	SF_INFO sfinfo = {
+		.samplerate = opt_sample_rate,
+		.channels = 2,
+		.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16,
+	};
 	char wavname[256];
 	printf("Outputting to %s\n", wavname);
 	replace_ext(wavname, sizeof(wavname), argv[1], "wav");
-	AFfilehandle file = afOpenFile("output.wav", "w", setup);
-	if(file == AF_NULL_FILEHANDLE) {
-		fprintf(stderr, "Error opening output file.\n");
+	SNDFILE *file = sf_open(wavname, SFM_WRITE, &sfinfo);
+	if(!file) {
+		printf("Failed to open file for writing\n");
 		return 1;
 	}
 
@@ -106,11 +106,10 @@ int main(int argc, char **argv) {
 			mixBufp += samples * 2;
 		}
 
-		afWriteFrames(file, AF_DEFAULT_TRACK, mixBuf, BUFFER_SIZE);
+		sf_write_short(file, mixBuf, BUFFER_SIZE);
 	}
 
-	afCloseFile(file);
-	afFreeFileSetup(setup);
+	sf_close(file);
 
 	return 0;
 }

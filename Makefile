@@ -2,9 +2,8 @@ CC=gcc
 YACC=bison
 LEX=flex
 
-CFLAGS=-ggdb -Wall -DFIXED_POINT -DOUTSIDE_SPEEX -DRANDOM_PREFIX=speex -DEXPORT= -D_GNU_SOURCE -DHAVE_MEMCPY -DSAMPLE_BITS=16 -Ix68ksjis
-CFLAGS+=$(shell pkg-config portaudio-2.0 audiofile --cflags)
-LIBS=-lz $(shell pkg-config portaudio-2.0 audiofile --libs)
+CFLAGS=-ggdb -Wall -DFIXED_POINT -DOUTSIDE_SPEEX -DRANDOM_PREFIX=speex -DEXPORT= -D_GNU_SOURCE -DHAVE_MEMCPY -DSAMPLE_BITS=16 -Ix68ksjis $(shell pkg-config portaudio-2.0 sndfile --cflags)
+LIBS=-lz $(shell pkg-config portaudio-2.0 sndfile --libs)
 ifneq (,$(findstring MINGW,$(shell uname -s)))
 LIBS+=-liconv -lws2_32 -static-libgcc
 endif
