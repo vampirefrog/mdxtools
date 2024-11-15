@@ -47,57 +47,6 @@ uint8_t *load_file(const char *filename, size_t *size_out) {
 	return data;
 }
 
-#ifndef WIN32
-#ifndef __EMSCRIPTEN__
-uint8_t *load_gzfile(const char *filename, size_t *size_out) {
-	gzFile f = gzopen(filename, "rb");
-	if(!f) {
-		fprintf(
-			stderr,
-			"Could not open %s: %s (%d)\n",
-			filename,
-			strerror(errno),
-			errno
-		);
-		return NULL;
-	}
-
-	uint8_t *data = malloc(1024);
-	if(!data) {
-		fprintf(
-			stderr,
-			"Could not allocate 1024 bytes for %s: %s (%d)\n",
-			filename, strerror(errno), errno
-		);
-		gzclose(f);
-		return NULL;
-	}
-	size_t size = 0;
-	while(1) {
-		int r = gzread(f, data + size, 1024);
-		if(r < 0) break;
-		size += r;
-		if(r == 1024) {
-			data = realloc(data, size + 1024);
-			if(!data) {
-				fprintf(
-					stderr,
-					"Could not reallocate from %lu bytes to %lu bytes for %s: %s (%d)\n",
-					(unsigned long)size, (unsigned long)size + 1024, filename, strerror(errno), errno
-				);
-				gzclose(f);
-				return NULL;
-			}
-		} else break;
-	}
-	gzclose(f);
-
-	if(size_out) *size_out = size;
-	return data;
-}
-#endif /* __EMSCRIPTEN */
-#endif /* WIN32 */
-
 #ifdef __MINGW32__
 int alphasort(const struct dirent **a, const struct dirent **b) {
 	return strcmp((*a)->d_name, (*b)->d_name);
