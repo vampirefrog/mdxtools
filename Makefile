@@ -97,7 +97,7 @@ sinctbl3.h: gensinc
 	./gensinc --zero-crossings 26 --denominator 3 --alpha 5.0 > $@
 
 midilib/libmidi.a:
-	cd midilib && make libmidi.a
+	cd midilib && make CC=gcc libmidi.a
 
 -include $(OBJS:.o=.d)
 
