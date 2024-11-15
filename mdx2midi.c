@@ -223,7 +223,7 @@ void handleOPMLFOMHON() {}
 void handleOPMLFOMHOF() {}
 void handlePCM8Enable() {}
 void handleFadeOut(uint8_t f) {}
-void handleUndefinedCommand() {}
+void handleUndefinedCommand(uint8_t b) {}
 void handleSetOPMRegister(uint8_t reg, uint8_t val) {}
 void handleSetNoteLength(uint8_t ticks) {}
 void handleLFOPitch(uint8_t b, uint16_t period, uint16_t change) {}
