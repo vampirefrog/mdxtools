@@ -15,10 +15,30 @@ jobs:
         uses: Homebrew/actions/setup-homebrew@master
       - name: Install deps
         run: brew install portaudio libsndfile bison flex
-      - run: bison --version
-      - run: flex --version
       - uses: actions/checkout@v4
         with:
           submodules: true
       - name: Build
         run: make YACC=$(brew --prefix bison)/bin/bison LEX=$(brew --prefix flex)/bin/flex all tests
+      - name: Set outputs
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mdxtools-${{steps.vars.outputs.sha_short}}
+          path: |
+            adpcm-decode
+            adpcm-encode
+            mdx2midi
+            mdx2mml
+            mdx2opm
+            mdxdump
+            mdxinfo
+            mdxplay
+            mdx2pcm
+            mkpdx
+            mml2mdx
+            pdx2sf2
+            pdx2wav
+            pdxinfo
