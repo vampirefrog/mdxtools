@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
 		// printf("%d %d %d %d  %d %d %d %d\n",
 		// 	in_buf[0], in_buf[1], in_buf[2], in_buf[3],
 		// 	out_buf[0], out_buf[1], out_buf[2], out_buf[3]);
-		// printf("result=%d in_len=%d out_len=%d\n", result, in_len, out_len);
+		printf("result=%d in_len=%d out_len=%d\n", result, in_len, out_len);
 
 		for(int i = 0; i < out_len; i++)
 			out_buf16[i] = out_buf[i];
