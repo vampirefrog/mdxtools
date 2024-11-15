@@ -23,7 +23,7 @@ jobs:
       - name: Set outputs
         id: vars
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-      - run: ls $(brew --prefix portaudio)/lib $(brew --prefix libsndfile)/lib
+      - run: ls -la $(brew --prefix portaudio)/lib $(brew --prefix libsndfile)/lib
       - run: cp $(brew --prefix portaudio)/lib/portaudio.2.dylib $(brew --prefix libsndfile)/lib/libsndfile.1.0.37.dylib .
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
