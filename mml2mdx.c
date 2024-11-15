@@ -5,6 +5,9 @@
 #ifdef __linux__
 #include <linux/limits.h>
 #endif
+#ifdef __APPLE__
+#include <sys/syslimits.h>
+#endif
 #include "mdx_compiler.h"
 #include "cmdline.h"
 #include "tools.h"

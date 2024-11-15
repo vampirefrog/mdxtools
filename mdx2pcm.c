@@ -5,6 +5,9 @@
 #ifdef __linux__
 #include <linux/limits.h>
 #endif
+#ifdef __APPLE__
+#include <sys/syslimits.h>
+#endif
 #include <sndfile.h>
 
 #include "cmdline.h"
