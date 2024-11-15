@@ -76,7 +76,7 @@ OBJS=$(CPPOBJS) $(COBJS)
 $(OBJS): Makefile
 
 $(TARGETS):$$(sort $$@.o $$(patsubst %.cpp,%.o,$$(patsubst %.c,%.o,$$($$@_SRCS))))
-	$(CXX) $(filter %.o, $^) -o $@ $(CFLAGS) $(LIBS) $($@_LIBS)
+	$(CC) $(filter %.o, $^) -o $@ $(CFLAGS) $(LIBS) $($@_LIBS)
 
 mmlc.tab.c mmlc.tab.h: mmlc.y
 	$(YACC) -v -o mmlc.tab.c --defines=mmlc.tab.h $(filter %.y,$^)
@@ -87,8 +87,6 @@ mmlc.yy.h: mmlc.tab.h
 mmlc.yy.c mmlc.yy.h: mmlc.l
 	$(LEX) -o mmlc.yy.c --header-file=$(patsubst %.c,%.h,$@) $(filter %.l,$^)
 
-$(CPPOBJS): %.cpp
-	$(CXX) -MMD -c $< -o $@ $(CFLAGS)
 $(COBJS): %.c
 	$(CC) -MMD -c $< -o $@ $(CFLAGS)
 
