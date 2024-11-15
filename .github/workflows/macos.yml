@@ -21,4 +21,4 @@ jobs:
         with:
           submodules: true
       - name: Build
-        run: make all tests
+        run: make YACC=/opt/homebrew/bin/bison LEX=/opt/homebrew/bin/flex all tests
