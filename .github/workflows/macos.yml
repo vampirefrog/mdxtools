@@ -23,6 +23,7 @@ jobs:
       - name: Set outputs
         id: vars
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - run: cp $(brew --prefix portaudio)/lib/portaudio.2.dylib $(brew --prefix libsndfile)/lib/libsndfile.1.0.37.dylib .
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -42,3 +43,4 @@ jobs:
             pdx2sf2
             pdx2wav
             pdxinfo
+            *.dylib
