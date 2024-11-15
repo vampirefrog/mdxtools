@@ -1,0 +1,22 @@
+name: macOS Build
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: Install deps
+        run: brew install portaudio libsndfile
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Build
+        run: make all tests
