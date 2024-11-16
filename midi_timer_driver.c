@@ -1,8 +1,9 @@
 #include "midi_timer_driver.h"
 
 static void midi_timer_driver_set_opm_tempo(struct timer_driver *driver, int opm_tempo) {
-	printf("midi_timer_driver_set_opm_tempo opm_tempo=%d\n", opm_tempo);
+
 }
+
 int midi_timer_driver_init(struct midi_timer_driver *driver) {
 	timer_driver_init(&driver->timer_driver);
 	driver->ticks_per_quarter_note = 48;
