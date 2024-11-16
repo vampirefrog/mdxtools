@@ -175,11 +175,8 @@ static void mdx_driver_note_on(struct mdx_driver *r, int track_num) {
 				}
 			} else printf("Note on !v %d\n", track_num);
 		}
-	} else {
-		if(track->note < 96 && r->pdx_file) {
-			adpcm_driver_play(r->adpcm_driver, track_num - 8, r->pdx_file->samples[track->note].data, r->pdx_file->samples[track->note].len, track->adpcm_freq_num, mdx_adpcm_volume_from_opm(track->opm_volume + r->fade_value));
-		}
-	}
+	} else if(track->note < 96 && r->pdx_file)
+		adpcm_driver_play(r->adpcm_driver, track_num - 8, r->pdx_file->samples[track->note].data, r->pdx_file->samples[track->note].len, track->adpcm_freq_num, mdx_adpcm_volume_from_opm(track->opm_volume + r->fade_value));
 }
 
 static void mdx_driver_note_off(struct mdx_driver *driver, int track_num) {
