@@ -7,7 +7,6 @@
 /* OPM emulation driver */
 struct fm_opm_emu_driver {
 	struct fm_opm_driver fm_opm_driver;
-
 	int sample_rate;
 	struct ym2151 opm;
 };

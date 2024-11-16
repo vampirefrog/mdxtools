@@ -140,7 +140,6 @@ int main(int argc, char **argv) {
 		mdx_driver_load(&mdx_driver, &mdx_file, &pdx_file);
 
 		while(!mdx_driver.ended) {
-			fflush(stdout);
 			int samples_remaining = BUFFER_SIZE;
 			memset(mixBuf, 0, sizeof(mixBuf));
 			int16_t *mixBufp = mixBuf;

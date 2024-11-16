@@ -40,7 +40,7 @@ tests: $(TESTS)
 .SECONDEXPANSION:
 adpcm-decode_SRCS=adpcm.c
 adpcm-encode_SRCS=adpcm.c
-mdx2midi_SRCS=mdx.c tools.c cmdline.c
+mdx2midi_SRCS=mdx.c tools.c cmdline.c adpcm_driver.c adpcm_midi_driver.c midi_timer_driver.c fm_driver.c fm_midi_driver.c mdx_driver.c timer_driver.c
 mdx2mml_SRCS=mdx.c mdx_decompiler.c tools.c cmdline.c x68ksjis/sjis.c x68ksjis/sjis_unicode.c x68ksjis/utf8.c
 mdx2opm_SRCS=mdx2opm.c tools.c mdx.c
 mdx2vgm_SRCS=mdx.c mdx_driver.c adpcm_driver.c adpcm.c speex_resampler.c timer.c tools.c x68ksjis/sjis_unicode.c x68ksjis/sjis.c ym2151.c okim6258.c vgm.c

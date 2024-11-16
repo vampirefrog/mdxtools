@@ -39,4 +39,3 @@ int adpcm_driver_set_pan(struct adpcm_driver *d, uint8_t pan) {
 		d->set_pan(d, pan);
 	return 0;
 }
-
