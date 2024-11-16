@@ -17,7 +17,6 @@ void fm_midi_driver_set_pitch(struct fm_driver *driver, int channel, int pitch) 
 		pitch -= 5;
 		int detune = pitch & 0x3f;
 		int note = pitch >> 6;
-		printf("pitch bend channel=%d pitch=%d note=%d detune=%d ticks=%d\n", channel, pitch, note, detune, mididrv->channels[channel].ticks);
 		mididrv->channels[channel].ticks = 0;
 	}
 	mididrv->channels[channel].pitch = pitch;
@@ -30,12 +29,10 @@ void fm_midi_driver_set_tl(struct fm_driver *driver, int channel, uint8_t tl, ui
 
 void fm_midi_driver_note_on(struct fm_driver *driver, int channel, uint8_t op_mask, uint8_t *v) {
 	struct fm_midi_driver *mididrv = (struct fm_midi_driver *)driver;
-	printf("note on channel=%d op_mask=%01x\n");
 	mididrv->channels[channel].on = 1;
 	int pitch = (mididrv->channels[channel].pitch >> 8) - 5;
 	int detune = pitch & 0x3f;
 	int note = pitch >> 6;
-	printf("set pitch channel=%d pitch=%d note=%d detune=%d ticks=%d\n", channel, pitch, note, detune, mididrv->channels[channel].ticks);
 	midi_track_write_note_on(&mididrv->midi_file->tracks[channel + 1], mididrv->channels[channel].ticks, channel, note, 127);
 	mididrv->channels[channel].ticks = 0;
 }
@@ -47,7 +44,6 @@ void fm_midi_driver_note_off(struct fm_driver *driver, int channel) {
 	int pitch = (mididrv->channels[channel].pitch >> 8) - 5;
 	int detune = pitch & 0x3f;
 	int note = pitch >> 6;
-	printf("note off channel=%d ticks=%d\n", channel, mididrv->channels[channel].ticks);
 	midi_track_write_note_off(&mididrv->midi_file->tracks[channel + 1], mididrv->channels[channel].ticks, channel, note, 127);
 	mididrv->channels[channel].ticks = 0;
 }
