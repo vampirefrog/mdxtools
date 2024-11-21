@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
 			mdx_voice_osc_get_tl(v, 2),
 			mdx_voice_osc_get_tl(v, 3)
 		);
-		fm_driver_load_voice((struct fm_driver *)&fm_driver, 2, v, 0, 3);
+		fm_driver_load_voice((struct fm_driver *)&fm_driver, 2, v, 0, 0, 3);
 		fm_driver_set_pitch((struct fm_driver *)&fm_driver, 2, ((0x2c << 6) + 5) << 8);
 		fm_driver_set_tl((struct fm_driver *)&fm_driver, 2, 0x15, v);
 		fm_driver_note_on((struct fm_driver *)&fm_driver, 2, 0xf, v);
