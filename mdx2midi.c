@@ -67,6 +67,22 @@ int main(int argc, char **argv) {
 		struct midi_file midi_file;
 		midi_file_init(&midi_file, MIDI_FORMAT_MULTI_TRACKS, 16, 48);
 
+		for(int t = 0; t < 16; t++) {
+			struct midi_track *track = midi_file.tracks + t;
+			char buf[256];
+			snprintf(buf, sizeof(buf), "Channel %c (%s)", mdx_track_name(t), t < 8 ? "FM" : "ADPCM");
+			midi_track_write_track_name(track, 0, buf, -1);
+			midi_track_write_bank_select(track, 0, t, 0);
+			midi_track_write_control_change(track, 0, t, 126, 127); // Monophonic mode
+			if(t >= 8) { // OPM only
+				midi_track_write_nrpn_msb(track, 0, t, 0, 112); // OPM Clock = 4MHz
+			}
+			midi_track_write_control_change(track, 0, t, 12, 0); // Amplitude LFO level
+			midi_track_write_control_change(track, 0, t, 13, 0); // Pitch LFO level
+			midi_track_write_rpn_msb(track, 0, t, 0, 32); // Pitch Bend Sensitivity
+			midi_track_write_pitch_bend(track, 0, t, 0x2000);
+		}
+
 		struct midi_track *first_track = midi_file_prepend_empty_track(&midi_file);
 		midi_track_write_time_signature(first_track, 0, 4, 2, 0, 0);
 		char buf[PATH_MAX];

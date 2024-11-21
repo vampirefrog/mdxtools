@@ -13,13 +13,11 @@ void fm_midi_driver_set_pms_ams(struct fm_driver *driver, int channel, uint8_t p
 void fm_midi_driver_set_pitch(struct fm_driver *driver, int channel, int pitch) {
 	struct fm_midi_driver *mididrv = (struct fm_midi_driver *)driver;
 	if(mididrv->channels[channel].on && pitch != mididrv->channels[channel].pitch) {
-		pitch >>= 8;
-		pitch -= 5;
 		int root_pitch = mididrv->channels[channel].note << 6;
-		int detune = (pitch - root_pitch);
+		int detune = ((pitch >> 8) - 5 - root_pitch);
 
 		if(detune != mididrv->channels[channel].detune) {
-			midi_track_write_pitch_bend(&mididrv->midi_file->tracks[channel + 1], mididrv->channels[channel].ticks, channel, detune);
+			midi_track_write_pitch_bend(&mididrv->midi_file->tracks[channel + 1], mididrv->channels[channel].ticks, channel, 8192 + detune * 4);
 			mididrv->channels[channel].detune = detune;
 			mididrv->channels[channel].ticks = 0;
 		}
@@ -40,7 +38,7 @@ void fm_midi_driver_note_on(struct fm_driver *driver, int channel, uint8_t op_ma
 	int note = pitch >> 6;
 	mididrv->channels[channel].note = note;
 	if(detune != mididrv->channels[channel].detune) {
-		midi_track_write_pitch_bend(&mididrv->midi_file->tracks[channel + 1], mididrv->channels[channel].ticks, channel, detune);
+		midi_track_write_pitch_bend(&mididrv->midi_file->tracks[channel + 1], mididrv->channels[channel].ticks, channel, 8192 + detune * 4);
 		mididrv->channels[channel].ticks = 0;
 	}
 	midi_track_write_note_on(&mididrv->midi_file->tracks[channel + 1], mididrv->channels[channel].ticks, channel, note, 127);
