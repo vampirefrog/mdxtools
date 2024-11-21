@@ -8,6 +8,7 @@ int midi_timer_driver_init(struct midi_timer_driver *driver) {
 	timer_driver_init(&driver->timer_driver);
 	driver->ticks_per_quarter_note = 48;
 	driver->timer_driver.set_opm_tempo = midi_timer_driver_set_opm_tempo;
+	return 0;
 }
 
 void midi_timer_driver_deinit(struct midi_timer_driver *driver) {

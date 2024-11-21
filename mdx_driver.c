@@ -249,7 +249,7 @@ static int mdx_driver_track_advance(struct mdx_driver *driver, int track_num) {
 		case 0xfd: // Set voice
 			if(track_num < 8) {
 				track->voice_num = track->data[track->pos + 1];
-				fm_driver_load_voice(driver->fm_driver, track_num, driver->mdx_file->voices[track->voice_num], track->opm_volume, track->pan);
+				fm_driver_load_voice(driver->fm_driver, track_num, driver->mdx_file->voices[track->voice_num], track->voice_num, track->opm_volume, track->pan);
 			}
 			track->pos += 2;
 			break;

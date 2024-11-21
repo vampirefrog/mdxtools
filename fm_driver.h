@@ -15,7 +15,7 @@ struct fm_driver {
 	void (*write_opm_reg)(struct fm_driver *driver, uint8_t reg, uint8_t data);
 	void (*set_pan)(struct fm_driver *driver, int channel, uint8_t pan, uint8_t *v);
 	void (*set_noise_freq)(struct fm_driver *driver, int channel, int freq);
-	void (*load_voice)(struct fm_driver *driver, int channel, uint8_t *v, int opm_volume, int pan);
+	void (*load_voice)(struct fm_driver *driver, int channel, uint8_t *v, int voice_num, int opm_volume, int pan);
 	void (*load_lfo)(struct fm_driver *driver, int channel, uint8_t wave, uint8_t freq, uint8_t pmd, uint8_t amd);
 };
 void fm_driver_init(struct fm_driver *driver);
@@ -29,7 +29,7 @@ void fm_driver_note_off(struct fm_driver *driver, int channel);
 void fm_driver_write_opm_reg(struct fm_driver *driver, uint8_t reg, uint8_t val);
 void fm_driver_set_pan(struct fm_driver *driver, int channel, uint8_t pan, uint8_t *v);
 void fm_driver_set_noise_freq(struct fm_driver *driver, int channel, int freq);
-void fm_driver_load_voice(struct fm_driver *driver, int channel, uint8_t *v, int opm_volume, int pan);
+void fm_driver_load_voice(struct fm_driver *driver, int channel, uint8_t *v, int voice_num, int opm_volume, int pan);
 void fm_driver_load_lfo(struct fm_driver *driver, int channel, uint8_t wave, uint8_t freq, uint8_t pmd, uint8_t amd);
 
 #endif /* FM_DRIVER_H_ */

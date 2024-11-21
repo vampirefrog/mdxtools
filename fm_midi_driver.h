@@ -5,7 +5,7 @@
 #include "midilib/midi_file.h"
 
 struct fm_midi_driver_channel {
-	int on, pitch, tl, ticks;
+	int on, pitch, note, detune, tl, ticks;
 };
 
 /* MIDI driver */

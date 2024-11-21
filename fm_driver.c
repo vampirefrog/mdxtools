@@ -60,9 +60,9 @@ void fm_driver_set_noise_freq(struct fm_driver *driver, int channel, int freq) {
 		driver->set_noise_freq(driver, channel, freq);
 }
 
-void fm_driver_load_voice(struct fm_driver *driver, int channel, uint8_t *v, int opm_volume, int pan) {
+void fm_driver_load_voice(struct fm_driver *driver, int channel, uint8_t *v, int voice_num, int opm_volume, int pan) {
 	if(driver->load_voice)
-		driver->load_voice(driver, channel, v, opm_volume, pan);
+		driver->load_voice(driver, channel, v, voice_num, opm_volume, pan);
 }
 
 void fm_driver_load_lfo(struct fm_driver *driver, int channel, uint8_t wave, uint8_t freq, uint8_t pmd, uint8_t amd) {

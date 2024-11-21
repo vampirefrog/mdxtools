@@ -85,7 +85,7 @@ static void fm_opm_driver_set_noise_freq(struct fm_driver *driver, int channel, 
 	fm_opm_driver_write(fmdrv, 0x0F, freq & 0x1f);
 }
 
-static void fm_opm_driver_load_voice(struct fm_driver *driver, int channel, uint8_t *v, int opm_volume, int pan) {
+static void fm_opm_driver_load_voice(struct fm_driver *driver, int channel, uint8_t *v, int voice_num, int opm_volume, int pan) {
 	struct fm_opm_driver *fmdrv = (struct fm_opm_driver *)driver;
 
 	for(int i = 0; i < 4; i++)

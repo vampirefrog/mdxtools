@@ -15,9 +15,14 @@ void fm_midi_driver_set_pitch(struct fm_driver *driver, int channel, int pitch) 
 	if(mididrv->channels[channel].on && pitch != mididrv->channels[channel].pitch) {
 		pitch >>= 8;
 		pitch -= 5;
-		int detune = pitch & 0x3f;
-		int note = pitch >> 6;
-		mididrv->channels[channel].ticks = 0;
+		int root_pitch = mididrv->channels[channel].note << 6;
+		int detune = (pitch - root_pitch);
+
+		if(detune != mididrv->channels[channel].detune) {
+			midi_track_write_pitch_bend(&mididrv->midi_file->tracks[channel + 1], mididrv->channels[channel].ticks, channel, detune);
+			mididrv->channels[channel].detune = detune;
+			mididrv->channels[channel].ticks = 0;
+		}
 	}
 	mididrv->channels[channel].pitch = pitch;
 }
@@ -33,6 +38,11 @@ void fm_midi_driver_note_on(struct fm_driver *driver, int channel, uint8_t op_ma
 	int pitch = (mididrv->channels[channel].pitch >> 8) - 5;
 	int detune = pitch & 0x3f;
 	int note = pitch >> 6;
+	mididrv->channels[channel].note = note;
+	if(detune != mididrv->channels[channel].detune) {
+		midi_track_write_pitch_bend(&mididrv->midi_file->tracks[channel + 1], mididrv->channels[channel].ticks, channel, detune);
+		mididrv->channels[channel].ticks = 0;
+	}
 	midi_track_write_note_on(&mididrv->midi_file->tracks[channel + 1], mididrv->channels[channel].ticks, channel, note, 127);
 	mididrv->channels[channel].ticks = 0;
 }
@@ -44,6 +54,8 @@ void fm_midi_driver_note_off(struct fm_driver *driver, int channel) {
 	int pitch = (mididrv->channels[channel].pitch >> 8) - 5;
 	int detune = pitch & 0x3f;
 	int note = pitch >> 6;
+
+	mididrv->channels[channel].detune = detune;
 	midi_track_write_note_off(&mididrv->midi_file->tracks[channel + 1], mididrv->channels[channel].ticks, channel, note, 127);
 	mididrv->channels[channel].ticks = 0;
 }
@@ -63,9 +75,10 @@ void fm_midi_driver_set_noise_freq(struct fm_driver *driver, int channel, int fr
 	(void)mididrv;
 }
 
-void fm_midi_driver_load_voice(struct fm_driver *driver, int channel, uint8_t *v, int volume, int pan) {
+void fm_midi_driver_load_voice(struct fm_driver *driver, int channel, uint8_t *v, int voice_num, int volume, int pan) {
 	struct fm_midi_driver *mididrv = (struct fm_midi_driver *)driver;
-	(void)mididrv;
+	midi_track_write_program_change(&mididrv->midi_file->tracks[channel + 1], mididrv->channels[channel].ticks, channel, voice_num);
+	mididrv->channels[channel].ticks = 0;
 }
 
 void fm_midi_driver_load_lfo(struct fm_driver *driver, int channel, uint8_t wave, uint8_t freq, uint8_t pmd, uint8_t amd) {
@@ -91,6 +104,9 @@ void fm_midi_driver_init(struct fm_midi_driver *driver, struct midi_file *midi_f
 	for(int i = 0; i < 8; i++) {
 		driver->channels[i].on = 0;
 		driver->channels[i].pitch = 0;
+		driver->channels[i].note = 0;
+		driver->channels[i].detune = 0;
+		driver->channels[i].tl = 0;
 		driver->channels[i].ticks = 0;
 	}
 }
