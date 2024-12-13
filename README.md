@@ -1,7 +1,7 @@
 mdxtools
 ========
 
-![Project status](https://img.shields.io/badge/Project%20status-Beta-blue.svg) ![License](https://img.shields.io/github/license/vampirefrog/mdxtools)
+![Project status](https://img.shields.io/badge/Project%20status-Beta-blue.svg) ![License](https://img.shields.io/github/license/vampirefrog/mdxtools?color=green)
 
 [![Linux Build](https://github.com/vampirefrog/mdxtools/actions/workflows/linux.yml/badge.svg)](https://github.com/vampirefrog/mdxtools/actions/workflows/linux.yml) [![MSYS2 MINGW64 Build](https://github.com/vampirefrog/mdxtools/actions/workflows/msys2-mingw64.yml/badge.svg)](https://github.com/vampirefrog/mdxtools/actions/workflows/msys2-mingw64.yml) [![MacOS Build](https://github.com/vampirefrog/mdxtools/actions/workflows/macos.yml/badge.svg)](https://github.com/vampirefrog/mdxtools/actions/workflows/macos.yml) [![GitHub Release](https://img.shields.io/github/v/release/vampirefrog/mdxtools?label=Latest+Release)](https://github.com/vampirefrog/mdxtools/releases/latest)
 
