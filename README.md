@@ -24,7 +24,7 @@ These tools are aimed at the large collections of MDX files available online (se
 * `pdx2sf2` - generate a SoundFont file with the samples from the PDX file. Useful for importing a song into a DAW.
 * `pdxinfo` - extract information from a PDX file, and output in `.csv` format
 * `adpcm-decode` - decodes ADPCM data from stdin and outputs 16-bit PCM to stdout (sample rate does not change)
-* `adpcm-encode` - encodes PCM data from stdrin and outputs APDCM data to stdout (sample rate does not change)
+* `adpcm-encode` - encodes PCM data from stdin and outputs APDCM data to stdout (sample rate does not change)
 
 The rest of this document is work in progress.
 
