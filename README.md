@@ -1,9 +1,9 @@
 mdxtools
 ========
 
-![Project status](https://img.shields.io/badge/Project%20status-Beta-blue.svg) ![License](https://img.shields.io/github/license/vampirefrog/mdxtools?color=green)
+![Project status](https://img.shields.io/badge/Project%20status-Beta-blue.svg) [![GitHub latest commit](https://badgen.net/github/last-commit/vampirefrog/mdxtools)](https://GitHub.com/vampirefrog/mdxtools/commit/) [![GitHub Release](https://img.shields.io/github/v/release/vampirefrog/mdxtools?label=Latest+Release&color=blue)](https://github.com/vampirefrog/mdxtools/releases/latest) ![License](https://img.shields.io/github/license/vampirefrog/mdxtools?color=green)
 
-[![Linux Build](https://github.com/vampirefrog/mdxtools/actions/workflows/linux.yml/badge.svg)](https://github.com/vampirefrog/mdxtools/actions/workflows/linux.yml) [![MSYS2 MINGW64 Build](https://github.com/vampirefrog/mdxtools/actions/workflows/msys2-mingw64.yml/badge.svg)](https://github.com/vampirefrog/mdxtools/actions/workflows/msys2-mingw64.yml) [![MacOS Build](https://github.com/vampirefrog/mdxtools/actions/workflows/macos.yml/badge.svg)](https://github.com/vampirefrog/mdxtools/actions/workflows/macos.yml) [![GitHub Release](https://img.shields.io/github/v/release/vampirefrog/mdxtools?label=Latest+Release&color=blue)](https://github.com/vampirefrog/mdxtools/releases/latest)
+[![Linux Build](https://github.com/vampirefrog/mdxtools/actions/workflows/linux.yml/badge.svg)](https://github.com/vampirefrog/mdxtools/actions/workflows/linux.yml) [![MSYS2 MINGW64 Build](https://github.com/vampirefrog/mdxtools/actions/workflows/msys2-mingw64.yml/badge.svg)](https://github.com/vampirefrog/mdxtools/actions/workflows/msys2-mingw64.yml) [![MacOS Build](https://github.com/vampirefrog/mdxtools/actions/workflows/macos.yml/badge.svg)](https://github.com/vampirefrog/mdxtools/actions/workflows/macos.yml)
 
 A bunch of tools for handling the MDX music format (music for the Sharp X68000 using the MXDRV sound driver).
 
