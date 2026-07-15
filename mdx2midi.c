@@ -88,6 +88,7 @@ int main(int argc, char **argv) {
 		char buf[PATH_MAX];
 		snprintf(buf, sizeof(buf), "Converted from %s", argv[optind]);
 		midi_track_write_text(first_track, 0, buf, -1);
+		midi_track_write_track_end(first_track, 0);
 
 		struct mdx_driver mdx_driver;
 		struct midi_timer_driver timer_driver;
