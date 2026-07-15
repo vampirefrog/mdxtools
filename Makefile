@@ -1,11 +1,12 @@
 CC=gcc
+CPPC=g++
 YACC=bison
 LEX=flex
 
 CFLAGS=-ggdb -Wall -DFIXED_POINT -DOUTSIDE_SPEEX -DRANDOM_PREFIX=speex -DEXPORT= -D_GNU_SOURCE -DHAVE_MEMCPY -DSAMPLE_BITS=16 -Ix68ksjis $(shell pkg-config portaudio-2.0 sndfile --cflags)
 LIBS=$(shell pkg-config portaudio-2.0 sndfile --libs)
 ifneq (,$(findstring MINGW,$(shell uname -s)))
-LIBS+=-liconv -lws2_32 -static-libgcc
+LIBS+= -liconv -lws2_32 -static-libgcc
 endif
 
 PROGS=\
@@ -51,7 +52,7 @@ mdxplay_LIBS=$(shell pkg-config portaudio-2.0 --libs)
 mdx2pcm_SRCS=mdx_driver.c timer_driver.c adpcm_driver.c fm_driver.c tools.c adpcm.c speex_resampler.c ym2151.c fixed_resampler.c mdx.c pdx.c cmdline.c adpcm_pcm_mix_driver.c fm_opm_emu_driver.c pcm_timer_driver.c fm_opm_driver.c sinctbl4.h sinctbl3.h vgm_logger.c
 mml2mdx_SRCS=mml2mdx.c mmlc.tab.c mmlc.yy.c cmdline.c tools.c mdx_compiler.c mmlc.yy.h mmlc.tab.h
 pdx2wav_SRCS=pdx.c tools.c adpcm.c
-pdx2sf2_SRCS=pdx.c tools.c adpcm.c Soundfont.c
+pdx2sf2_SRCS=pdx.c tools.c adpcm.c
 pdxinfo_SRCS=pdx.c tools.c cmdline.c md5.c adpcm.c
 gensinc_SRCS=gensinc.c cmdline.c
 
@@ -59,6 +60,14 @@ mdx2midi: midilib/libmidi.a
 
 mdx2midi_LIBS=midilib/libmidi.a
 mml2mdx_LIBS=midilib/libmidi.a
+
+pdx2sf2: sf2cute/build/libsf2cute.a
+
+pdx2sf2_LIBS=sf2cute/build/libsf2cute.a
+
+ifneq (,$(findstring MINGW,$(shell uname -s)))
+pdx2sf2_LIBS+= -static-libstdc++ -static
+endif
 
 # Tests
 resample-test_SRCS=resample-test.c fixed_resampler.c sinctbl4.h sinctbl3.h
@@ -78,6 +87,9 @@ $(OBJS): Makefile
 $(TARGETS):$$(sort $$@.o $$(patsubst %.cpp,%.o,$$(patsubst %.c,%.o,$$($$@_SRCS))))
 	$(CC) $(filter %.o, $^) -o $@ $(CFLAGS) $(LIBS) $($@_LIBS)
 
+pdx2sf2:$$(sort $$@.o $$(patsubst %.cpp,%.o,$$(patsubst %.c,%.o,$$($$@_SRCS))))
+	$(CPPC) $(filter %.o, $^) -o $@ $(CFLAGS) $(LIBS) $($@_LIBS)
+
 mmlc.tab.c mmlc.tab.h: mmlc.y
 	$(YACC) -v -o mmlc.tab.c --defines=mmlc.tab.h $(filter %.y,$^)
 
@@ -87,6 +99,9 @@ mmlc.yy.h: mmlc.tab.h
 mmlc.yy.c mmlc.yy.h: mmlc.l
 	$(LEX) -o mmlc.yy.c --header-file=$(patsubst %.c,%.h,$@) $(filter %.l,$^)
 
+$(CPPOBJS): %.cpp
+	$(CPPC) -MMD -c $< -o $@ $(CFLAGS)
+	
 $(COBJS): %.c
 	$(CC) -MMD -c $< -o $@ $(CFLAGS)
 
@@ -99,8 +114,12 @@ sinctbl3.h: gensinc
 midilib/libmidi.a:
 	cd midilib && make CC=gcc libmidi.a
 
+sf2cute/build/libsf2cute.a:
+	cd sf2cute && cmake -B build . && cd build && make
+
 -include $(OBJS:.o=.d)
 
 clean:
 	rm -f $(TARGETS) $(addsuffix .exe,$(TARGETS)) *.o *.d
 	cd midilib && make clean
+	cd sf2cute && rm -rf build

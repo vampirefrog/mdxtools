@@ -2,12 +2,16 @@
 #define MIDI_TIMER_DRIVER_H_
 
 #include "timer_driver.h"
+#include "midilib/midi_file.h"
 
 struct midi_timer_driver {
 	struct timer_driver timer_driver;
+	struct midi_file *midi_file;
 	int ticks_per_quarter_note;
+	int ticks;
+	uint32_t tempoBPM;
 };
-int midi_timer_driver_init(struct midi_timer_driver *driver);
+int midi_timer_driver_init(struct midi_timer_driver *driver, struct midi_file *midi_file);
 void midi_timer_driver_deinit(struct midi_timer_driver *driver);
 int midi_timer_driver_tick(struct midi_timer_driver *driver);
 

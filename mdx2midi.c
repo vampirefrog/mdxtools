@@ -28,7 +28,7 @@ static int write_cb(void *buf, size_t len, void *data_ptr) {
 	return fwrite(buf, 1, len, (FILE *)data_ptr);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) { // NOTE: the tempo in the output midi does not always match the musical tempo of the song. for Bathead (DRA01) it does, but not Moon Fight (DRA17). This program will output midi conversions that play at the correct speed, but it seems to be impossible to automatically create a good musical structure for the output.
 	int optind = cmdline_parse_args(argc, argv, (struct cmdline_option[]){
 		{
 			'm', "mask",
@@ -74,11 +74,12 @@ int main(int argc, char **argv) {
 			midi_track_write_track_name(track, 0, buf, -1);
 			midi_track_write_bank_select(track, 0, t, 0);
 			midi_track_write_control_change(track, 0, t, 126, 127); // Monophonic mode
-			if(t >= 8) { // OPM only
-				midi_track_write_nrpn_msb(track, 0, t, 0, 112); // OPM Clock = 4MHz
+			if(t < 8) { // OPM only
+				midi_track_write_nrpn_msb(track, 0, t, 0, 112); // OPM Clock = 4MHz // TODO: set this constantly throughout track, to ensure skipping through a song doesn't erase it?
 			}
-			midi_track_write_control_change(track, 0, t, 12, 0); // Amplitude LFO level
-			midi_track_write_control_change(track, 0, t, 13, 0); // Pitch LFO level
+			// All of the Midi controls changes are designed for VOPMex extended mode (the default). Output Midi files will not work with VOPM.
+			midi_track_write_control_change(track, 0, t, 3, 0); // Amplitude LFO level.
+			midi_track_write_control_change(track, 0, t, 2, 0); // Pitch LFO level
 			midi_track_write_rpn_msb(track, 0, t, 0, 32); // Pitch Bend Sensitivity
 			midi_track_write_pitch_bend(track, 0, t, 0x2000);
 		}
@@ -95,7 +96,7 @@ int main(int argc, char **argv) {
 		struct adpcm_midi_driver adpcm_driver;
 		struct fm_midi_driver fm_driver;
 
-		midi_timer_driver_init(&timer_driver);
+		midi_timer_driver_init(&timer_driver, &midi_file);
 		adpcm_midi_driver_init(&adpcm_driver, &midi_file);
 		fm_midi_driver_init(&fm_driver, &midi_file);
 		mdx_driver_init(
@@ -117,6 +118,7 @@ int main(int argc, char **argv) {
 		printf("Loaded MDX file \"%s\"\n", argv[i]);
 
 		mdx_driver_load(&mdx_driver, &mdx_file, &pdx_file);
+		printf("Loaded MDX driver.\n");
 
 		while(!mdx_driver.ended) {
 			adpcm_midi_driver_tick(&adpcm_driver);

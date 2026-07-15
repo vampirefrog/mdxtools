@@ -6,12 +6,14 @@
 
 struct adpcm_midi_driver_channel {
 	int ticks;
+	int midi_note, midi_vol;
 };
 
 struct adpcm_midi_driver {
 	struct adpcm_driver adpcm_driver; // parent
 	struct midi_file *midi_file;
 	struct adpcm_midi_driver_channel channels[8];
+	int midi_pan;
 };
 int adpcm_midi_driver_init(struct adpcm_midi_driver *driver, struct midi_file *midi_file);
 int adpcm_midi_driver_tick(struct adpcm_midi_driver *driver);

@@ -6,6 +6,8 @@
 
 struct fm_midi_driver_channel {
 	int on, pitch, note, detune, tl, ticks;
+	int midi_note, midi_pitch_bend, midi_pan, freq;
+	int midi_vol[4];
 };
 
 /* MIDI driver */

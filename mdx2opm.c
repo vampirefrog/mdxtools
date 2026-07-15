@@ -28,21 +28,16 @@ static void printVoice(uint8_t *v, int num) {
 	}
 }
 
-void printEmptyVoice(int num) {
-	printf("@:%d no Name %d\r\n", num, num);
-	printf("LFO: 0 0 0 0 0\r\n");
-	printf("CH: 64 0 0 0 0 64 0\r\n");
-	printf("M1: 31 0 0 4 0 0 0 1 0 0 0\r\n");
-	printf("C1: 31 0 0 4 0 0 0 1 0 0 0\r\n");
-	printf("M2: 31 0 0 4 0 0 0 1 0 0 0\r\n");
-	printf("C2: 31 0 0 4 0 0 0 1 0 0 0\r\n");
-}
-
 int main(int argc, char **argv) {
+	if (argc == 1) {
+		printf("Usage: mdx2opm your_mdx_file.mdx\nThis program will output text to the command line; this text can be saved to a .opm file to make an instrument set for VOPM.\nYou can immediately write this program's output to a .opm file by using the below command structure. This works on both Windows and Linux.\nmdx2opm your_mdx_file.mdx > your_instruments.opm\n");
+		return 1;
+	}
 	for(int i = 1; i < argc; i++) {
 		size_t l;
 		uint8_t *mdx_data = load_file(argv[i], &l);
 		if(!mdx_data) {
+			printf("Failed to load file.\r\n");
 			return 1;
 		}
 		struct mdx_file f;
@@ -59,8 +54,7 @@ int main(int argc, char **argv) {
 		printf("// CH: PAN   FL CON AMS PMS SLOT NE\r\n");
 		printf("// [OPname]: AR D1R D2R  RR D1L  TL  KS MUL DT1 DT2 AMS-EN\r\n");
 		for(int i = 0; i < 256; i++) {
-			if(i < f.num_voices) printVoice(f.voices[i], i);
-			else printEmptyVoice(i);
+			if(f.voices[i] != NULL) printVoice(f.voices[i], i);
 		}
 	}
 	return 0;

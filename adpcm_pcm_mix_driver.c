@@ -96,7 +96,7 @@ static stream_sample_t adpcm_mix_driver_channel_get_sample(struct adpcm_mix_driv
 	return sample;
 }
 
-static int adpcm_mix_driver_channel_play(struct adpcm_mix_driver_channel *channel, uint8_t *data, int data_len, uint8_t freq_num, uint8_t volume) {
+static int adpcm_mix_driver_channel_play(struct adpcm_mix_driver_channel *channel, uint8_t *data, int data_len, uint8_t freq_num, uint8_t volume, int note) {
 	adpcm_init(&channel->decoder_status);
 
 	channel->data = data;
@@ -141,9 +141,9 @@ static int adpcm_pcm_mix_driver_alloc_buffers(struct adpcm_pcm_mix_driver *drive
 	return 0;
 }
 
-static int adpcm_pcm_mix_driver_play(struct adpcm_driver *driver, uint8_t channel, uint8_t *data, int data_len, uint8_t freq_num, uint8_t volume) {
+static int adpcm_pcm_mix_driver_play(struct adpcm_driver *driver, uint8_t channel, uint8_t *data, int data_len, uint8_t freq_num, uint8_t volume, int note) {
 	struct adpcm_pcm_mix_driver *pdrv = (struct adpcm_pcm_mix_driver *)driver;
-	return adpcm_mix_driver_channel_play(&pdrv->channels[channel], data, data_len, freq_num, volume);
+	return adpcm_mix_driver_channel_play(&pdrv->channels[channel], data, data_len, freq_num, volume, note);
 }
 
 static int adpcm_pcm_mix_driver_stop(struct adpcm_driver *driver, uint8_t channel) {

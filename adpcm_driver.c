@@ -10,9 +10,9 @@ void adpcm_driver_init(struct adpcm_driver *driver) {
 	driver->pan = 3;
 }
 
-int adpcm_driver_play(struct adpcm_driver *d, uint8_t channel, uint8_t *data, int len, uint8_t freq, uint8_t vol) {
+int adpcm_driver_play(struct adpcm_driver *d, uint8_t channel, uint8_t *data, int len, uint8_t freq, uint8_t vol, int note) {
 	if(d->play)
-		return d->play(d, channel, data, len, freq, vol);
+		return d->play(d, channel, data, len, freq, vol, note);
 	return 0;
 }
 

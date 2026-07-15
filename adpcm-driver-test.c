@@ -25,9 +25,9 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	adpcm_driver_play((struct adpcm_driver *)&driver, 2, sample, sample_len, 4, 255);
-	adpcm_driver_play((struct adpcm_driver *)&driver, 4, sample, sample_len, 2, 255);
-	adpcm_driver_play((struct adpcm_driver *)&driver, 3, sample, sample_len, 0, 255);
+	adpcm_driver_play((struct adpcm_driver *)&driver, 2, sample, sample_len, 4, 255, 0);
+	adpcm_driver_play((struct adpcm_driver *)&driver, 4, sample, sample_len, 2, 255, 0);
+	adpcm_driver_play((struct adpcm_driver *)&driver, 3, sample, sample_len, 0, 255, 0);
 
 	SF_INFO sfinfo = {
 		.samplerate = opt_sample_rate,
@@ -35,8 +35,8 @@ int main(int argc, char **argv) {
 		.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16,
 	};
 	char wavname[256];
-	printf("Outputting to %s\n", wavname);
 	replace_ext(wavname, sizeof(wavname), argv[1], "wav");
+	printf("Outputting to %s\n", wavname);
 	SNDFILE *file = sf_open(wavname, SFM_WRITE, &sfinfo);
 	if(!file) {
 		printf("Failed to open file for writing\n");
