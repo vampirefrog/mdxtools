@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
 		memset(instGenLists, 0, genSize);
 		x = 0;
 		for(int j = 0; j < PDX_NUM_SAMPLES; j++) {
-			if(p.samples[j].num_samples > 0) {
+			if(p.samples[j].len > 0) {
 				int k = x * GENS_PER_ZONE;
 				instGenLists[k].sfGenOper = keyRange;
 				instGenLists[k].genAmount.ranges.byHi = BASE_NOTE + j;
